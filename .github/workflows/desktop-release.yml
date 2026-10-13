@@ -90,6 +90,16 @@ jobs:
         with:
           node-version: '20'
 
+      # better-sqlite3 is rebuilt for Electron with node-gyp, which still
+      # imports Python's distutils (removed in 3.12). Some macos-15-intel images
+      # default to a Python without it, so the rebuild failed there
+      # intermittently ("No module named 'distutils'"). Pin a Python that has
+      # it on the macOS hosts instead of taking whatever the image ships.
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        if: runner.os == 'macOS'
+        with:
+          python-version: '3.11'
+
       # #948: v0.8.2–v0.8.4 shipped installers stamped 0.8.1 because
       # desktop/package.json was never bumped after v0.8.1. electron-builder
       # reads that field for the artifact filenames AND the latest*.yml updater
@@ -352,8 +362,22 @@ jobs:
               --key-id "$APPLE_API_KEY_ID" \
               --issuer "$APPLE_API_ISSUER" \
               --wait --timeout 30m
-            xcrun stapler staple "$dmg"
-            xcrun stapler validate "$dmg"
+            # Stapling fetches the ticket from Apple's CloudKit, and the Intel
+            # runners regularly lose that connection mid-request (error 68,
+            # "The network connection was lost") right after Apple accepted
+            # the submission. The ticket is already issued at that point, so
+            # retrying with a short backoff is safe and is all it takes.
+            for attempt in 1 2 3 4 5; do
+              if xcrun stapler staple "$dmg" && xcrun stapler validate "$dmg"; then
+                break
+              fi
+              if [ "$attempt" -eq 5 ]; then
+                echo "::error::stapling $(basename "$dmg") failed after $attempt attempts"
+                exit 1
+              fi
+              echo "::warning::stapling attempt $attempt failed, retrying in $((attempt * 20))s"
+              sleep $((attempt * 20))
+            done
             # The verdict Gatekeeper will give the download.
             spctl -a -vv -t install "$dmg"
             # Stapling rewrites the DMG in place, so the size, hash and blockmap
