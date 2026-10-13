@@ -96,6 +96,10 @@ export const PREFIX_MAP: Record<string, string> = {
   OPENROUTER_: 'openrouter',
   GITHUB_: 'github',
   COHERE_: 'cohere',
+  TAVILY_: 'tavily',
+  EXA_: 'exa',
+  FIRECRAWL_: 'firecrawl',
+  LINKUP_: 'linkup',
   CLOUDFLARE_: 'cloudflare',
   ZHIPU_: 'zhipu',
   OLLAMA_: 'ollama',
@@ -232,6 +236,10 @@ export const AUTH_JSON_PROVIDER_MAP: Record<string, string> = {
   xfyun: 'xfyun',
   spark: 'xfyun',
   iflytek: 'xfyun',
+  tavily: 'tavily',
+  exa: 'exa',
+  firecrawl: 'firecrawl',
+  linkup: 'linkup',
 };
 
 export function detectPlatform(prefix: string): string | null {

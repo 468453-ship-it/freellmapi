@@ -43,6 +43,8 @@ const PURE_MODULES = [
   'provider-identity.ts',
   'provider-size-parser.ts',
   'retry-hint.ts',
+  // Search platform list; the provider list, keys route and search service import it.
+  'search-platforms.ts',
   'structured-output.ts',
   'tool-args.ts',
   'tool-call-rescue.ts',

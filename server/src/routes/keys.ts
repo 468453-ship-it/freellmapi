@@ -16,6 +16,7 @@ import { getMonthlyBudgetCaps, getMonthlyUsage, nextMonthResetAt } from '../serv
 import { resolveCustomEndpointKey, customEndpointKeyIds, siblingEndpointKeyId, endpointHasCredential, normalizeGroupLabel, setCustomEndpointGroup } from '../services/custom-endpoint.js';
 import { registerCustomModels, registerCustomChatModels } from '../services/custom-model-register.js';
 import { registerCustomMediaModel } from '../services/custom-media-register.js';
+import { isSearchPlatform } from '../lib/search-platforms.js';
 import { discoverEndpointModels, probeEndpointModel, classifyModelId, ModelDiscoveryError } from '../services/model-discovery.js';
 import { probeEmbeddingDimensions, registerCustomEmbeddingModel } from '../services/embeddings.js';
 import { endpointScopeForBaseUrl, normalizeBaseUrl } from '../lib/endpoint-scope.js';
@@ -54,7 +55,7 @@ const PLATFORMS = [
   'moondream',
   'freeai',
   'google', 'groq', 'cerebras', 'sail', 'electronhub', 'experiential', 'router9', 'septor', 'clod', 'speechify', 'blaze', 'lucidity', 'airforce', 'dreamprompting', 'waterfall', 'logfare', 'bai', 'radeon', 'nvidia', 'mistral',
-  'openrouter', 'github', 'cohere', 'cloudflare', 'zhipu', 'ollama',
+  'openrouter', 'github', 'cohere', 'tavily', 'exa', 'firecrawl', 'linkup', 'cloudflare', 'zhipu', 'ollama',
   'kilo', 'pollinations', 'llm7', 'huggingface', 'opencode', 'ovh', 'agnes', 'reka', 'siliconflow',
   'routeway', 'bazaarlink', 'ainative', 'aion', 'anyapi', 'requesty', 'navy', 'nara', 'sealion', 'orcarouter', 'unorouter', 'xkiro', 'modelscope',
   'qianfan', 'volcengine', 'longcat', 'xfyun', 'aihorde', 'custom',
@@ -254,6 +255,12 @@ function openAICompatBaseUrl(platform: string): string | null {
 // the base URL, and only offers the custom-provider route where it works.
 function noModelsNotice(platform: string): string | undefined {
   if (enabledModelCount(platform) > 0) return undefined;
+  // Search keys have engines, not models (#1174): a key whose engine is off
+  // or not in this catalog gets told where engines live instead of the chat
+  // advice below.
+  if (isSearchPlatform(platform)) {
+    return `Key saved, but no ${platform} search engine is turned on. Turn it on from Models → Search.`;
+  }
   // #1348: a built-in provider the catalog does not carry fills its model list
   // from its own /models, so the Premium and custom-provider advice below
   // would send the operator the wrong way.
@@ -309,6 +316,9 @@ keysRouter.get('/providers', (_req: Request, res: Response) => {
       return {
         platform: p.platform,
         name: p.name,
+        // 'search' keys serve /v1/search and the agents' web_search tools,
+        // never chat (#1174); the dashboard groups them separately.
+        kind: isSearchPlatform(p.platform) ? 'search' as const : 'chat' as const,
         keyless: p.keyless,
         configured: keyCount > 0,
         keyCount,
