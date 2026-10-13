@@ -22,6 +22,7 @@ asar: true
 # Linux chrome-sandbox must be mode 4755 (setuid) in the .deb; otherwise
 # Electron aborts at launch (#1229). Path is relative to desktop/.
 afterPack: ./scripts/after-pack-linux-sandbox.mjs
+afterSign: ./scripts/after-sign-notarize.mjs
 asarUnpack:
   - "**/node_modules/better-sqlite3/**/*.node"
   - "**/node_modules/better-sqlite3/build/Release/**"
@@ -39,7 +40,10 @@ mac:
   gatekeeperAssess: false
   entitlements: assets/entitlements.mac.plist
   entitlementsInherit: assets/entitlements.mac.inherit.plist
-  notarize: true
+  # Notarization runs in afterSign (scripts/after-sign-notarize.mjs) rather
+  # than electron-builder's built-in step, which staples once and fails the
+  # whole build when Apple's ticket lookup drops the connection (v0.14.0/1).
+  notarize: false
   # Select the architecture with --arm64 or --x64 in the build command.
   # Per-target arch lists override that selection and make each CI job build
   # both architectures, including the native SQLite module for the other CPU.
