@@ -32,8 +32,11 @@ export default function PremiumPage() {
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['premium'] })
-    // A sync may have changed the model list and quirks.
-    queryClient.invalidateQueries({ queryKey: ['models'] })
+    // A sync may have changed every model list (chat, embeddings, media,
+    // search) and quirks, not just ['models'].
+    for (const queryKey of [['models'], ['fallback'], ['embeddings'], ['media'], ['search-engines']]) {
+      queryClient.invalidateQueries({ queryKey })
+    }
   }
 
   const activate = useMutation({
