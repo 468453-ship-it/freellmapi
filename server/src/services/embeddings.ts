@@ -20,6 +20,7 @@ import type { Db } from '../db/types.js';
 import { SPEKA_BASE_URL } from '../providers/speka.js';
 import { ELECTRONHUB_BASE_URL } from '../providers/electronhub.js';
 import { INFERBASE_BASE_URL } from '../providers/inferbase.js';
+import { AURAY_BASE_URL } from '../providers/auray.js';
 
 export interface EmbeddingModelRow {
   id: number;
@@ -119,6 +120,7 @@ export const EMBEDDING_PLATFORMS = new Set([
   'speka',
   'electronhub',
   'inferbase',
+  'auray',
 ]);
 
 interface ProviderCallResult {
@@ -135,6 +137,7 @@ async function openAiStyleEmbed(
   extra: Record<string, unknown> = {},
   dimensions?: number,
   expectedDimensions?: number,
+  timeoutMs = FETCH_TIMEOUT_MS,
 ): Promise<ProviderCallResult> {
   const body: Record<string, unknown> = { model: modelId, input: inputs, ...extra };
   // Some providers (NVIDIA NeMo NIM, Google Gemini Embedding, OpenAI v3) support
@@ -150,8 +153,8 @@ async function openAiStyleEmbed(
     // header instead of sending `Bearer no-key` (#1331).
     headers: { 'Content-Type': 'application/json', ...bearerAuthHeader(key) },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  }, platform, 'embedding', FETCH_TIMEOUT_MS);
+    signal: AbortSignal.timeout(timeoutMs),
+  }, platform, 'embedding', timeoutMs);
   if (!r.ok) {
     throw await upstreamEmbeddingsError(r);
   }
@@ -161,7 +164,7 @@ async function openAiStyleEmbed(
     usage?: { prompt_tokens?: number; total_tokens?: number };
   };
   const data = [...(j.data ?? [])].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
-  if ((platform === 'electronhub' || platform === 'inferbase') && (
+  if (['electronhub', 'inferbase', 'auray'].includes(platform) && (
     j.model !== modelId || data.length !== inputs.length ||
     data.some((d, i) => d.index !== i || !Array.isArray(d.embedding) ||
       d.embedding.length !== (dimensions ?? expectedDimensions) ||
@@ -169,7 +172,7 @@ async function openAiStyleEmbed(
   )) {
     // A successful HTTP response is not enough: wrong model/dimension or
     // malformed vectors would corrupt the caller's embedding family.
-    const provider = platform === 'electronhub' ? 'ElectronHub' : 'Inferbase';
+    const provider = platform === 'electronhub' ? 'ElectronHub' : platform === 'auray' ? 'Auray' : 'Inferbase';
     throw new EmbeddingsError(`${provider} returned mismatched or malformed embeddings`, 502);
   }
   return {
@@ -288,6 +291,13 @@ async function callProvider(row: EmbeddingModelRow, credential: ProviderCredenti
       return openAiStyleEmbed(`${ELECTRONHUB_BASE_URL}/embeddings`, row.platform, key, row.model_id, inputs, { encoding_format: 'float' }, dimensions, row.dimensions);
     case 'inferbase':
       return openAiStyleEmbed(`${INFERBASE_BASE_URL}/embeddings`, row.platform, key, row.model_id, inputs, { encoding_format: 'float' }, dimensions, row.dimensions);
+    case 'auray':
+      // Auray documents fixed-width vectors, not Matryoshka truncation. A cold
+      // request can take longer than the generic 30-second embedding deadline.
+      if (dimensions !== undefined && dimensions !== row.dimensions) {
+        throw new EmbeddingsError('Auray does not support an embedding dimension override', 400);
+      }
+      return openAiStyleEmbed(`${AURAY_BASE_URL}/embeddings`, row.platform, key, row.model_id, inputs, {}, undefined, row.dimensions, 180_000);
     case 'cloudflare': {
       // Key is stored as "account_id:token".
       const sep = key.indexOf(':');

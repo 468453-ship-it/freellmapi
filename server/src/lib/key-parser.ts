@@ -46,6 +46,7 @@ export interface ParseResult {
 export const PREFIX_MAP: Record<string, string> = {
   ACLIDE_: 'aclide',
   SPEKA_: 'speka',
+  AURAY_: 'auray',
   TYPHOON_: 'typhoon',
   PLUGSKY_: 'plugsky',
   INFERBASE_: 'inferbase',
@@ -156,6 +157,7 @@ export const AUTH_JSON_PROVIDER_MAP: Record<string, string> = {
   sail: 'sail',
   aclide: 'aclide',
   speka: 'speka',
+  auray: 'auray',
   typhoon: 'typhoon',
   plugsky: 'plugsky',
   inferbase: 'inferbase',

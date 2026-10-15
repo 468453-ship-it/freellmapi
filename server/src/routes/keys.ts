@@ -45,6 +45,7 @@ export const keysRouter = Router();
 const PLATFORMS = [
   'aclide',
   'speka',
+  'auray',
   'typhoon',
   'plugsky',
   'inferbase',
