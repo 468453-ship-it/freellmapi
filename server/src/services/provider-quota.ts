@@ -118,6 +118,9 @@ export function inferPoolForPlatform(platform: Platform, modelId?: string | null
   if (platform === 'sail') return 'sail::monthly-credit';
   if (platform === 'aclide') return 'aclide::monthly-credit';
   if (platform === 'speka') return 'speka::monthly-credit';
+  // Auray: free credits renew monthly and are one wallet shared across chat
+  // and embeddings (see providers/auray.ts), so one pool for the account.
+  if (platform === 'auray') return 'auray::monthly-credit';
   if (platform === 'plugsky') return 'plugsky::fair-use';
   if (platform === 'inferbase') return 'inferbase::managed-free';
   if (platform === 'simplellm') return 'simplellm::free';
@@ -183,6 +186,7 @@ export function inferPoolForPlatform(platform: Platform, modelId?: string | null
 function isSharedPool(platform: Platform): boolean {
   if (platform === 'aclide') return true;
   if (platform === 'speka') return true;
+  if (platform === 'auray') return true;
   if (platform === 'plugsky') return true;
   if (platform === 'inferbase' || platform === 'simplellm') return true;
   if (['electronhub', 'experiential', 'router9', 'septor', 'clod', 'speechify', 'blaze', 'lucidity', 'airforce', 'dreamprompting', 'waterfall', 'logfare'].includes(platform)) return true;
