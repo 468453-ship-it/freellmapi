@@ -206,12 +206,18 @@ describe('reasoning_effort normalization (#619 — off-scale values must not 400
     expect(pickSamplingParams({ reasoning_effort: 'nonsense', seed: 3 })).toEqual({ seed: 3 });
   });
 
-  it('per-platform clamping: github takes only low/medium/high', () => {
+  it('per-platform clamping: github and groq take only low/medium/high', () => {
     expect(extendedBodyParams('github', { reasoning_effort: 'none' }).reasoning_effort).toBe('low');
     expect(extendedBodyParams('github', { reasoning_effort: 'minimal' }).reasoning_effort).toBe('low');
     expect(extendedBodyParams('github', { reasoning_effort: 'medium' }).reasoning_effort).toBe('medium');
+    // Groq's enum is the same three values, so 'none'/'minimal' are clamped
+    // instead of being sent and 400ing the request off the platform.
+    expect(extendedBodyParams('groq', { reasoning_effort: 'none' }).reasoning_effort).toBe('low');
+    expect(extendedBodyParams('groq', { reasoning_effort: 'minimal' }).reasoning_effort).toBe('low');
+    expect(extendedBodyParams('groq', { reasoning_effort: 'medium' }).reasoning_effort).toBe('medium');
+    expect(extendedBodyParams('groq', { reasoning_effort: 'high' }).reasoning_effort).toBe('high');
     // Platforms without a restriction still get the value verbatim.
-    expect(extendedBodyParams('groq', { reasoning_effort: 'none' }).reasoning_effort).toBe('none');
+    expect(extendedBodyParams('cerebras', { reasoning_effort: 'none' }).reasoning_effort).toBe('none');
   });
 });
 

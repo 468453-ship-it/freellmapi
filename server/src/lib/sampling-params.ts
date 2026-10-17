@@ -273,8 +273,16 @@ export const PLATFORM_PARAM_POLICIES: Partial<Record<Platform, PlatformParamPoli
     rename: { seed: 'random_seed' },
   },
   // Groq documents logprobs / top_logprobs / logit_bias as unsupported and
-  // rejects requests that include them.
-  groq: { drop: ['logprobs', 'top_logprobs', 'logit_bias'] },
+  // rejects requests that include them. Its reasoning_effort enum is the plain
+  // low/medium/high one as well: 'none' and 'minimal' are rejected with a 400
+  // ("must be one of low, medium, or high", observed on openai/gpt-oss-120b),
+  // which cost the request a fallback hop onto another platform's copy of the
+  // same model. Clamped rather than dropped so the knob still arrives, at the
+  // weakest setting Groq accepts.
+  groq: {
+    drop: ['logprobs', 'top_logprobs', 'logit_bias'],
+    reasoningEfforts: ['low', 'medium', 'high'],
+  },
   // GitHub Models sits on Azure OpenAI, which 400s "Unrecognized request
   // argument" for knobs outside the OpenAI set. Its reasoning_effort enum is
   // the older low/medium/high one, so 'none'/'minimal' are clamped rather
