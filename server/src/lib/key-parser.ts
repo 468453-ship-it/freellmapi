@@ -95,7 +95,6 @@ export const PREFIX_MAP: Record<string, string> = {
   NVIDIA_: 'nvidia',
   MISTRAL_: 'mistral',
   OPENROUTER_: 'openrouter',
-  GITHUB_: 'github',
   COHERE_: 'cohere',
   TAVILY_: 'tavily',
   EXA_: 'exa',

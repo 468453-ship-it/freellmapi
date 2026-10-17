@@ -405,6 +405,27 @@ describe('OpenAICompatProvider', () => {
     expect(await provider.validateKey('valid')).toBe(true);
   });
 
+  it('validateKey treats a 200 that is not JSON as an error, not a healthy key (#1557)', async () => {
+    // Retired GitHub Models answered every path with 200 "OK" in plain text.
+    vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'text/plain' }),
+      text: () => Promise.resolve('OK\n'),
+    } as any);
+    await expect(provider.validateKey('any')).rejects.toThrow(/did not answer JSON/);
+  });
+
+  it('validateKey accepts a JSON model list', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      text: () => Promise.resolve('{"object":"list","data":[]}'),
+    } as any);
+    expect(await provider.validateKey('valid')).toBe(true);
+  });
+
   it('validateKey preserves the provider reason on confirmed 401', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValueOnce({
       ok: false,

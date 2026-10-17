@@ -14,7 +14,7 @@ import { runImageGeneration, runVideoGeneration, runSpeech, runTranscription, Me
 import multer from 'multer';
 import { getDb } from '../db/index.js';
 import { resolveAuth, prependSystemPrompt, type ResolvedAuth } from '../lib/system-prompt.js';
-import { contentToString, estimateInputTokens, messageHasImage, normalizeOutboundContent, sanitizeResponse, truncateMessagesForGithub } from '../lib/content.js';
+import { contentToString, estimateInputTokens, messageHasImage, normalizeOutboundContent, sanitizeResponse } from '../lib/content.js';
 import { routeOutputBudget } from '../lib/output-cap.js';
 import { resolveTaskType } from '../lib/task-type.js';
 import { normalizeMessageImages } from '../lib/image-normalize.js';
@@ -1398,12 +1398,6 @@ proxyRouter.post('/completions', async (req: Request, res: Response) => {
         requestedModel: attempt === 0 ? requestedModelLabel : undefined,
       });
 
-      // Same GitHub input ceiling as /chat/completions below: trim the
-      // dispatched copy so a long legacy prompt doesn't 413 the github hop.
-      const dispatchMessages = route.platform === 'github'
-        ? truncateMessagesForGithub(messages)
-        : messages;
-
       if (stream) {
         let totalOutputTokens = 0;
         let headerSent = false;
@@ -1434,7 +1428,7 @@ proxyRouter.post('/completions', async (req: Request, res: Response) => {
         try {
           const gen = route.provider.streamChatCompletion(
             route.apiKey,
-            dispatchMessages,
+            messages,
             route.modelId,
             { temperature, max_tokens, top_p, stop, contextBudget, signal: AbortSignal.any([clientAbort.signal, hedgeAbort.signal]) },
             quotaContextForRoute(route, 'chat/completions'),
@@ -1534,7 +1528,7 @@ proxyRouter.post('/completions', async (req: Request, res: Response) => {
 
       const result = await route.provider.chatCompletion(
         route.apiKey,
-        dispatchMessages,
+        messages,
         route.modelId,
         { temperature, max_tokens, top_p, stop, contextBudget, signal: AbortSignal.any([clientAbort.signal, hedgeAbort.signal]) },
         quotaContextForRoute(route, 'chat/completions'),
@@ -2351,16 +2345,6 @@ proxyRouter.post('/chat/completions', async (req: Request, res: Response) => {
     const rememberedReasoning = rememberedReasoningFor(reasoningSessionKey, modelKey);
     if (rememberedReasoning) {
       outboundMessages = restoreSessionReasoning(outboundMessages, rememberedReasoning, route.platform);
-    }
-
-    // GitHub Models 413s a history above its input ceiling instead of
-    // truncating it, so a long conversation burns the github hop of every
-    // chain it appears in. Trim the outbound copy to what the platform will
-    // accept — scoped to this attempt, so the next candidate still sees the
-    // client's full history. A no-op returning the same array when the
-    // request already fits.
-    if (route.platform === 'github') {
-      outboundMessages = truncateMessagesForGithub(outboundMessages);
     }
 
       if (stream) {

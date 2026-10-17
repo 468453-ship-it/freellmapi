@@ -602,6 +602,20 @@ export class OpenAICompatProvider extends BaseProvider {
 
   async validateKey(apiKey: string, quotaContext?: QuotaObservationContext): Promise<KeyValidationResult> {
     const res = await this.fetchCatalogEndpoint(this.validateUrl ?? this.modelsUrl, apiKey, quotaContext);
+    // An OpenAI-compatible /models answers JSON. A 200 with anything else is a
+    // shut-down or parked service, not a working key: retired GitHub Models
+    // answered every path with 200 "OK" in plain text and every key looked
+    // healthy (#1557). Thrown, so health records an error without counting it
+    // toward auto-disable. Provider-specific validate URLs keep their own shape.
+    if (res.ok && !this.validateUrl && typeof res.text === 'function') {
+      const text = await res.text().catch(() => '');
+      try {
+        JSON.parse(text);
+      } catch {
+        throw providerHttpError(res, `${this.name} /models did not answer JSON (got ${JSON.stringify(text.trim().slice(0, 40))}); the service may be retired or down`);
+      }
+      return true;
+    }
     return this.validationResult(res);
   }
 

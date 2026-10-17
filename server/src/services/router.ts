@@ -1799,13 +1799,6 @@ function getModelChainRow(db: Db, modelDbId: number): ChainRow | undefined {
  */
 export const CONTEXT_WINDOW_SAFETY_FACTOR = 1.25;
 
-// Platforms whose pre-dispatch trim guard already caps the dispatched input
-// below the live context ceiling (lib/content.ts truncateMessagesForGithub):
-// the guard — not the routing estimate — is what guarantees the fit there, so
-// applying the factor too would only make that guard unreachable. The margin
-// checks below treat these platforms as strict comparisons.
-const TRIM_GUARDED_PLATFORMS = new Set(['github']);
-
 /** True when `estimatedTokens` fits the RAW advertised window (null window =
  * unknown, never filtered — same convention as the auto-router). This is the
  * comparison /v1/models publishes and the soft-preference fallback tier.
@@ -1819,17 +1812,15 @@ export function fitsContextWindowStrict(contextWindow: number | null | undefined
 /** True when `estimatedTokens` plausibly fits `contextWindow` WITH the safety
  * margin. The chars/4 heuristic portion is scaled by the factor; an explicit
  * output reserve derived from the client's max_tokens (`routingReserveTokens`)
- * is already an exact count and is added UNSCALED (#956 review). Trim-guarded
- * platforms compare strictly — their guard guarantees the fit. Also enforces
+ * is already an exact count and is added UNSCALED (#956 review). Also enforces
  * the operator's min-context-window floor (lib/min-context-window.ts): a model
  * below the configured preset is excluded from every chain, while an unknown
  * window (null) always passes. */
-export function fitsContextWindow(platform: string, contextWindow: number | null | undefined, estimatedTokens: number, exactOutputReserve = 0): boolean {
+export function fitsContextWindow(_platform: string, contextWindow: number | null | undefined, estimatedTokens: number, exactOutputReserve = 0): boolean {
   if (!passesContextWindowFloor(contextWindow)) return false;
   if (contextWindow == null) return true;
   // Raw advertised comparison first — the margin can only shrink eligibility.
   if (estimatedTokens > contextWindow) return false;
-  if (TRIM_GUARDED_PLATFORMS.has(platform)) return true;
   const reserve = Math.max(0, exactOutputReserve);
   const heuristic = Math.max(0, estimatedTokens - reserve);
   return heuristic * CONTEXT_WINDOW_SAFETY_FACTOR + reserve <= contextWindow;
@@ -2302,9 +2293,7 @@ export function routeRequest(estimatedTokens = 1000, skipKeys?: Set<string>, pre
       // false (#956 review): e.g. `context 131072 < estimated 106000 x1.25 = 132500`.
       const reserve = Math.max(0, exactOutputReserve);
       const requiredWithMargin = Math.ceil(Math.max(0, estimatedTokens - reserve) * CONTEXT_WINDOW_SAFETY_FACTOR + reserve);
-      diag.push(TRIM_GUARDED_PLATFORMS.has(entry.platform)
-        ? `${label}: context ${entry.context_window} < estimated ${estimatedTokens}`
-        : `${label}: context ${entry.context_window} < estimated ${estimatedTokens} x${CONTEXT_WINDOW_SAFETY_FACTOR} = ${requiredWithMargin}`);
+      diag.push(`${label}: context ${entry.context_window} < estimated ${estimatedTokens} x${CONTEXT_WINDOW_SAFETY_FACTOR} = ${requiredWithMargin}`);
       continue;
     }
 

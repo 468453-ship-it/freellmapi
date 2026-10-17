@@ -141,7 +141,7 @@ final = client.chat.completions.create(
 print(final.choices[0].message.content)
 ```
 
-配合 `stream=True` 也可以，你会先收到一串 `delta.tool_calls` 分块，然后是一个 `finish_reason: "tool_calls"` 收尾。底层实现上，兼容 OpenAI 的提供方（Groq、Cerebras、Mistral、OpenRouter、GitHub Models、HuggingFace、Cloudflare、Cohere 兼容模式）会直接透传请求；发往 Gemini 的请求会被翻译成 Google 的 `functionDeclarations` / `functionResponse` 结构，响应再翻译回来。
+配合 `stream=True` 也可以，你会先收到一串 `delta.tool_calls` 分块，然后是一个 `finish_reason: "tool_calls"` 收尾。底层实现上，兼容 OpenAI 的提供方（Groq、Cerebras、Mistral、OpenRouter、HuggingFace、Cloudflare、Cohere 兼容模式）会直接透传请求；发往 Gemini 的请求会被翻译成 Google 的 `functionDeclarations` / `functionResponse` 结构，响应再翻译回来。
 
 ## Gemini 的 Google 搜索接地
 
@@ -251,8 +251,6 @@ curl http://localhost:3001/v1/embeddings \
 | 系列（`model`） | 维度 | 提供方（故障转移顺序） |
 | --- | --- | --- |
 | `gemini-embedding-001` *（默认）* | 3072 | Google |
-| `text-embedding-3-large` | 3072 | GitHub Models |
-| `text-embedding-3-small` | 1536 | GitHub Models |
 | `embed-v4.0` | 1536 | Cohere |
 | `bge-m3` | 1024 | Cloudflare → Hugging Face |
 | `qwen3-embedding-0.6b` | 1024 | Cloudflare |
