@@ -1,5 +1,5 @@
 import { getDb, getSetting, setSetting } from '../db/index.js';
-import { parseRetryAfterMs } from '../providers/base.js';
+import { parseRetryAfterMs, parseStatedRetryMs } from '../providers/base.js';
 import { RetryHintTracker } from '../lib/retry-hint.js';
 import { getClientContext } from '../lib/client-context.js';
 import { proxyFetch } from '../lib/proxy.js';
@@ -184,11 +184,19 @@ async function upstream(url: string, platform: string, init: RequestInit, signal
   );
   if (!res.ok) {
     const body = await res.text().catch(() => '');
+    // Header first, then a back-off stated inside the body (RetryInfo or
+    // prose), mirroring buildUpstreamError in providers/base.ts.
+    let stated: number | undefined;
+    try {
+      stated = parseStatedRetryMs(JSON.parse(body));
+    } catch {
+      stated = parseStatedRetryMs(body);
+    }
     throw new SearchError(
       `${platform} ${res.status}: ${body.slice(0, 200)}`,
       res.status,
       undefined,
-      parseRetryAfterMs(res.headers?.get('retry-after') ?? null),
+      parseRetryAfterMs(res.headers?.get('retry-after') ?? null) ?? stated,
     );
   }
   // MCP servers may answer a POST as a one-event stream instead of plain JSON.

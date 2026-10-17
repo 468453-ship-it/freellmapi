@@ -264,6 +264,17 @@ describe('search service', () => {
     expect(err.retryAfterMs).toBe(30_000);
   });
 
+  it('reads a back-off stated in the error body when there is no header', async () => {
+    addKey('tavily');
+    // Tavily states its cap in prose; Exa in a RetryInfo-shaped field. With no
+    // Retry-After header, the chain used to fall back to the 60s heuristic.
+    mockFetch(() => new Response('too many requests, try again in 15 seconds', { status: 429 }));
+    const err = await runSearch('q').catch(e => e) as SearchError;
+    expect(err).toBeInstanceOf(SearchError);
+    expect(err.status).toBe(429);
+    expect(err.retryAfterMs).toBe(15_000);
+  });
+
   it('reports a provider 401 as a 502, never as the caller’s auth failure', async () => {
     addKey('tavily');
     mockFetch(() => json({ detail: 'bad key' }, 401));

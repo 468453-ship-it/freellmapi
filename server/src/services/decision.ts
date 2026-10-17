@@ -1,5 +1,5 @@
 import { getDb } from '../db/index.js';
-import { parseRetryAfterMs } from '../providers/base.js';
+import { parseRetryAfterMs, parseStatedRetryMs } from '../providers/base.js';
 import { RetryHintTracker } from '../lib/retry-hint.js';
 import { getClientContext } from '../lib/client-context.js';
 import { proxyFetch } from '../lib/proxy.js';
@@ -119,6 +119,16 @@ interface AdapterResult {
 
 type Adapter = (cred: ReservedProviderCredential, modelId: string, body: DecisionRequest, signal?: AbortSignal) => Promise<AdapterResult>;
 
+/** A back-off stated inside an error body: JSON first (RetryInfo-shaped), the
+ *  raw text as prose otherwise. Mirrors buildUpstreamError in providers/base.ts. */
+function statedBodyRetryMs(text: string): number | undefined {
+  try {
+    return parseStatedRetryMs(JSON.parse(text));
+  } catch {
+    return parseStatedRetryMs(text);
+  }
+}
+
 async function upstream(url: string, platform: string, init: RequestInit, signal?: AbortSignal): Promise<unknown> {
   const timeoutSignal = AbortSignal.timeout(FETCH_TIMEOUT_MS);
   const res = await proxyFetch(
@@ -130,11 +140,15 @@ async function upstream(url: string, platform: string, init: RequestInit, signal
   );
   if (!res.ok) {
     const text = await res.text().catch(() => '');
+    // Same rule as the chat path (providers/base.ts buildUpstreamError): a
+    // header Retry-After wins, then a back-off stated in the error BODY
+    // (Gemini RetryInfo, prose "try again in 45 seconds"). Dropping the body
+    // hint demotes an exact promise to the 60s heuristic and to no hint.
     throw new DecisionError(
       `${platform} ${res.status}: ${text.slice(0, 200)}`,
       res.status,
       undefined,
-      parseRetryAfterMs(res.headers?.get('retry-after') ?? null),
+      parseRetryAfterMs(res.headers?.get('retry-after') ?? null) ?? statedBodyRetryMs(text),
     );
   }
   return res.json();
