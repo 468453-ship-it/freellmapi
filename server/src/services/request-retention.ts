@@ -219,25 +219,34 @@ export function pruneServerLogs(db: RetentionDb, nowMs: number): number {
 }
 
 /**
- * Sweep expired rows from the two short-lived replay stores.
+ * Sweep expired rows from the short-lived replay stores and the session table.
  *
- * Both tables are write-once with a TTL that readers already filter on
- * (`expires_at_ms > now`), and both are indexed on `expires_at_ms`. Neither
- * had a sweeper: `storeIdempotencyResult` only deletes expired rows for the
- * SAME key hash it is about to overwrite, so a claim whose hash never repeats
- * — the common case, since clients send a fresh UUID per request — sat in the
- * DB forever with its full response JSON. A busy install replaying
- * Idempotency-Key traffic grew this table monotonically. `response_cache`
- * swept expired rows only at startup, so a long-running server accumulated
- * them between restarts too.
+ * idempotency_claims and response_cache are write-once with a TTL that readers
+ * already filter on (`expires_at_ms > now`), and both are indexed on
+ * `expires_at_ms`. Neither had a sweeper: `storeIdempotencyResult` only deletes
+ * expired rows for the SAME key hash it is about to overwrite, so a claim
+ * whose hash never repeats — the common case, since clients send a fresh UUID
+ * per request — sat in the DB forever with its full response JSON. A busy
+ * install replaying Idempotency-Key traffic grew this table monotonically.
+ * `response_cache` swept expired rows only at startup, so a long-running
+ * server accumulated them between restarts too.
  *
- * The deletes are plain index-range walks over `expires_at_ms`, so cost scales
- * with what is actually expired. Guarded against the tables being absent the
- * same way every other prune here is.
+ * `sessions` joins the sweep for the same reason (#1510-era retention series):
+ * validateSession only deletes a row when its OWN token is checked again — and
+ * an expired token is by definition never re-sent — while login mints a new
+ * row per sign-in (30-day TTL). Desktop installs that mint a session on every
+ * dashboard load leak one row per load. Expired rows are dead weight for every
+ * reader (validateSession filters on expires_at_ms), so deleting them is safe.
+ * sessions has no index on expires_at_ms; the delete is a scan of a table that
+ * is at most a few hundred rows on any install, once per prune gate.
+ *
+ * The claims/cache deletes are plain index-range walks over `expires_at_ms`,
+ * so cost scales with what is actually expired. Guarded against the tables
+ * being absent the same way every other prune here is.
  */
 export function pruneExpiredClaims(db: RetentionDb, nowMs: number): number {
   let deleted = 0;
-  for (const table of ['idempotency_claims', 'response_cache'] as const) {
+  for (const table of ['idempotency_claims', 'response_cache', 'sessions'] as const) {
     const present = db
       .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?")
       .get(table);
@@ -321,8 +330,9 @@ export function pruneRequestAnalytics(options: {
   // Persisted server logs, on the same 60s gate as the requests prune above.
   deleted += pruneServerLogs(db, nowMs);
 
-  // Expired idempotency claims and cache rows, on the same 60s gate. Both are
-  // TTL'd replay stores with no reader past expiry and no other sweeper.
+  // Expired idempotency claims, cache rows and dashboard sessions, on the
+  // same 60s gate. All are TTL'd stores with no reader past expiry and no
+  // other sweeper.
   deleted += pruneExpiredClaims(db, nowMs);
   // Web-search attempt log, same gate (see pruneSearchLogs).
   deleted += pruneSearchLogs(db, nowMs);

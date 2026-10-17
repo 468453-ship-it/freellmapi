@@ -164,6 +164,28 @@ describe('request analytics retention', () => {
     expect((db.prepare("SELECT COUNT(*) AS n FROM response_cache WHERE cache_key = 'cache-live'").get() as { n: number }).n).toBe(1);
   });
 
+  it('sweeps expired dashboard sessions on the prune pass', () => {
+    // Expired session rows used to be uncollectable: validateSession only
+    // deletes the row it is validating, and an expired token is never re-sent,
+    // while every login mints a fresh row. Seed one of each and require the
+    // prune to take only the expired half.
+    const db = getDb();
+    const now = new Date('2026-05-31T00:00:00Z').getTime();
+    const userId = db
+      .prepare("INSERT INTO users (email, password_hash) VALUES ('prune@example.com', 'x')")
+      .run().lastInsertRowid as number;
+    const session = db.prepare(
+      'INSERT INTO sessions (token_hash, user_id, expires_at_ms) VALUES (?, ?, ?)',
+    );
+    session.run('hash-expired-session', userId, now - 1000);
+    session.run('hash-live-session', userId, now + 3600_000);
+
+    const result = pruneRequestAnalytics({ db, force: true, now: new Date(now) });
+    expect(result.deleted).toBe(1);
+    expect((db.prepare("SELECT COUNT(*) AS n FROM sessions WHERE token_hash = 'hash-expired-session'").get() as { n: number }).n).toBe(0);
+    expect((db.prepare("SELECT COUNT(*) AS n FROM sessions WHERE token_hash = 'hash-live-session'").get() as { n: number }).n).toBe(1);
+  });
+
   it('bounds the web-search attempt log by age and count', () => {
     process.env.SEARCH_LOGS_RETENTION_DAYS = '7';
     process.env.SEARCH_LOGS_MAX_ROWS = '2';
