@@ -538,6 +538,8 @@
     "providerActions": "提供方操作",
     "routeViaProxy": "经由代理服务器转发",
     "checkNow": "立即检查",
+    "noAutoCheckHint": "该提供商不允许自动检查密钥。密钥在处理完第一个请求后会变为正常。",
+    "noModelsYetHint": "你的目录中还没有该提供商的模型，因此暂时没有可处理的请求。",
     "proxyEnvHintBefore": "也可通过 ",
     "proxyEnvHintAfter": " 环境变量配置（优先生效）。留空则禁用。示例：",
     "importKeys": "导入提供方密钥",

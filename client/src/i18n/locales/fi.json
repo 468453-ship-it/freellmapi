@@ -524,6 +524,8 @@
     "providerActions": "Palveluntarjoajan toimet",
     "routeViaProxy": "Reitti välityspalvelimen kautta",
     "checkNow": "Tarkista nyt",
+    "noAutoCheckHint": "Tämä palveluntarjoaja ei salli avainten automaattisia tarkistuksia. Avain muuttuu terveeksi, kun se on palvellut ensimmäisen pyyntönsä.",
+    "noModelsYetHint": "Katalogissasi ei ole vielä tämän palveluntarjoajan malleja, joten sillä ei ole mitään palveltavaa.",
     "proxyEnvHintBefore": "Myös konfiguroitavissa",
     "proxyEnvHintAfter": "ympäristömuuttuja (etenee etusijalla). Jätä tyhjä ruutu pois käytöstä varten. Esimerkkejä:",
     "importKeys": "Tuontipalveluntarjoajan avaimet",

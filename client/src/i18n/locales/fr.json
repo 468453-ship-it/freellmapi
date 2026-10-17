@@ -524,6 +524,8 @@
     "providerActions": "Actions du fournisseur",
     "routeViaProxy": "Acheminer via le proxy",
     "checkNow": "Vérifier maintenant",
+    "noAutoCheckHint": "Ce fournisseur n'autorise pas les vérifications automatiques de clés. La clé passe à l'état sain après avoir servi sa première requête.",
+    "noModelsYetHint": "Votre catalogue ne contient encore aucun modèle de ce fournisseur, il n'a donc rien à servir.",
     "proxyEnvHintBefore": "Également configurable via la variable d'environnement ",
     "proxyEnvHintAfter": " (prioritaire). Laissez vide pour désactiver. Exemples :",
     "importKeys": "Importer des clés de fournisseur",

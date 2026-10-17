@@ -524,6 +524,8 @@
     "providerActions": "Ayyukan mai bayarwa",
     "routeViaProxy": "Hanya ta hanyar wakili",
     "checkNow": "Duba yanzu",
+    "noAutoCheckHint": "Wannan mai bayarwa ba ya ba da izinin duba maɓalli ta atomatik. Maɓallin zai zama lafiya bayan ya yi hidimar buƙatarsa ta farko.",
+    "noModelsYetHint": "Kasidarka ba ta da samfura daga wannan mai bayarwa tukuna, don haka babu abin da zai yi wa hidima.",
     "proxyEnvHintBefore": "Hakanan ana iya daidaitawa ta hanyar",
     "proxyEnvHintAfter": "canjin yanayi (yana ɗaukar fifiko). Bar komai don kashewa. Misalai:",
     "importKeys": "Shigo maɓallan mai bayarwa",

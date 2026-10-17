@@ -524,6 +524,8 @@
     "providerActions": "Acțiuni ale furnizorului",
     "routeViaProxy": "Traseu prin procură",
     "checkNow": "Verifică acum",
+    "noAutoCheckHint": "Acest furnizor nu permite verificări automate ale cheilor. Cheia devine funcțională după ce servește prima cerere.",
+    "noModelsYetHint": "Catalogul tău nu are încă modele de la acest furnizor, așa că nu are ce servi.",
     "proxyEnvHintBefore": "De asemenea, configurabil prin",
     "proxyEnvHintAfter": "variabila de mediu (are prioritate). Lasă gol pentru a dezactiva. Exemple:",
     "importKeys": "Cheile furnizorului de import",

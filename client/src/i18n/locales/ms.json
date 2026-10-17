@@ -524,6 +524,8 @@
     "providerActions": "Tindakan penyedia",
     "routeViaProxy": "Laluan melalui proksi",
     "checkNow": "Semak sekarang",
+    "noAutoCheckHint": "Penyedia ini tidak membenarkan semakan kunci automatik. Kunci menjadi sihat selepas ia melayan permintaan pertamanya.",
+    "noModelsYetHint": "Katalog anda belum mempunyai model daripada penyedia ini, jadi tiada apa untuk dilayan.",
     "proxyEnvHintBefore": "Juga boleh dikonfigurasikan melalui",
     "proxyEnvHintAfter": "pembolehubah persekitaran (diberi keutamaan). Biarkan kosong untuk dinyahaktifkan. Contoh:",
     "importKeys": "Import kunci penyedia",

@@ -524,6 +524,8 @@
     "providerActions": "Acties van aanbieders",
     "routeViaProxy": "Route via proxy",
     "checkNow": "Controleer nu",
+    "noAutoCheckHint": "Deze provider staat geen automatische sleutelcontroles toe. De sleutel wordt gezond nadat hij zijn eerste verzoek heeft afgehandeld.",
+    "noModelsYetHint": "Je catalogus heeft nog geen modellen van deze provider, dus er valt niets af te handelen.",
     "proxyEnvHintBefore": "Ook configureerbaar via de",
     "proxyEnvHintAfter": "omgevingsvariabele (heeft voorrang). Laat leeg staan om uit te schakelen. Voorbeelden:",
     "importKeys": "Providersleutels importeren",

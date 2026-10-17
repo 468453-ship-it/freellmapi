@@ -524,6 +524,8 @@
     "providerActions": "Provayderning harakatlari",
     "routeViaProxy": "Proksi orqali marshrut",
     "checkNow": "Hozir tekshiring",
+    "noAutoCheckHint": "Bu provayder kalitlarni avtomatik tekshirishga ruxsat bermaydi. Kalit birinchi so‘roviga xizmat ko‘rsatgach, sog‘lom holatga o‘tadi.",
+    "noModelsYetHint": "Katalogingizda hali bu provayderning modellari yo‘q, shuning uchun xizmat ko‘rsatadigan narsa yo‘q.",
     "proxyEnvHintBefore": "orqali ham sozlanishi mumkin",
     "proxyEnvHintAfter": "muhit o'zgaruvchisi (ustunlikka ega). O'chirish uchun bo'sh qoldiring. Misollar:",
     "importKeys": "Provayder kalitlarini import qilish",

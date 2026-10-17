@@ -524,6 +524,8 @@
     "providerActions": "Akcije pružatelja",
     "routeViaProxy": "Ruta putem posrednika",
     "checkNow": "Provjeri sada",
+    "noAutoCheckHint": "Ovaj pružatelj ne dopušta automatske provjere ključeva. Ključ postaje ispravan nakon što posluži svoj prvi zahtjev.",
+    "noModelsYetHint": "Vaš katalog još nema modele ovog pružatelja, pa nema što posluživati.",
     "proxyEnvHintBefore": "Također se može konfigurirati putem",
     "proxyEnvHintAfter": "varijable okoline (ima prednost). Ostavi prazno za isključivanje. Primjeri:",
     "importKeys": "Uvoz ključeva pružatelja usluga",

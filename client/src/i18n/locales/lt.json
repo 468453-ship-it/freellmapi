@@ -524,6 +524,8 @@
     "providerActions": "Tiekėjų veiksmai",
     "routeViaProxy": "Maršrutas per tarpininką",
     "checkNow": "Patikrinkite dabar",
+    "noAutoCheckHint": "Šis teikėjas neleidžia automatinių raktų patikrų. Raktas tampa veikiančiu, kai aptarnauja pirmąją užklausą.",
+    "noModelsYetHint": "Jūsų kataloge dar nėra šio teikėjo modelių, todėl nėra ką aptarnauti.",
     "proxyEnvHintBefore": "Taip pat konfigūruojama per",
     "proxyEnvHintAfter": "aplinkos kintamasis (turi pirmenybę). Palikite tuščią vietą, kad išjungtumėte. Pavyzdžiai:",
     "importKeys": "Importuoti paslaugų teikėjo raktus",

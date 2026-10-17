@@ -524,6 +524,8 @@
     "providerActions": "Akce poskytovatele",
     "routeViaProxy": "Trasa přes zástupce",
     "checkNow": "Zkontrolujte to teď",
+    "noAutoCheckHint": "Tento poskytovatel nepovoluje automatické kontroly klíčů. Klíč bude v pořádku, jakmile obslouží svůj první požadavek.",
+    "noModelsYetHint": "Váš katalog zatím neobsahuje žádné modely tohoto poskytovatele, takže nemá co obsluhovat.",
     "proxyEnvHintBefore": "Také konfigurovatelné přes",
     "proxyEnvHintAfter": "proměnné prostředí (má přednost). Nechte prázdné pro deaktivaci. Příklady:",
     "importKeys": "Importovat klíče poskytovatele",

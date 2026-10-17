@@ -524,6 +524,8 @@
     "providerActions": "Awọn iṣẹ olupese",
     "routeViaProxy": "Ipa ọna nipasẹ aṣoju",
     "checkNow": "Ṣayẹwo bayi",
+    "noAutoCheckHint": "Olùpèsè yìí kò gba àyẹ̀wò kọ́kọ́rọ́ aládàáṣe láàyè. Kọ́kọ́rọ́ náà yóò dára lẹ́yìn tí ó bá sin ìbéèrè àkọ́kọ́ rẹ̀.",
+    "noModelsYetHint": "Àkójọ rẹ kò tíì ní àwòṣe kankan láti ọ̀dọ̀ olùpèsè yìí, nítorí náà kò sí nǹkan tí yóò sìn.",
     "proxyEnvHintBefore": "Tun Configurable nipasẹ awọn",
     "proxyEnvHintAfter": "oniyipada ayika (mu ṣaaju). Fi òfo silẹ lati mu ṣiṣẹ. Awọn apẹẹrẹ:",
     "importKeys": "Gbe wọle awọn bọtini olupese",

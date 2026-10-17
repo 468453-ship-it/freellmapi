@@ -569,6 +569,8 @@
     "providerActions": "Provider actions",
     "routeViaProxy": "Route via proxy",
     "checkNow": "Check now",
+    "noAutoCheckHint": "This provider doesn't allow automated key checks. The key turns healthy after it serves its first request.",
+    "noModelsYetHint": "Your catalog has no models from this provider yet, so there's nothing for it to serve.",
     "proxyEnvHintBefore": "Also configurable via the ",
     "proxyEnvHintAfter": " environment variable (takes precedence). Leave blank to disable. Examples:",
     "importKeys": "Import provider keys",

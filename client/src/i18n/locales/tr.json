@@ -524,6 +524,8 @@
     "providerActions": "Sağlayıcı eylemleri",
     "routeViaProxy": "Proxy aracılığıyla yönlendirme",
     "checkNow": "Şimdi kontrol et",
+    "noAutoCheckHint": "Bu sağlayıcı otomatik anahtar kontrollerine izin vermiyor. Anahtar ilk isteğini karşıladıktan sonra sağlıklı olur.",
+    "noModelsYetHint": "Kataloğunuzda henüz bu sağlayıcıdan model yok, bu yüzden karşılayacağı bir istek yok.",
     "proxyEnvHintBefore": "Ayrıca ",
     "proxyEnvHintAfter": " ortam değişkeniyle yapılandırılabilir (önceliklidir). Devre dışı bırakmak için boş bırakın. Örnekler:",
     "importKeys": "Sağlayıcı anahtarlarını içe aktar",

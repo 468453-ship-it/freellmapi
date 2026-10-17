@@ -94,6 +94,7 @@ export default function KeysPage() {
               onValueChange={setTab}
               options={KEYS_TABS.map(tb => ({ value: tb.id, label: t(tb.labelKey) }))}
               ariaLabel={t('keys.pageTitle')}
+              className="w-full sm:w-auto"
             />
           </>
         }

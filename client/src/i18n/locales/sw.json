@@ -524,6 +524,8 @@
     "providerActions": "Vitendo vya mtoaji",
     "routeViaProxy": "Njia kupitia seva mbadala",
     "checkNow": "Angalia sasa",
+    "noAutoCheckHint": "Mtoa huduma huyu haruhusu ukaguzi wa funguo wa kiotomatiki. Ufunguo unakuwa mzima baada ya kuhudumia ombi lake la kwanza.",
+    "noModelsYetHint": "Katalogi yako bado haina modeli kutoka kwa mtoa huduma huyu, kwa hivyo hakuna cha kuhudumia.",
     "proxyEnvHintBefore": "Pia inaweza kusanidiwa kupitia",
     "proxyEnvHintAfter": "kutofautisha kwa mazingira (huchukua nafasi ya kwanza). Acha wazi ili kuzima. Mifano:",
     "importKeys": "Ingiza funguo za mtoa huduma",

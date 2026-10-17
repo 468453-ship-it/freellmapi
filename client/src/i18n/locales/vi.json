@@ -524,6 +524,8 @@
     "providerActions": "Hành động của nhà cung cấp",
     "routeViaProxy": "Định tuyến qua proxy",
     "checkNow": "Kiểm tra ngay",
+    "noAutoCheckHint": "Nhà cung cấp này không cho phép kiểm tra khóa tự động. Khóa sẽ chuyển sang trạng thái tốt sau khi phục vụ yêu cầu đầu tiên.",
+    "noModelsYetHint": "Danh mục của bạn chưa có mô hình nào từ nhà cung cấp này, nên chưa có gì để phục vụ.",
     "proxyEnvHintBefore": "Cũng có thể cấu hình thông qua",
     "proxyEnvHintAfter": "biến môi trường (được ưu tiên). Để trống để vô hiệu hóa. Ví dụ:",
     "importKeys": "Nhập khóa nhà cung cấp",

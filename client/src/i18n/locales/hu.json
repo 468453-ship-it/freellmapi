@@ -524,6 +524,8 @@
     "providerActions": "Szolgáltatói intézkedések",
     "routeViaProxy": "Útvonal proxyn keresztül",
     "checkNow": "Ellenőrizd most",
+    "noAutoCheckHint": "Ez a szolgáltató nem engedélyezi a kulcsok automatikus ellenőrzését. A kulcs az első kiszolgált kérése után lesz egészséges.",
+    "noModelsYetHint": "A katalógusodban még nincs modell ettől a szolgáltatótól, így nincs mit kiszolgálnia.",
     "proxyEnvHintBefore": "Konfigurálható a",
     "proxyEnvHintAfter": "környezeti változó (elsőbbséget élvez). Hagyj üres gombot a letiltáshoz. Példák:",
     "importKeys": "Szolgáltató kulcsok importálása",

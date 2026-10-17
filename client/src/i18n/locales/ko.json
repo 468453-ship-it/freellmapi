@@ -524,6 +524,8 @@
     "providerActions": "공급자 작업",
     "routeViaProxy": "프록시를 통한 라우팅",
     "checkNow": "지금 확인하세요",
+    "noAutoCheckHint": "이 공급자는 자동 키 확인을 허용하지 않습니다. 키는 첫 요청을 처리한 뒤 정상 상태가 됩니다.",
+    "noModelsYetHint": "카탈로그에 아직 이 공급자의 모델이 없어 처리할 요청이 없습니다.",
     "proxyEnvHintBefore": "또한 다음을 통해 구성할 수 있습니다.",
     "proxyEnvHintAfter": "환경 변수(우선순위를 갖습니다). 비활성화하려면 비워 두세요. 예:",
     "importKeys": "공급자 키 가져오기",

@@ -524,6 +524,8 @@
     "providerActions": "Działania dostawcy",
     "routeViaProxy": "Trasa przez proxy",
     "checkNow": "Sprawdź teraz",
+    "noAutoCheckHint": "Ten dostawca nie pozwala na automatyczne sprawdzanie kluczy. Klucz staje się sprawny po obsłużeniu pierwszego żądania.",
+    "noModelsYetHint": "Twój katalog nie ma jeszcze modeli tego dostawcy, więc nie ma czego obsługiwać.",
     "proxyEnvHintBefore": "Możliwość konfiguracji również poprzez",
     "proxyEnvHintAfter": "zmienna środowiskowa (ma pierwszeństwo). Pozostaw puste, aby wyłączyć. Przykłady:",
     "importKeys": "Importuj klucze dostawcy",

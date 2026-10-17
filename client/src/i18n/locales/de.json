@@ -524,6 +524,8 @@
     "providerActions": "Anbieteraktionen",
     "routeViaProxy": "Route über Proxy",
     "checkNow": "Jetzt prüfen",
+    "noAutoCheckHint": "Dieser Anbieter erlaubt keine automatischen Schlüsselprüfungen. Der Schlüssel wird gesund, sobald er seine erste Anfrage bedient hat.",
+    "noModelsYetHint": "Dein Katalog enthält noch keine Modelle dieses Anbieters, daher gibt es nichts zu bedienen.",
     "proxyEnvHintBefore": "Auch konfigurierbar über die",
     "proxyEnvHintAfter": "Umgebungsvariable (hat Vorrang). Zum Deaktivieren leer lassen. Beispiele:",
     "importKeys": "Anbieterschlüssel importieren",

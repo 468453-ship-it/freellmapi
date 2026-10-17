@@ -17,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu'
-import { ChevronDown, CircleAlert, Copy, ExternalLink, FlaskConical, KeyRound, Layers, ListFilter, ListPlus, MoreHorizontal, Pencil, Plus, RefreshCw, Search, Sparkles, Trash2, Zap } from 'lucide-react'
+import { ChevronDown, CircleAlert, Copy, ExternalLink, FlaskConical, Info, KeyRound, Layers, ListFilter, ListPlus, MoreHorizontal, Pencil, Plus, RefreshCw, Search, Sparkles, Trash2, Zap } from 'lucide-react'
 import type { ApiKey, ApiKeyModel } from '../../../../shared/types'
 import { formatSqliteUtcToLocalTime } from '@/lib/utils'
 import { useI18n } from '@/i18n'
@@ -153,7 +153,10 @@ export function ProviderList({ onAddKey }: { onAddKey: () => void }) {
 
   const checkKey = useMutation({
     mutationFn: (keyId: number) => apiFetch(`/api/health/check/${keyId}`, { method: 'POST' }),
-    onSuccess: () => {
+    onSuccess: (_data, keyId) => {
+      // #1459: the server sends no probe for these keys, so say why instead
+      // of letting the button look broken.
+      if (keys.find(k => k.id === keyId)?.autoHealthCheck === false) toast.info(t('keys.noAutoCheckHint'))
       queryClient.invalidateQueries({ queryKey: ['health'] })
       queryClient.invalidateQueries({ queryKey: ['keys'] })
     },
@@ -292,6 +295,9 @@ export function ProviderList({ onAddKey }: { onAddKey: () => void }) {
   const healthKeyMap = new Map<number, { status: string; lastCheckedAt: string | null; lastHealthError: string | null }>()
   for (const k of healthData?.keys ?? []) healthKeyMap.set(k.id, k)
   const statusOf = (k: ApiKey) => healthKeyMap.get(k.id)?.status ?? k.status
+  // "unchecked" is not a problem (#1459): a new key sits there until its
+  // first check, and an LLMTR key until its first served request.
+  const isIssue = (status: string) => status !== 'healthy' && status !== 'unknown'
 
   // #1403 phase 3: the provider-reported balance for a key, from the same
   // health poll the row's status already rides on. One badge per key: the
@@ -333,7 +339,7 @@ export function ProviderList({ onAddKey }: { onAddKey: () => void }) {
 
   function matchStatus(group: (typeof grouped)[number]): boolean {
     const enabled = group.keys.some(k => k.enabled)
-    const hasIssue = group.keys.some(k => statusOf(k) !== 'healthy')
+    const hasIssue = group.keys.some(k => isIssue(statusOf(k)))
     switch (statusFilter) {
       case 'healthy': return enabled && !hasIssue
       case 'issues': return hasIssue
@@ -360,7 +366,7 @@ export function ProviderList({ onAddKey }: { onAddKey: () => void }) {
     if (q) return true // an active search auto-expands every matching group
     const override = groupOverrides.get(group.value)
     if (override !== undefined) return override
-    const hasIssue = group.keys.some(k => statusOf(k) !== 'healthy')
+    const hasIssue = group.keys.some(k => isIssue(statusOf(k)))
     return hasIssue || grouped.length <= 3
   }
 
@@ -429,7 +435,7 @@ export function ProviderList({ onAddKey }: { onAddKey: () => void }) {
             const showSections = visibleGroups.some(g => g.search)
             const sectionStart = showSections && (i === 0 || !!visibleGroups[i - 1].search !== !!group.search)
             const healthyCount = group.keys.filter(k => statusOf(k) === 'healthy').length
-            const issueCount = group.keys.filter(k => statusOf(k) !== 'healthy').length
+            const issueCount = group.keys.filter(k => isIssue(statusOf(k))).length
             // #787: once a selection exists in this group the checkboxes stay
             // visible, so the rest of the selection can be built without hunting.
             const groupHasSelection = group.keys.some(k => selectedKeyIds.has(k.id))
@@ -849,6 +855,15 @@ export function ProviderList({ onAddKey }: { onAddKey: () => void }) {
                               </ConfirmButton>
                             </div>
                           </div>
+                          {k.autoHealthCheck === false && status === 'unknown' && !lastHealthError && (
+                            <div className="flex items-start gap-2 px-4 pb-3 pl-8 text-xs text-muted-foreground" role="status">
+                              <Info className="mt-0.5 size-3.5 flex-shrink-0" />
+                              <span>
+                                {t('keys.noAutoCheckHint')}
+                                {k.modelsAvailable === 0 && <> {t('keys.noModelsYetHint')}</>}
+                              </span>
+                            </div>
+                          )}
                           {lastHealthError && (
                             <div className="flex items-start gap-2 px-4 pb-3 pl-8 text-xs text-destructive" role="status">
                               <CircleAlert className="mt-0.5 size-3.5 flex-shrink-0" />

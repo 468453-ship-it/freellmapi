@@ -524,6 +524,8 @@
     "providerActions": "Omume ndị na-eweta",
     "routeViaProxy": "Ụzọ site na proxy",
     "checkNow": "Lelee ugbu a",
+    "noAutoCheckHint": "Onye na-enye ọrụ a anaghị ekwe ka a lelee igodo na-akpaghị aka. Igodo ahụ ga-adị mma mgbe o jesịrị arịrịọ mbụ ya ozi.",
+    "noModelsYetHint": "Katalọgụ gị enweghị ụdị ọ bụla sitere n'aka onye na-enye ọrụ a ugbu a, ya mere ọ nweghị ihe ọ ga-eje ozi.",
     "proxyEnvHintBefore": "Ọzọkwa configurable site na",
     "proxyEnvHintAfter": "mgbanwe gburugburu ebe obibi (na-ebute ụzọ). Hapụ oghere iji gbanyụọ. Ọmụmaatụ:",
     "importKeys": "Bubata igodo ndị na-eweta",

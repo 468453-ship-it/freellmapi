@@ -382,6 +382,12 @@ export interface ApiKey {
   /** True for a built-in provider key whose platform the catalog carries no
    *  models for, so the dashboard offers Fetch models on it (#1348). */
   modelDiscovery?: boolean;
+  /** False for a provider that forbids automated key checks (LLMTR, #1459):
+   *  its keys turn healthy on their first served request, not on a probe. */
+  autoHealthCheck?: boolean;
+  /** Only sent when autoHealthCheck is false: how many of the provider's
+   *  models this install can route to (0 = nothing to serve yet). */
+  modelsAvailable?: number;
 }
 
 export interface ApiKeyCreate {

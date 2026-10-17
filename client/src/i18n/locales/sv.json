@@ -524,6 +524,8 @@
     "providerActions": "Leverantörsåtgärder",
     "routeViaProxy": "Rutt via proxy",
     "checkNow": "Kolla nu",
+    "noAutoCheckHint": "Den här leverantören tillåter inte automatiska nyckelkontroller. Nyckeln blir frisk när den har betjänat sin första förfrågan.",
+    "noModelsYetHint": "Din katalog har ännu inga modeller från den här leverantören, så det finns inget för den att betjäna.",
     "proxyEnvHintBefore": "Kan också konfigureras via",
     "proxyEnvHintAfter": "miljövariabel (har företräde). Lämna tomt för att inaktivera. Exempel:",
     "importKeys": "Importera leverantörsnycklar",

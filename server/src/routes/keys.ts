@@ -343,6 +343,11 @@ keysRouter.get('/providers', (_req: Request, res: Response) => {
 keysRouter.get('/', (_req: Request, res: Response) => {
   const db = getDb();
   const rows = db.prepare('SELECT * FROM api_keys ORDER BY created_at DESC').all() as any[];
+  const modelCounts = new Map<string, number>();
+  const modelCountFor = (platform: string): number => {
+    if (!modelCounts.has(platform)) modelCounts.set(platform, enabledModelCount(platform));
+    return modelCounts.get(platform)!;
+  };
 
   const customModels = [
     ...db.prepare(`
@@ -445,6 +450,15 @@ keysRouter.get('/', (_req: Request, res: Response) => {
       // key-optional platform is an ordinary key row (#1331).
       keyOptional: resolveProvider(row.platform)?.keyless === true,
       keyless: resolveProvider(row.platform)?.keyless === true && isAnonymousCredential(realKey),
+      // #1459: false for a provider that forbids automated key checks (LLMTR).
+      // Its keys stay 'unknown' until they serve a request, and "Check now"
+      // sends nothing, so the dashboard explains that instead of showing an
+      // unexplained "unchecked". modelsAvailable says whether this install has
+      // any of the provider's models to serve that first request with.
+      autoHealthCheck: resolveProvider(row.platform)?.supportsKeyValidation !== false,
+      ...(resolveProvider(row.platform)?.supportsKeyValidation === false
+        ? { modelsAvailable: modelCountFor(row.platform) }
+        : {}),
       // Lets the export dialog count exactly what the export will write.
       exportable: isExportableKey({ platform: row.platform, baseUrl: row.base_url ?? null, key: realKey }),
       createdAt: row.created_at,
@@ -1841,6 +1855,10 @@ keysRouter.patch('/:id', (req: Request, res: Response) => {
     const { encrypted, iv, authTag } = encrypt(changedKey);
     updates.push('encrypted_key = ?', 'iv = ?', 'auth_tag = ?', "status = 'unknown'", 'last_checked_at = NULL', 'last_health_error = NULL');
     values.push(encrypted, iv, authTag);
+    // #1459: pasting in a new key means "use this key". A row the health
+    // checker auto-disabled would otherwise stay off with a fresh credential
+    // and never serve a request. An explicit `enabled` in the same call wins.
+    if (enabled === undefined) updates.push('enabled = 1');
   }
   if (label !== undefined) {
     updates.push('label = ?');
