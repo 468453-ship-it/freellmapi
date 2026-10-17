@@ -66,6 +66,22 @@ export function inBandCreditsError(text: string | null | undefined): string | nu
 }
 
 /**
+ * The retry options for a custom endpoint that answered 400 to a tool_choice
+ * pinning one function. Some local servers (LM Studio 0.4.26) reject
+ * {"type":"function","function":{"name":...}} but accept "required", and
+ * "required" with the tool list narrowed to the pinned function asks for the
+ * same call. Returns null when the request does not pin a function present in
+ * tools, so a retry never changes what the client asked for. (#1548)
+ */
+function pinnedToolChoiceRetry(options?: CompletionOptions): CompletionOptions | null {
+  const choice = options?.tool_choice;
+  if (!choice || typeof choice === 'string') return null;
+  const tools = options?.tools?.filter(t => t.function.name === choice.function.name);
+  if (!tools?.length) return null;
+  return { ...options, tools, tool_choice: 'required' };
+}
+
+/**
  * Generic provider for platforms that use an OpenAI-compatible API.
  * Covers: Groq, Cerebras, NVIDIA NIM, Mistral, OpenRouter,
  * GitHub Models, Fireworks AI.
@@ -170,6 +186,16 @@ export class OpenAICompatProvider extends BaseProvider {
       return null;
     }
     return rescued;
+  }
+
+  /** Options for one retry of a custom endpoint's 400 to a pinned tool_choice,
+   * or null when no retry applies. The retried request uses "required", so it
+   * can never qualify for a second retry. See pinnedToolChoiceRetry (#1548). */
+  private pinnedToolChoiceRetryFor(status: number, options?: CompletionOptions): CompletionOptions | null {
+    if (this.platform !== 'custom' || status !== 400) return null;
+    const retry = pinnedToolChoiceRetry(options);
+    if (retry) console.log(`[${this.name}] 400 on a pinned tool_choice; retrying with "required" over the pinned tool (#1548)`);
+    return retry;
   }
 
   /** Extract the useful text from an upstream error body. Most providers put it
@@ -349,6 +375,8 @@ export class OpenAICompatProvider extends BaseProvider {
         out._routed_via = { platform: this.platform, model: modelId };
         return out;
       }
+      const retry = this.pinnedToolChoiceRetryFor(res.status, options);
+      if (retry) return this.chatCompletion(apiKey, messages, modelId, retry, quotaContext);
       throw providerHttpError(res, `${this.name} API error ${res.status}: ${this.upstreamErrorText(err, res)}`, err);
     }
 
@@ -473,6 +501,11 @@ export class OpenAICompatProvider extends BaseProvider {
         yield { ...base, choices: [{ index: 0, delta: { role: 'assistant' }, finish_reason: null }] };
         yield { ...base, choices: [{ index: 0, delta: { tool_calls: rescued.map((c, i) => ({ index: i, ...c })) as unknown as ChatToolCall[] }, finish_reason: null }] };
         yield { ...base, choices: [{ index: 0, delta: {}, finish_reason: 'tool_calls' }] };
+        return;
+      }
+      const retry = this.pinnedToolChoiceRetryFor(res.status, options);
+      if (retry) {
+        yield* this.streamChatCompletion(apiKey, messages, modelId, retry, quotaContext);
         return;
       }
       throw providerHttpError(res, `${this.name} API error ${res.status}: ${this.upstreamErrorText(err, res)}`, err);

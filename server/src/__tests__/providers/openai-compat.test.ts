@@ -1130,3 +1130,131 @@ describe('OpenAICompatProvider in-band out-of-credits notice (#pollinations-inba
     expect(chunks.map(c => c.choices?.[0]?.delta?.content ?? '').join('')).toBe('Hello world');
   });
 });
+
+describe('pinned tool_choice retry on custom endpoints (#1548)', () => {
+  const custom = () => new OpenAICompatProvider({ platform: 'custom', name: 'Custom', baseUrl: 'http://127.0.0.1:1234/v1' });
+  const moveNote = { type: 'function' as const, function: { name: 'move_note', description: 'Move a note', parameters: { type: 'object', properties: { folder: { type: 'string' } }, required: ['folder'] } } };
+  const tagNote = { type: 'function' as const, function: { name: 'tag_note', description: 'Tag a note', parameters: { type: 'object', properties: { tag: { type: 'string' } } } } };
+  const pinned = { type: 'function' as const, function: { name: 'move_note' } };
+  const messages = [{ role: 'user' as const, content: 'File this note under Finance.' }];
+  const badRequest = () => ({ ok: false, status: 400, statusText: 'Bad Request', json: () => Promise.resolve({}) }) as any;
+  const toolCallResponse = () => ({
+    ok: true,
+    json: () => Promise.resolve({
+      id: 'x', object: 'chat.completion', created: 1, model: 'm',
+      choices: [{ index: 0, message: { role: 'assistant', content: null, tool_calls: [{ id: 'call_1', type: 'function', function: { name: 'move_note', arguments: '{"folder":"Finance"}' } }] }, finish_reason: 'tool_calls' }],
+      usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
+    }),
+  }) as any;
+  const toolCallStream = () => {
+    const frames = [
+      'data: {"id":"x","object":"chat.completion.chunk","created":1,"model":"m","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"call_1","type":"function","function":{"name":"move_note","arguments":"{\\"folder\\":\\"Finance\\"}"}}]},"finish_reason":null}]}\n\n',
+      'data: {"id":"x","object":"chat.completion.chunk","created":1,"model":"m","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}\n\n',
+      'data: [DONE]\n\n',
+    ];
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        const encoder = new TextEncoder();
+        for (const frame of frames) controller.enqueue(encoder.encode(frame));
+        controller.close();
+      },
+    });
+    return { ok: true, status: 200, body, headers: new Headers() } as any;
+  };
+
+  /** Answer each request with the next response and record every request body. */
+  function upstream(...responses: Array<() => any>) {
+    const bodies: any[] = [];
+    vi.spyOn(global, 'fetch').mockImplementation(async (_u, init) => {
+      bodies.push(JSON.parse((init as any).body));
+      const next = responses[bodies.length - 1];
+      if (!next) throw new Error(`unexpected request #${bodies.length}`);
+      return next();
+    });
+    return bodies;
+  }
+
+  let log: ReturnType<typeof vi.spyOn>;
+  beforeEach(() => {
+    log = vi.spyOn(console, 'log').mockImplementation(() => {});
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('sends the object form first and does not retry when the endpoint accepts it', async () => {
+    const bodies = upstream(toolCallResponse);
+    const r = await custom().chatCompletion('k', messages, 'm', { tools: [moveNote, tagNote], tool_choice: pinned });
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0].tool_choice).toEqual(pinned);
+    expect(bodies[0].tools).toEqual([moveNote, tagNote]);
+    expect(r.choices[0].message.tool_calls?.[0].function.name).toBe('move_note');
+  });
+
+  it('non-stream: retries a 400 once with "required" over only the pinned tool', async () => {
+    const bodies = upstream(badRequest, toolCallResponse);
+    const r = await custom().chatCompletion('k', messages, 'm', { tools: [moveNote, tagNote], tool_choice: pinned, max_tokens: 300 });
+    expect(bodies).toHaveLength(2);
+    expect(bodies[1].tool_choice).toBe('required');
+    expect(bodies[1].tools).toEqual([moveNote]);
+    expect(bodies[1].messages).toEqual(bodies[0].messages);
+    expect(bodies[1].max_tokens).toBe(bodies[0].max_tokens);
+    expect(r.choices[0].message.tool_calls?.[0].function).toEqual({ name: 'move_note', arguments: '{"folder":"Finance"}' });
+    expect(log).toHaveBeenCalledWith(expect.stringContaining('#1548'));
+  });
+
+  it('stream: retries a 400 once with "required" over only the pinned tool', async () => {
+    const bodies = upstream(badRequest, toolCallStream);
+    const chunks: any[] = [];
+    for await (const c of custom().streamChatCompletion('k', messages, 'm', { tools: [moveNote, tagNote], tool_choice: pinned })) chunks.push(c);
+    expect(bodies).toHaveLength(2);
+    expect(bodies[0].tool_choice).toEqual(pinned);
+    expect(bodies[1].tool_choice).toBe('required');
+    expect(bodies[1].tools).toEqual([moveNote]);
+    expect(bodies[1].stream).toBe(true);
+    const calls = chunks.flatMap(c => c.choices[0]?.delta?.tool_calls ?? []);
+    expect(calls[0].function.name).toBe('move_note');
+  });
+
+  const rejected = (message: string) => () => ({ ok: false, status: 400, statusText: 'Bad Request', json: () => Promise.resolve({ error: { message } }) }) as any;
+
+  it('non-stream: throws the retry error when the rewritten request is rejected too, without a third attempt', async () => {
+    const bodies = upstream(rejected('first rejection'), rejected('retry rejection'));
+    await expect(custom().chatCompletion('k', messages, 'm', { tools: [moveNote], tool_choice: pinned })).rejects.toThrow('Custom API error 400: retry rejection');
+    expect(bodies).toHaveLength(2);
+  });
+
+  it('stream: throws the retry error when the rewritten request is rejected too, without a third attempt', async () => {
+    const bodies = upstream(rejected('first rejection'), rejected('retry rejection'));
+    const drain = async () => {
+      for await (const _ of custom().streamChatCompletion('k', messages, 'm', { tools: [moveNote], tool_choice: pinned })) { /* drain */ }
+    };
+    await expect(drain()).rejects.toThrow('Custom API error 400: retry rejection');
+    expect(bodies).toHaveLength(2);
+  });
+
+  it('does not retry when tool_choice is already a string', async () => {
+    const bodies = upstream(badRequest);
+    await expect(custom().chatCompletion('k', messages, 'm', { tools: [moveNote], tool_choice: 'required' })).rejects.toThrow('Custom API error 400');
+    expect(bodies).toHaveLength(1);
+  });
+
+  it('does not retry when the pinned function is not among the tools', async () => {
+    const bodies = upstream(badRequest);
+    await expect(custom().chatCompletion('k', messages, 'm', { tools: [tagNote], tool_choice: pinned })).rejects.toThrow('Custom API error 400');
+    expect(bodies).toHaveLength(1);
+  });
+
+  it('does not retry errors other than 400', async () => {
+    const bodies = upstream(() => ({ ok: false, status: 500, statusText: 'Internal Server Error', json: () => Promise.resolve({}) }) as any);
+    await expect(custom().chatCompletion('k', messages, 'm', { tools: [moveNote], tool_choice: pinned })).rejects.toThrow('Custom API error 500');
+    expect(bodies).toHaveLength(1);
+  });
+
+  it('does not retry built-in platforms', async () => {
+    const groq = new OpenAICompatProvider({ platform: 'groq', name: 'Groq', baseUrl: 'https://api.groq.com/openai/v1' });
+    const bodies = upstream(badRequest);
+    await expect(groq.chatCompletion('k', messages, 'm', { tools: [moveNote], tool_choice: pinned })).rejects.toThrow('Groq API error 400');
+    expect(bodies).toHaveLength(1);
+  });
+});
