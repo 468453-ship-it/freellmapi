@@ -27,6 +27,12 @@ const DEFAULT_QUOTA_OBSERVATIONS_MAX_ROWS = 200_000;
 // window is 90d, so the default age bound matches the `requests` table.
 const DEFAULT_SEARCH_RETENTION_DAYS = 90;
 const DEFAULT_SEARCH_MAX_ROWS = 100_000;
+// decision_requests (#1537) is the per-attempt decision-model log behind the
+// Models → Decision page. Same shape as search_requests: an append-only
+// attempt log whose only reader is a month-scoped count, so older rows are
+// pure disk growth. Bounded like the search log.
+const DEFAULT_DECISION_RETENTION_DAYS = 90;
+const DEFAULT_DECISION_MAX_ROWS = 100_000;
 
 type RetentionDb = ReturnType<typeof getDb>;
 
@@ -96,6 +102,19 @@ export function getSearchLogRetentionConfig(): SearchLogRetentionConfig {
   return {
     retentionDays: readNonNegativeInt('SEARCH_LOGS_RETENTION_DAYS', DEFAULT_SEARCH_RETENTION_DAYS),
     maxRows: readNonNegativeInt('SEARCH_LOGS_MAX_ROWS', DEFAULT_SEARCH_MAX_ROWS),
+  };
+}
+
+export interface DecisionLogRetentionConfig {
+  retentionDays: number;
+  maxRows: number;
+}
+
+/** Same env convention as the pairs above; 0 on either knob disables that half. */
+export function getDecisionLogRetentionConfig(): DecisionLogRetentionConfig {
+  return {
+    retentionDays: readNonNegativeInt('DECISION_LOGS_RETENTION_DAYS', DEFAULT_DECISION_RETENTION_DAYS),
+    maxRows: readNonNegativeInt('DECISION_LOGS_MAX_ROWS', DEFAULT_DECISION_MAX_ROWS),
   };
 }
 
@@ -293,6 +312,44 @@ export function pruneSearchLogs(db: RetentionDb, nowMs: number): number {
   return deleted;
 }
 
+/**
+ * Age- and count-bound the decision-model attempt log (#1537).
+ *
+ * decision_requests grew on every POST /v1/decisions attempt (and every failed
+ * one — a cooling-down key still logs) with no prune of any kind. Its only
+ * reader is the month-scoped count on the Decision page, so the 90d default
+ * matches the other attempt logs. Guarded against the table being absent like
+ * every other prune here.
+ */
+export function pruneDecisionLogs(db: RetentionDb, nowMs: number): number {
+  const hasTable = !!db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='decision_requests'")
+    .get();
+  if (!hasTable) return 0;
+
+  const { retentionDays, maxRows } = getDecisionLogRetentionConfig();
+  let deleted = 0;
+
+  if (retentionDays > 0) {
+    const cutoff = toSqliteTimestamp(new Date(nowMs - retentionDays * DAY_MS));
+    deleted += db.prepare('DELETE FROM decision_requests WHERE created_at < ?').run(cutoff).changes;
+  }
+
+  if (maxRows > 0) {
+    deleted += db.prepare(`
+      DELETE FROM decision_requests
+      WHERE id IN (
+        SELECT id
+        FROM decision_requests
+        ORDER BY created_at DESC, id DESC
+        LIMIT -1 OFFSET ?
+      )
+    `).run(maxRows).changes;
+  }
+
+  return deleted;
+}
+
 export function pruneRequestAnalytics(options: {
   db?: RetentionDb;
   force?: boolean;
@@ -336,6 +393,8 @@ export function pruneRequestAnalytics(options: {
   deleted += pruneExpiredClaims(db, nowMs);
   // Web-search attempt log, same gate (see pruneSearchLogs).
   deleted += pruneSearchLogs(db, nowMs);
+  // Decision-model attempt log, same gate (see pruneDecisionLogs).
+  deleted += pruneDecisionLogs(db, nowMs);
 
   // Hourly aggregate prune (gated once per day). The UI's widest window is
   // 30d, so we keep at most 30 days of hourly buckets (~720 rows). The table
