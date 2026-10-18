@@ -129,6 +129,22 @@ describe('decision routing (#1354)', () => {
     expect((await chooseRoutingPreset(HARD)).strategy).toBe('reliable');
   });
 
+  it('re-judges when the minimum probability changes (cache is threshold-scoped)', async () => {
+    // A low-confidence pick cached as Balanced must not outlive a lowering of
+    // the threshold: the point of lowering it is to let the model's own pick
+    // through for texts already judged during the cache TTL.
+    addKey('cloudflare', 'acct:token');
+    const fn = mockFetch(() => cloudflareAnswer('reliable', 0.31));
+    expect(await chooseRoutingPreset(HARD)).toMatchObject({ strategy: 'balanced', source: 'low_confidence' });
+    setDecisionRoutingSettings({ minProbability: 0.3 });
+    const after = await chooseRoutingPreset(HARD);
+    expect(after).toMatchObject({ strategy: 'reliable', source: 'decision' });
+    expect(fn).toHaveBeenCalledTimes(2);
+    // Same threshold again: answered from cache, no third call.
+    expect(await chooseRoutingPreset(HARD)).toMatchObject({ strategy: 'reliable', source: 'cache' });
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
   it('asks once per turn: the same text is answered from cache', async () => {
     addKey('cloudflare', 'acct:token');
     const fn = mockFetch(() => cloudflareAnswer('fastest', 0.9));
