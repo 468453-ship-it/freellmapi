@@ -18,6 +18,7 @@ import { qualifiedModelMemberId } from '../lib/endpoint-scope.js';
 import { overriddenFieldNames } from '../services/model-state.js';
 import { parseModelScope, scopeAllows } from '../lib/model-scope.js';
 import { getQuotaOutlook } from '../services/quota-outlook.js';
+import { getDecisionRoutingStatus, setDecisionRoutingSettings } from '../services/routing-decision.js';
 
 export const fallbackRouter = Router();
 
@@ -39,6 +40,9 @@ fallbackRouter.get('/routing', (_req: Request, res: Response) => {
     peakEndHour: peakHours.endHour,
     peakTimezone: peakHours.timezone,
     cooldownCeilingMs: getCooldownCeilingMs(),
+    // Decision routing (#1354): its settings, whether a decision model is
+    // usable, and since-boot picks. Present whatever the active strategy is.
+    decision: getDecisionRoutingStatus(),
   });
 });
 
@@ -54,7 +58,7 @@ fallbackRouter.delete('/penalty-inspector', (_req: Request, res: Response) => {
 });
 
 const routingSchema = z.object({
-  strategy: z.enum(['priority', 'balanced', 'smartest', 'fastest', 'reliable', 'custom']),
+  strategy: z.enum(['priority', 'balanced', 'smartest', 'fastest', 'reliable', 'custom', 'decision']),
   // Only meaningful with strategy 'custom': the user's weight vector. Any
   // non-negative vector is accepted; setCustomWeights renormalizes to sum 1.
   weights: z.object({
@@ -81,6 +85,11 @@ const routingSchema = z.object({
     .min(MIN_COOLDOWN_CEILING_MS, { message: `cooldownCeilingMs must be at least ${MIN_COOLDOWN_CEILING_MS} (1 minute)` })
     .max(MAX_COOLDOWN_CEILING_MS, { message: `cooldownCeilingMs must be at most ${MAX_COOLDOWN_CEILING_MS} (24 hours)` })
     .nullable().optional(),
+  // Decision routing (#1354): which decision model picks the preset ('auto' or
+  // a decision model id) and the top probability below which it routes as
+  // Balanced. Saved whatever the strategy, so they can be set before switching.
+  decisionModel: z.string().trim().min(1).max(200).optional(),
+  decisionMinProbability: z.number().min(0).max(1).optional(),
 });
 
 // PUT /routing → switch strategy. Presets are just weight vectors over the three
@@ -112,6 +121,7 @@ fallbackRouter.put('/routing', (req: Request, res: Response) => {
   if (parsed.data.cooldownCeilingMs !== undefined) {
     setCooldownCeilingMs(parsed.data.cooldownCeilingMs);
   }
+  setDecisionRoutingSettings({ model: parsed.data.decisionModel, minProbability: parsed.data.decisionMinProbability });
   try {
     setPeakHoursConfig({
       enabled: parsed.data.peakHoursAdjust,
@@ -133,6 +143,7 @@ fallbackRouter.put('/routing', (req: Request, res: Response) => {
     strategy: getRoutingStrategy(),
     exploreEnabled: getExploreEnabled(),
     keySelectionStrategy: getKeySelectionStrategy(),
+    decision: getDecisionRoutingStatus(),
     presets: BANDIT_PRESETS,
     weights: active.weights,
     peakAdjusted: active.adjusted,

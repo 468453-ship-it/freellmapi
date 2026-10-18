@@ -48,6 +48,7 @@ import {
   runFusion,
   type FusionResult,
 } from '../services/fusion.js';
+import { applyDecisionRouting, routingStrategyHeader } from '../services/routing-decision.js';
 
 export const responsesRouter = Router();
 
@@ -1160,6 +1161,13 @@ export async function handleResponses(req: Request, res: Response): Promise<void
     res.write(`event: ${event}\n`);
     res.write(`data: ${JSON.stringify({ type: event, sequence_number: seq++, ...payload })}\n\n`);
   };
+
+  // Decision routing (#1354): with the 'decision' strategy on, a decision
+  // model picks which preset (Smartest / Fastest / Balanced / Most reliable)
+  // this turn routes with. Skipped when the client pinned a model or the
+  // conversation is sticky to one. Any doubt routes as Balanced.
+  const routingPick = await applyDecisionRouting(messages, { pinned: !isAutoModel(requestedModelLabel) || preferredModel != null, signal: clientAbort.signal });
+  if (routingPick && !res.headersSent) res.setHeader('X-FreeLLM-Routing-Strategy', routingStrategyHeader(routingPick));
 
   await runFallbackLoop({
     maxRetries: MAX_RETRIES,

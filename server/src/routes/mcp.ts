@@ -217,7 +217,7 @@ function routingInfo(): unknown {
   };
 }
 
-const ROUTING_STRATEGIES = ['priority', 'balanced', 'smartest', 'fastest', 'reliable', 'custom'] as const;
+const ROUTING_STRATEGIES = ['priority', 'balanced', 'smartest', 'fastest', 'reliable', 'custom', 'decision'] as const;
 
 function setStrategy(args: Record<string, unknown>): unknown {
   const strategy = args.strategy;

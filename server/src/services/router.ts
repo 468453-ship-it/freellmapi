@@ -35,6 +35,7 @@ import { platformDropsResponseFormat } from '../lib/sampling-params.js';
 import { passesContextWindowFloor } from '../lib/min-context-window.js';
 import { isUnifyEnabled, getModelGroups, resolveRequestedIdForDispatch } from './model-groups.js';
 import { getActiveProfileId } from './profile-models.js';
+import { getClientContext } from '../lib/client-context.js';
 import { customEndpointKeyIds } from './custom-endpoint.js';
 import { isDegraded } from './degradation.js';
 import { modelStatsKey, endpointScopeForBaseUrl } from '../lib/endpoint-scope.js';
@@ -509,7 +510,7 @@ export const EXPLORE_CHANCE = 0.1;
 /** A model counts as "has data" once its decay-weighted success+failure
  *  pseudo-count reaches this many samples. */
 export const EXPLORE_MIN_SAMPLES = 5;
-const VALID_STRATEGIES: RoutingStrategy[] = ['priority', 'balanced', 'smartest', 'fastest', 'reliable', 'custom'];
+const VALID_STRATEGIES: RoutingStrategy[] = ['priority', 'balanced', 'smartest', 'fastest', 'reliable', 'custom', 'decision'];
 
 export function getRoutingStrategy(): RoutingStrategy {
   const raw = getSetting(STRATEGY_KEY);
@@ -751,7 +752,19 @@ export function setCommunityPriors(priors: CommunityPriorMap): number {
 function weightsWithPeak(strategy: RoutingStrategy): { weights: RoutingWeights | null; adjusted: boolean } {
   if (strategy === 'priority') return { weights: null, adjusted: false };
   if (strategy === 'custom') return { weights: getCustomWeights(), adjusted: false };
+  // 'decision' outside a picked request (display, fusion, background) scores
+  // as Balanced, the same preset an unsure or unavailable decision falls to.
+  if (strategy === 'decision') return weightsWithPeak('balanced');
   return peakAdjustedWeights(BANDIT_PRESETS[strategy], strategy, getPeakHoursConfig());
+}
+
+/** The strategy THIS request routes with. Under 'decision' (#1354) that is the
+ *  preset the decision model picked for the request, else Balanced; every
+ *  other strategy is used as set. */
+export function effectiveRoutingStrategy(): RoutingStrategy {
+  const strategy = getRoutingStrategy();
+  if (strategy !== 'decision') return strategy;
+  return getClientContext().routingStrategy ?? 'balanced';
 }
 
 function weightsFor(strategy: RoutingStrategy): RoutingWeights | null {
@@ -1934,7 +1947,7 @@ export function resolveModelGroupCandidates(
   demotedDbIds?: ReadonlySet<number>,
 ): ChainRow[] {
   const db = getDb();
-  const strategy = getRoutingStrategy();
+  const strategy = effectiveRoutingStrategy();
   if (strategy !== 'priority') refreshStatsCache(db);
 
   const activeProfileId = getActiveProfileId(db);
@@ -2139,7 +2152,7 @@ export function resolveFusionCandidate(modelId: string): FusionCandidate | null 
 export function routeRequest(estimatedTokens = 1000, skipKeys?: Set<string>, preferredModelDbId?: number, requireVision = false, requireTools = false, skipModels?: Set<number>, prefetchedChain?: ChainRow[], requireStructured = false, skipPlatforms?: Set<string>, exactOutputReserve = 0, task?: 'code' | 'chat'): RouteResult {
   const db = getDb();
 
-  const strategy = getRoutingStrategy();
+  const strategy = effectiveRoutingStrategy();
   if (strategy !== 'priority') refreshStatsCache(db);
 
   const chain = (prefetchedChain ?? getActiveChain(db)).filter(e => e.enabled);
