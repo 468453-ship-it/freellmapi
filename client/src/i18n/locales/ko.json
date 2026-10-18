@@ -347,7 +347,9 @@
     "scoreColumn": "점수",
     "minReliabilityFloor": "최소 신뢰성 기준",
     "minReliabilityFloorHint": "관측된 성공률이 이 값 아래로 떨어지면 해당 모델을 라우팅에서 제외합니다. 0.8은 80%를 의미합니다. 비워 두면 비활성화됩니다 — 기록이 너무 적은 모델은 항상 유지되어 새 모델도 계속 시도할 수 있습니다. 전체 체인을 비우지는 않습니다.",
-    "minReliabilityFloorOff": "비활성"
+    "minReliabilityFloorOff": "비활성",
+    "providerMomentAttribution": "Attribute rate-limit failures to the provider",
+    "providerMomentAttributionHint": "When on, 429s, 5xx errors, timeouts and dropped connections are treated as the provider having a bad minute: they still bench the key, but they no longer count against the model's reliability score. Off by default — leave it off to keep today's scoring."
   },
   "penaltyInspector": {
     "title": "라우터 압력",

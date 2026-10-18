@@ -49,6 +49,7 @@ import { Tooltip } from '@/components/tooltip'
 import { PenaltyInspector } from '@/components/penalty-inspector'
 import { PeakHoursControls } from '@/components/peak-hours-controls'
 import { ReliabilityFloorControl } from '@/components/reliability-floor-control'
+import { ProviderMomentControl } from '@/components/provider-moment-control'
 import { ChainManager } from '@/components/chain-manager'
 
 // `tKey` is the i18n suffix under `strategies.*` (label) and `strategies.*Blurb`.
@@ -495,6 +496,10 @@ export default function FallbackPage() {
                   Shown in every mode; the floor pre-filters the candidate chain
                   regardless of how models are ranked. */}
               <ReliabilityFloorControl />
+              {/* Provider-moment failure attribution (#1347, opt-in): 429s, 5xx,
+                  timeouts and transport drops steer the key without counting
+                  against the model's reliability. Off by default. */}
+              <ProviderMomentControl />
             </div>
           )}
 

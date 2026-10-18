@@ -347,7 +347,9 @@
     "scoreColumn": "النتيجة",
     "minReliabilityFloor": "الحد الأدنى للموثوقية",
     "minReliabilityFloorHint": "يستبعد النموذج من التوجيه عندما تنخفض نسبة نجاحه المرصودة دون هذه القيمة. 0.8 تعني 80٪. اتركه فارغًا للتعطيل — تُحفظ دائمًا النماذج ذات السجلّ القليل حتى تظل النماذج الجديدة قابلة للتجربة. لا يُفرِّغ السلسلة كاملة أبدًا.",
-    "minReliabilityFloorOff": "معطّل"
+    "minReliabilityFloorOff": "معطّل",
+    "providerMomentAttribution": "Attribute rate-limit failures to the provider",
+    "providerMomentAttributionHint": "When on, 429s, 5xx errors, timeouts and dropped connections are treated as the provider having a bad minute: they still bench the key, but they no longer count against the model's reliability score. Off by default — leave it off to keep today's scoring."
   },
   "penaltyInspector": {
     "title": "ضغط جهاز التوجيه",

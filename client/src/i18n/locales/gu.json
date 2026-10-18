@@ -347,7 +347,9 @@
     "scoreColumn": "સ્કોર",
     "minReliabilityFloor": "Minimum reliability floor",
     "minReliabilityFloorHint": "Drop a model from routing once its observed success rate falls below this. 0.8 means 80%. Leave blank to disable — models with too little history are always kept so new models can still be tried. Never empties the whole chain.",
-    "minReliabilityFloorOff": "Disabled"
+    "minReliabilityFloorOff": "Disabled",
+    "providerMomentAttribution": "Attribute rate-limit failures to the provider",
+    "providerMomentAttributionHint": "When on, 429s, 5xx errors, timeouts and dropped connections are treated as the provider having a bad minute: they still bench the key, but they no longer count against the model's reliability score. Off by default — leave it off to keep today's scoring."
   },
   "penaltyInspector": {
     "title": "રાઉટર દબાણ",

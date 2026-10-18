@@ -17,7 +17,7 @@ import { nextMonthResetAt } from '../services/key-budget.js';
 // the fire-and-forget key revalidation kicked off on an upstream 401 (below).
 
 import type { RouteResult } from '../services/router.js';
-import { recordRateLimitHit, recordModelFailure, recordSuccess, hasOtherUsableKey, routableKeyIdsForModel, formatResetEta } from '../services/router.js';
+import { recordRateLimitHit, recordModelFailure, recordSuccess, hasOtherUsableKey, routableKeyIdsForModel, formatResetEta, isProviderMomentAttributionEnabled } from '../services/router.js';
 import { safeHeaderValue } from './header-value.js';
 import {
   recordRequest,
@@ -47,6 +47,7 @@ import {
   isProviderBadRequestError,
   isProviderDegradedError,
   isProviderLevelError,
+  isProviderMomentFailure,
   isContextTooLargeError,
   isTimeoutErrorText,
   isStreamTruncatedError,
@@ -588,11 +589,20 @@ export function recordRetryableFailure(route: RouteResult, err: any, state: Fall
     // different wallet and may well have credits, so only THIS key is out.
     benchKeyAcrossPlatform(route, decision.durationMs, decision.source, state, 'is out of credits (402)');
   }
-  // Model-level failure benching: a model failing across keys (or repeatedly on
-  // one key) must sink out of routing instead of being re-picked every request.
-  noteModelFailure(route, now);
+  // #1347 (PR 1): a provider-moment failure (429 / 5xx / timeout / transport)
+  // is the provider's bad minute, not model evidence. When attribution is
+  // enabled it still steers the key via the cooldown above, but leaves the
+  // model's books (failure window, penalties) untouched — so one slow minute
+  // stops sinking a healthy model out of routing.
+  const providerMoment = isProviderMomentAttributionEnabled() && isProviderMomentFailure(err);
+  if (!providerMoment) {
+    // Model-level failure benching: a model failing across keys (or repeatedly
+    // on one key) must sink out of routing instead of being re-picked every
+    // request.
+    noteModelFailure(route, now);
+  }
   // Model-level penalty only when no sibling key can still serve (#454).
-  if (!hasOtherUsableKey(route.modelDbId, route.keyId, state.skipKeys)) {
+  if (!providerMoment && !hasOtherUsableKey(route.modelDbId, route.keyId, state.skipKeys)) {
     // Hard limit signals (429/402) carry the heavier demotion; ordinary
     // upstream failures (5xx/timeout/empty stream) get a lighter one so the
     // model sinks gradually instead of being banished on a single blip.

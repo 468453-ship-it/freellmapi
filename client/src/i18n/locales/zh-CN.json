@@ -323,6 +323,8 @@
     "minReliabilityFloor": "最低可靠性门槛",
     "minReliabilityFloorHint": "当模型的实测成功率低于此值时将其移出路由。0.8 即 80%。留空表示关闭——历史样本不足的模型始终保留，以便新模型仍有机会被尝试。绝不会让整条链变空。",
     "minReliabilityFloorOff": "关闭",
+    "providerMomentAttribution": "把限流失败归因到渠道",
+    "providerMomentAttributionHint": "开启后，429、5xx、超时和连接中断会被视为「渠道这一刻不行」：仍会冷却对应的 key，但不再计入模型的可靠性评分。默认关闭——关闭即保持现有评分行为。",
     "guardrails": "护栏",
     "guardrailsTooltip": "始终生效的护栏：免费额度余量 × 实时限流惩罚。低于 1.0 表示该模型正在被抑制。",
     "scoreTooltip": "最终路由得分 = 三个维度的加权平均值，再乘以护栏系数。得分越高越优先路由。",

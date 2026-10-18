@@ -9,7 +9,7 @@ import type {
   ChatToolChoice,
   ChatContentBlock,
 } from '@freellmapi/shared/types.js';
-import { routeRequest, resolveModelGroupCandidates, resolveRoutingChain, resolveStickyPreference, routingReserveTokens, type RouteResult, type ResolvedChain, type ChainRow } from '../services/router.js';
+import { routeRequest, resolveModelGroupCandidates, resolveRoutingChain, resolveStickyPreference, routingReserveTokens, failureAttributionFor, type RouteResult, type ResolvedChain, type ChainRow } from '../services/router.js';
 import { getSetting, getUnifiedApiKey } from '../db/index.js';
 import { contentToString, estimateInputTokens } from '../lib/content.js';
 import { routeOutputBudget } from '../lib/output-cap.js';
@@ -794,7 +794,7 @@ export async function handleMessages(req: Request, res: Response): Promise<void>
       return 'done';
     },
     logFailure: (route, err) => {
-      logRequest(route.platform, route.modelId, route.keyId, 'error', estimatedInputTokens, 0, Date.now() - start, sanitizeProviderErrorMessage(err.message), null, pinnedModelId, null, 'http');
+      logRequest(route.platform, route.modelId, route.keyId, 'error', estimatedInputTokens, 0, Date.now() - start, sanitizeProviderErrorMessage(err.message), null, pinnedModelId, null, 'http', failureAttributionFor(err));
     },
     onFatal: (route, err, attempt) => {
       setFallbackHeaders(res, attempt, attemptLog);
@@ -936,7 +936,7 @@ async function streamCompletion(
         if (!messageStarted) throw new Error(`in-band provider error from ${route.displayName}: ${msg}`);
         writeSse(res, 'error', { type: 'error', error: { type: 'api_error', message: `Provider error (${route.displayName}): ${sanitizeProviderErrorMessage(String(msg))}` } });
         res.end();
-        logRequest(route.platform, route.modelId, route.keyId, 'error', ctx.estimatedInputTokens, outputChars, Date.now() - ctx.start, `in-band error frame: ${sanitizeProviderErrorMessage(String(msg))}`, null, ctx.pinnedModelId, null, 'http');
+        logRequest(route.platform, route.modelId, route.keyId, 'error', ctx.estimatedInputTokens, outputChars, Date.now() - ctx.start, `in-band error frame: ${sanitizeProviderErrorMessage(String(msg))}`, null, ctx.pinnedModelId, null, 'http', failureAttributionFor({ message: String(msg) }));
         throw new StreamAlreadyStarted();
       }
 
@@ -1104,7 +1104,7 @@ async function streamCompletion(
       // honestly instead of leaving Claude Code hanging, and stop the retry loop.
       writeSse(res, 'error', { type: 'error', error: { type: 'api_error', message: `Provider error (${route.displayName}): stream interrupted` } });
       try { res.end(); } catch { /* socket gone */ }
-      logRequest(route.platform, route.modelId, route.keyId, 'error', ctx.estimatedInputTokens, outputChars, Date.now() - ctx.start, sanitizeProviderErrorMessage(err.message), null, ctx.pinnedModelId, null, 'http');
+      logRequest(route.platform, route.modelId, route.keyId, 'error', ctx.estimatedInputTokens, outputChars, Date.now() - ctx.start, sanitizeProviderErrorMessage(err.message), null, ctx.pinnedModelId, null, 'http', failureAttributionFor(err));
       throw new StreamAlreadyStarted();
     }
     // Headers never sent — bubble to the outer loop for failover.

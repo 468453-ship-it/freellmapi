@@ -347,7 +347,9 @@
     "scoreColumn": "Score",
     "minReliabilityFloor": "Seuil de fiabilité minimal",
     "minReliabilityFloorHint": "Retire un modèle du routage dès que son taux de succès observé passe sous cette valeur. 0,8 signifie 80 %. Laissez vide pour désactiver — les modèles avec trop peu d'historique sont toujours conservés afin que les nouveaux modèles puissent encore être essayés. Ne vide jamais toute la chaîne.",
-    "minReliabilityFloorOff": "Désactivé"
+    "minReliabilityFloorOff": "Désactivé",
+    "providerMomentAttribution": "Attribute rate-limit failures to the provider",
+    "providerMomentAttributionHint": "When on, 429s, 5xx errors, timeouts and dropped connections are treated as the provider having a bad minute: they still bench the key, but they no longer count against the model's reliability score. Off by default — leave it off to keep today's scoring."
   },
   "penaltyInspector": {
     "title": "Pression sur le routeur",

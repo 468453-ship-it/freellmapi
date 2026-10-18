@@ -24,7 +24,7 @@ import {
   getCompressionConfig,
   setCompressionConfig,
 } from '../services/compression/config.js';
-import { getHeadroomThresholds, setHeadroomThresholds, getTaskWeightShare, setTaskWeightShare, getMinReliabilityFloor, setMinReliabilityFloor } from '../services/router.js';
+import { getHeadroomThresholds, setHeadroomThresholds, getTaskWeightShare, setTaskWeightShare, getMinReliabilityFloor, setMinReliabilityFloor, isProviderMomentAttributionEnabled, setProviderMomentAttribution } from '../services/router.js';
 import { MCP_ENABLED_SETTING, isMcpServerEnabled } from './mcp.js';
 import { z } from 'zod';
 import { getAppVersion } from '../lib/app-version.js';
@@ -426,6 +426,30 @@ settingsRouter.put('/min-reliability-floor', (req: Request, res: Response) => {
   } catch (err: any) {
     res.status(400).json({ error: { message: `Invalid min-reliability-floor: ${err.message}`, type: 'invalid_request_error' } });
   }
+});
+
+// Provider-moment failure attribution (opt-in, #1347): tag 429 / 5xx /
+// timeout / transport failures as the provider's bad minute so they steer the
+// key without counting against the model's reliability. Off by default; the
+// ROUTER_PROVIDER_MOMENT_ATTRIBUTION env var pins the behaviour when set.
+settingsRouter.get('/provider-moment-attribution', (_req: Request, res: Response) => {
+  res.json({ enabled: isProviderMomentAttributionEnabled() });
+});
+
+const providerMomentAttributionPutSchema = z.object({
+  enabled: z.boolean(),
+});
+
+// Update the failure-attribution toggle. Takes effect immediately — the
+// setter force-refreshes the stats cache that bakes the filter in.
+settingsRouter.put('/provider-moment-attribution', (req: Request, res: Response) => {
+  const parsed = providerMomentAttributionPutSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: { message: 'Invalid provider-moment-attribution: send {"enabled": true|false}', type: 'invalid_request_error' } });
+    return;
+  }
+  setProviderMomentAttribution(parsed.data.enabled);
+  res.json({ enabled: isProviderMomentAttributionEnabled() });
 });
 
 // Update the guardrails. Partial: send just the knob you want to change.
