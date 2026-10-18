@@ -465,6 +465,8 @@ export const platformColors: Record<string, string> = {
   firecrawl:   '#ef4444',
   linkup:      '#10b981',
   parallel:    '#0ea5e9',
+  serpsearch:  '#2563eb',
+  beatapi:     '#8b5cf6',
 }
 
 // ── Grouped (unified) rendering ──────────────────────────────────────────────

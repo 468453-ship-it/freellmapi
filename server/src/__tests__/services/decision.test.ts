@@ -63,8 +63,8 @@ describe('decision service', () => {
     vi.restoreAllMocks();
   });
 
-  it('has adapters for exactly the launch platforms', () => {
-    expect([...DECISION_PLATFORMS].sort()).toEqual(['cloudflare', 'openrouter']);
+  it('has adapters for the supported decision platforms', () => {
+    expect([...DECISION_PLATFORMS].sort()).toEqual(['beatapi', 'cloudflare', 'openrouter']);
   });
 
   it('calls Cloudflare ai/run with the account from the key and the short model selector', async () => {

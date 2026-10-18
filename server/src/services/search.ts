@@ -5,6 +5,7 @@ import { getClientContext } from '../lib/client-context.js';
 import { proxyFetch } from '../lib/proxy.js';
 import { isSearchPlatform } from '../lib/search-platforms.js';
 import { TAVILY_BASE_URL } from '../providers/tavily.js';
+import { SERPSEARCH_BASE_URL } from '../providers/serpsearch.js';
 import { EXA_BASE_URL } from '../providers/exa.js';
 import { FIRECRAWL_BASE_URL } from '../providers/firecrawl.js';
 import { LINKUP_BASE_URL } from '../providers/linkup.js';
@@ -285,6 +286,33 @@ async function tavilyShaped(url: string, platform: string, cred: ReservedProvide
 }
 
 const ADAPTERS: Record<string, Adapter> = {
+  serpsearch: async (cred, query, opts, n) => {
+    const news = opts.topic === 'news';
+    const url = new URL(`${SERPSEARCH_BASE_URL}/${news ? 'news' : 'search'}`);
+    url.searchParams.set('query', query);
+    const parsed = await upstream(url.toString(), 'serpsearch', {
+      method: 'GET', redirect: 'error', headers: { Authorization: `Bearer ${cred.key}` },
+    }, opts.signal);
+    let rows: unknown[];
+    if (news) {
+      if (!Array.isArray(parsed) || parsed.some(g => !g || !Array.isArray(g.articles))) {
+        throw new SearchError('SerpSearch returned invalid news results', 502);
+      }
+      rows = parsed.flatMap(g => g.articles);
+    } else {
+      const result = parsed as { organic_results?: unknown; error?: unknown } | null;
+      if (!result || typeof result !== 'object' || Array.isArray(result) || result.error ||
+          (result.organic_results !== undefined && !Array.isArray(result.organic_results))) {
+        throw new SearchError('SerpSearch returned invalid search results', 502);
+      }
+      // A valid SERP may omit organic_results entirely (e.g. no matches).
+      rows = (result.organic_results ?? []) as unknown[];
+    }
+    const hits = rows.filter((r): r is Record<string, unknown> => !!r && typeof r === 'object').map(r => ({
+      title: str(r.title), url: str(r.url), content: str(r.description),
+    }));
+    return { results: keepHits(hits).slice(0, n) };
+  },
   tavily: (cred, query, opts, n) => tavilyShaped(`${TAVILY_BASE_URL}/search`, 'tavily', cred, query, opts, n),
 
   custom: (cred, query, opts, n) => {
