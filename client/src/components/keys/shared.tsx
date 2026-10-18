@@ -26,10 +26,13 @@ export function GetKeyLink({ url }: { url: string }) {
 // one (#1331): the key field is optional, a blank submit stores a sentinel so
 // routing treats the platform as configured and calls go out anonymously, and
 // a real key is stored and sent like any other.
-export const PLATFORMS: { value: Platform; label: string; url: string; keyless?: boolean }[] = [
+// `hidden: true` providers stopped offering free API access: they are no longer
+// offered to new users (add/import/add-model pickers, setup checklist), but an
+// existing key still shows with its label so it can be edited or removed.
+export const PLATFORMS: { value: Platform; label: string; url: string; keyless?: boolean; hidden?: boolean }[] = [
   { value: 'aclide', label: 'ACLIDE (shared monthly credits)', url: 'https://aclide.com/en/dashboard/api-keys' },
   { value: 'speka', label: 'Speka ($1 shared monthly credits)', url: 'https://speka.me/dashboard/keys' },
-  { value: 'auray', label: 'Auray (50 shared monthly credits)', url: 'https://app.auray.ai' },
+  { value: 'auray', label: 'Auray', url: 'https://app.auray.ai', hidden: true },
   { value: 'beatapi', label: 'BeatAPI (JEV decisions; temporary free offer)', url: 'https://beatapi.io' },
   { value: 'typhoon', label: 'Typhoon (free research API)', url: 'https://playground.opentyphoon.ai' },
   { value: 'plugsky', label: 'Plugsky (free chat aliases)', url: 'https://plugsky.com/dashboard' },
@@ -101,6 +104,9 @@ export const PLATFORMS: { value: Platform; label: string; url: string; keyless?:
   { value: 'longcat', label: 'LongCat (free daily, email signup ok)', url: 'https://longcat.chat/platform' },
   { value: 'xfyun', label: 'iFlytek Spark (free Lite, needs cn real-name)', url: 'https://console.xfyun.cn' },
 ]
+
+/** Providers a new user can pick (`hidden` ones only stay for existing keys). */
+export const LISTED_PLATFORMS = PLATFORMS.filter(p => !p.hidden)
 
 // 'custom' is configured through its own form (base URL + model), not the
 // generic key dropdown — but it still appears in the grouped provider list.

@@ -38,6 +38,13 @@ import { KEY_PROXY_URL_ERROR, KEY_PROXY_URL_MAX, decryptProxyUrl, encryptProxyUr
 
 export const keysRouter = Router();
 
+// Providers that stopped offering free API access but keep their adapter so
+// existing keys still work if the catalog re-enables them. The setup
+// checklist stops suggesting them to anyone who has no key yet; the dashboard
+// pickers hide them through `hidden` in client/src/components/keys/shared.tsx.
+// Auray: free accounts locked and API access charged (#1563).
+const UNLISTED_PLATFORMS = new Set<string>(['auray']);
+
 // Active providers — must match providers/index.ts registrations + shared/types.ts Platform.
 // Moonshot and MiniMax direct integrations were dropped in V4. HuggingFace
 // was dropped in V4 and re-added in V13 via the router.huggingface.co route.
@@ -329,6 +336,7 @@ keysRouter.get('/providers', (_req: Request, res: Response) => {
         enabledKeyCount: counts?.enabled_keys ?? 0,
       };
     })
+    .filter(p => p.configured || !UNLISTED_PLATFORMS.has(p.platform))
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const configured = providers.filter(p => p.configured).length;
