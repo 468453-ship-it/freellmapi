@@ -47,10 +47,12 @@ export function parseRetryAfterMs(value: string | null | undefined): number | un
  *  digits, an optional fraction, then a literal `s` ("17s", "1.5s", "0.25s"). */
 const PROTOBUF_DURATION = /^(\d+(?:\.\d+)?)s$/;
 
-/** "Please try again in 7.66s" / "retry after 30 seconds" / "try again in 2m".
- *  Anchored on an explicit retry phrase so an unrelated number in an error
- *  message can never be mistaken for a back-off. */
-const PROSE_RETRY = /(?:try again|retry)\s+(?:in|after)\s+(\d+(?:\.\d+)?)\s*(ms|s|sec|secs|second|seconds|m|min|mins|minute|minutes|h|hour|hours)\b/i;
+/** "Please try again in 7.66s" / "retry after 30 seconds" / "try again in 2m",
+ *  and compound Go-style durations like Groq's "try again in 1m26s" or
+ *  "6m0.512s". Anchored on an explicit retry phrase so an unrelated number in
+ *  an error message can never be mistaken for a back-off. */
+const PROSE_RETRY = /(?:try again|retry)\s+(?:in|after)\s+(\d+(?:\.\d+)?\s*[a-z]+(?:\s*\d+(?:\.\d+)?\s*[a-z]+)*)/i;
+const DURATION_PART = /(\d+(?:\.\d+)?)\s*([a-z]+)/gi;
 
 const UNIT_MS: Record<string, number> = {
   ms: 1,
@@ -118,8 +120,13 @@ export function parseStatedRetryMs(body: unknown): number | undefined {
   const text = typeof body === 'string' ? body : safeStringify(body);
   const prose = text ? PROSE_RETRY.exec(text) : null;
   if (prose) {
-    const unit = UNIT_MS[prose[2].toLowerCase()];
-    if (unit) return clampRetryMs(Number(prose[1]) * unit);
+    let total: number | undefined;
+    for (const [, amount, unitName] of prose[1].matchAll(DURATION_PART)) {
+      const unit = UNIT_MS[unitName.toLowerCase()];
+      if (!unit) break; // "try again in 5 or so" — stop at the first non-unit word
+      total = (total ?? 0) + Number(amount) * unit;
+    }
+    if (total !== undefined) return clampRetryMs(total);
   }
   return undefined;
 }
