@@ -467,6 +467,7 @@ export const platformColors: Record<string, string> = {
   parallel:    '#0ea5e9',
   serpsearch:  '#2563eb',
   beatapi:     '#8b5cf6',
+  apinex:      '#06b6d4',
 }
 
 // ── Grouped (unified) rendering ──────────────────────────────────────────────

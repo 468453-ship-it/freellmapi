@@ -76,6 +76,8 @@ export type Platform =
   | 'auray'
   // Decision-only JEV adapter; promotional availability is catalog-managed.
   | 'beatapi'
+  // Free-category chat and decisions share one weighted daily allowance.
+  | 'apinex'
   // Ongoing free research API for chat and speech recognition; catalog only.
   | 'typhoon'
   // Permanent free chat aliases, shared fair-use quota; signed catalog only.

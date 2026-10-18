@@ -1,5 +1,6 @@
 import { getDb } from '../db/index.js';
 import { BEATAPI_BASE_URL } from '../providers/beatapi.js';
+import { APINEX_BASE_URL } from '../providers/apinex.js';
 import { parseRetryAfterMs, parseStatedRetryMs } from '../providers/base.js';
 import { RetryHintTracker } from '../lib/retry-hint.js';
 import { getClientContext } from '../lib/client-context.js';
@@ -178,6 +179,27 @@ function cloudflareKey(key: string): { accountId: string; token: string } {
 }
 
 const ADAPTERS: Record<string, Adapter> = {
+  apinex: async (cred, modelId, body, signal) => {
+    const json = await upstream(`${APINEX_BASE_URL}/decisions`, 'apinex', {
+      method: 'POST', redirect: 'error',
+      headers: { Authorization: `Bearer ${cred.key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: modelId, state: body.state, questions: body.questions }),
+    }, signal) as { model?: string; answers?: unknown; usage?: unknown; error?: unknown } | null;
+    if (!json || json.error || json.model !== modelId) {
+      throw new DecisionError('apinex returned an error or a different decision model', 502);
+    }
+    const answers = answersOf(json.answers, 'apinex');
+    for (const [id, question] of Object.entries(body.questions)) {
+      const answer = answers[id] as { type?: unknown; choice?: unknown; noul?: unknown; score?: unknown } | null;
+      const value = answer?.[question.type];
+      if (!answer || answer.type !== question.type || (question.type === 'choice'
+        ? typeof value !== 'string'
+        : typeof value !== 'number' || !Number.isFinite(value))) {
+        throw new DecisionError('apinex returned a missing or invalid typed answer', 502);
+      }
+    }
+    return { answers, usage: usageOf(json.usage) };
+  },
   beatapi: async (cred, modelId, body, signal) => {
     const json = await upstream(`${BEATAPI_BASE_URL}/systemone`, 'beatapi', {
       method: 'POST', redirect: 'error',

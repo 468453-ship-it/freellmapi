@@ -64,7 +64,7 @@ describe('decision service', () => {
   });
 
   it('has adapters for the supported decision platforms', () => {
-    expect([...DECISION_PLATFORMS].sort()).toEqual(['beatapi', 'cloudflare', 'openrouter']);
+    expect([...DECISION_PLATFORMS].sort()).toEqual(['apinex', 'beatapi', 'cloudflare', 'openrouter']);
   });
 
   it('calls Cloudflare ai/run with the account from the key and the short model selector', async () => {
