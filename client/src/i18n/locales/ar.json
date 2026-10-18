@@ -614,6 +614,7 @@
     "cpKeyOnce": "انسخ هذا المفتاح الآن — لن يظهر مرة أخرى.",
     "cpEnabledAria": "الملف مفعّل",
     "selectKey": "حدد هذا المفتاح",
+    "selectModel": "اختر هذا الطراز",
     "bulkSelected": "تم تحديد {count}",
     "bulkEnable": "تمكين الكل",
     "bulkDisable": "تعطيل الكل",

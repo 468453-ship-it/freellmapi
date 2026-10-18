@@ -614,6 +614,7 @@
     "cpKeyOnce": "העתיקו את המפתח עכשיו — הוא לא יוצג שוב.",
     "cpEnabledAria": "הפרופיל מופעל",
     "selectKey": "בחר מפתח זה",
+    "selectModel": "בחר מודל זה",
     "bulkSelected": "{count} נבחרו",
     "bulkEnable": "הפעל הכול",
     "bulkDisable": "השבת הכול",

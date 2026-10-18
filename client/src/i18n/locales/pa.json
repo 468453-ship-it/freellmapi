@@ -614,6 +614,7 @@
     "cpKeyOnce": "ਇਹ ਕੁੰਜੀ ਹੁਣੇ ਕਾਪੀ ਕਰੋ — ਇਹ ਦੁਬਾਰਾ ਨਹੀਂ ਦਿਖਾਈ ਜਾਵੇਗੀ।",
     "cpEnabledAria": "ਪ੍ਰੋਫਾਈਲ ਚਾਲੂ",
     "selectKey": "ਇਹ ਕੁੰਜੀ ਚੁਣੋ",
+    "selectModel": "ਇਹ ਮਾਡਲ ਚੁਣੋ",
     "bulkSelected": "{count} ਚੁਣੇ ਗਏ",
     "bulkEnable": "ਸਾਰੇ ਯੋਗ ਕਰੋ",
     "bulkDisable": "ਸਾਰੇ ਅਯੋਗ ਕਰੋ",

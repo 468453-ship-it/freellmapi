@@ -614,6 +614,7 @@
     "cpKeyOnce": "Bu kalitni hozir nusxalang — u boshqa ko'rsatilmaydi.",
     "cpEnabledAria": "Profil yoqilgan",
     "selectKey": "Bu kalitni tanlang",
+    "selectModel": "Bu modelni tanlang",
     "bulkSelected": "{count} tanlandi",
     "bulkEnable": "Hammasini yoqish",
     "bulkDisable": "Hammasini faolsizlantirish",

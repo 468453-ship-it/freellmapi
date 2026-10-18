@@ -614,6 +614,7 @@
     "cpKeyOnce": "このキーを今すぐコピーしてください。二度と表示されません。",
     "cpEnabledAria": "プロファイル有効",
     "selectKey": "このキーを選択",
+    "selectModel": "このモデルを選択",
     "bulkSelected": "{count} 件選択中",
     "bulkEnable": "すべて有効にする",
     "bulkDisable": "すべて無効にする",

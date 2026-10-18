@@ -614,6 +614,7 @@
     "cpKeyOnce": "คัดลอกคีย์นี้ตอนนี้ — จะไม่แสดงอีก",
     "cpEnabledAria": "เปิดใช้งานโปรไฟล์",
     "selectKey": "เลือกคีย์นี้",
+    "selectModel": "เลือกรุ่นนี้",
     "bulkSelected": "เลือก {count} แล้ว",
     "bulkEnable": "เปิดใช้งานทั้งหมด",
     "bulkDisable": "ปิดใช้งานทั้งหมด",

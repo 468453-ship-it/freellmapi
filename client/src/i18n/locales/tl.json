@@ -614,6 +614,7 @@
     "cpKeyOnce": "Kopyahin ang key na ito ngayon — hindi na ito ipapakita muli.",
     "cpEnabledAria": "Naka-enable ang profile",
     "selectKey": "Piliin ang key na ito",
+    "selectModel": "Piliin ang modelong ito",
     "bulkSelected": "{count} napili",
     "bulkEnable": "Paganahin lahat",
     "bulkDisable": "I-disable lahat",

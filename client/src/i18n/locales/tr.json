@@ -614,6 +614,7 @@
     "cpKeyOnce": "Bu anahtarı şimdi kopyalayın — bir daha gösterilmeyecek.",
     "cpEnabledAria": "Profil etkin",
     "selectKey": "Bu anahtarı seç",
+    "selectModel": "Bu modeli seç",
     "bulkSelected": "{count} seçildi",
     "bulkEnable": "Tümünü etkinleştir",
     "bulkDisable": "Tümünü devre dışı bırak",

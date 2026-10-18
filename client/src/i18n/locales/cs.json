@@ -614,6 +614,7 @@
     "cpKeyOnce": "Zkopírujte tento klíč hned — už se znovu nezobrazí.",
     "cpEnabledAria": "Profil povolen",
     "selectKey": "Vybrat tento klíč",
+    "selectModel": "Vybrat tento model",
     "bulkSelected": "{count} vybráno",
     "bulkEnable": "Povolit vše",
     "bulkDisable": "Zakázat vše",

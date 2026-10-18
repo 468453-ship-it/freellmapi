@@ -614,6 +614,7 @@
     "cpKeyOnce": "Copiază această cheie acum — nu va mai fi afișată.",
     "cpEnabledAria": "Profil activat",
     "selectKey": "Selectează această cheie",
+    "selectModel": "Selectați acest model",
     "bulkSelected": "{count} selectate",
     "bulkEnable": "Activează toate",
     "bulkDisable": "Dezactivează toate",

@@ -614,6 +614,7 @@
     "cpKeyOnce": "इस कुंजी को अभी कॉपी करें — यह दोबारा नहीं दिखाई जाएगी।",
     "cpEnabledAria": "प्रोफ़ाइल सक्षम",
     "selectKey": "यह कुंजी चुनें",
+    "selectModel": "इस मॉडल को चुनें",
     "bulkSelected": "{count} चयनित",
     "bulkEnable": "सभी सक्षम करें",
     "bulkDisable": "सभी अक्षम करें",

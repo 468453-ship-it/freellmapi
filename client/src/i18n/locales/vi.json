@@ -614,6 +614,7 @@
     "cpKeyOnce": "Sao chép khóa này ngay — nó sẽ không được hiển thị lại.",
     "cpEnabledAria": "Hồ sơ đang bật",
     "selectKey": "Chọn khóa này",
+    "selectModel": "Chọn mô hình này",
     "bulkSelected": "{count} đã chọn",
     "bulkEnable": "Bật tất cả",
     "bulkDisable": "Tắt tất cả",

@@ -614,6 +614,7 @@
     "cpKeyOnce": "지금 이 키를 복사하세요. 다시 표시되지 않습니다.",
     "cpEnabledAria": "프로필 활성화됨",
     "selectKey": "이 키 선택",
+    "selectModel": "이 모델 선택",
     "bulkSelected": "{count}개 선택됨",
     "bulkEnable": "모두 활성화",
     "bulkDisable": "모두 비활성화",

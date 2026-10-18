@@ -628,6 +628,7 @@
     "cpKeyOnce": "请立即复制此密钥——之后将不再显示。",
     "cpEnabledAria": "配置文件已启用",
     "selectKey": "选择此密钥",
+    "selectModel": "选择此模型",
     "bulkSelected": "已选择 {count} 个密钥",
     "bulkEnable": "批量启用",
     "bulkDisable": "批量禁用",

@@ -614,6 +614,7 @@
     "cpKeyOnce": "Копирајте овај кључ одмах — неће бити поново приказан.",
     "cpEnabledAria": "Профил омогућен",
     "selectKey": "Изабери овај кључ",
+    "selectModel": "Изабери овај модел",
     "bulkSelected": "{count} изабрано",
     "bulkEnable": "Омогући све",
     "bulkDisable": "Онемогући све",

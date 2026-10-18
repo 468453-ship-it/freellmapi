@@ -635,6 +635,7 @@
     "cpKeyOnce": "Copy this key now — it won't be shown again.",
     "cpEnabledAria": "Profile enabled",
     "selectKey": "Select this key",
+    "selectModel": "Select this model",
     "bulkSelected": "{count} selected",
     "bulkEnable": "Enable all",
     "bulkDisable": "Disable all",

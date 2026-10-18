@@ -614,6 +614,7 @@
     "cpKeyOnce": "මෙම යතුර දැන්ම පිටපත් කරන්න — එය නැවත නොපෙන්වයි.",
     "cpEnabledAria": "පැතිකඩ සක්‍රීයයි",
     "selectKey": "මෙම යතුර තෝරන්න",
+    "selectModel": "මෙම ආකෘතිය තෝරන්න",
     "bulkSelected": "{count} තෝරා ඇත",
     "bulkEnable": "සියල්ල සබල කරන්න",
     "bulkDisable": "සියල්ල අබල කරන්න",

@@ -614,6 +614,7 @@
     "cpKeyOnce": "Nukopijuokite šį raktą dabar — jis daugiau nebus rodomas.",
     "cpEnabledAria": "Profilis įjungtas",
     "selectKey": "Pasirinkti šį raktą",
+    "selectModel": "Pasirinkite šį modelį",
     "bulkSelected": "Pasirinkta {count}",
     "bulkEnable": "Įjungti visus",
     "bulkDisable": "Išjungti visus",

@@ -618,6 +618,7 @@
     "cpKeyOnce": "請立即複製此金鑰——之後將不會再顯示。",
     "cpEnabledAria": "設定檔已啟用",
     "selectKey": "選擇此金鑰",
+    "selectModel": "選擇此模型",
     "bulkSelected": "已選擇 {count} 個金鑰",
     "bulkEnable": "批次啟用",
     "bulkDisable": "批次停用",

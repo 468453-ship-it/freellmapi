@@ -614,6 +614,7 @@
     "cpKeyOnce": "এই কী এখনই কপি করুন — এটি আর দেখানো হবে না।",
     "cpEnabledAria": "প্রোফাইল সক্রিয়",
     "selectKey": "এই কী নির্বাচন করুন",
+    "selectModel": "এই মডেলটি নির্বাচন করুন",
     "bulkSelected": "{count} নির্বাচিত",
     "bulkEnable": "সব সক্ষম করুন",
     "bulkDisable": "সব নিষ্ক্রিয় করুন",

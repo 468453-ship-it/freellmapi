@@ -614,6 +614,7 @@
     "cpKeyOnce": "Skopiuj ten klucz teraz — nie zostanie ponownie wyświetlony.",
     "cpEnabledAria": "Profil włączony",
     "selectKey": "Wybierz ten klucz",
+    "selectModel": "Wybierz ten model",
     "bulkSelected": "Wybrano {count}",
     "bulkEnable": "Włącz wszystkie",
     "bulkDisable": "Wyłącz wszystkie",

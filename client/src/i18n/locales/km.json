@@ -614,6 +614,7 @@
     "cpKeyOnce": "ចម្លងសោនេះឥឡូវនេះ — វានឹងមិនបង្ហាញម្ដងទៀតទេ។",
     "cpEnabledAria": "ប្រវត្តិរូបបានបើក",
     "selectKey": "ជ្រើសរើសកូនសោនេះ",
+    "selectModel": "ជ្រើសរើសម៉ូដែលនេះ",
     "bulkSelected": "បានជ្រើសរើស {count}",
     "bulkEnable": "បើកទាំងអស់",
     "bulkDisable": "បិទទាំងអស់",

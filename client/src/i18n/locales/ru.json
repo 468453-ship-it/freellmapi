@@ -614,6 +614,7 @@
     "cpKeyOnce": "Скопируйте этот ключ сейчас — он больше не будет показан.",
     "cpEnabledAria": "Профиль включён",
     "selectKey": "Выбрать этот ключ",
+    "selectModel": "Выбрать эту модель",
     "bulkSelected": "Выбрано {count}",
     "bulkEnable": "Включить все",
     "bulkDisable": "Отключить все",

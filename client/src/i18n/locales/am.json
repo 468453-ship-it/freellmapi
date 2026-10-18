@@ -614,6 +614,7 @@
     "cpKeyOnce": "ይህን ቁልፍ አሁን ቅዱ — ዳግም አይታይም።",
     "cpEnabledAria": "መገለጫ ነቅቷል",
     "selectKey": "ይህን ቁልፍ ይምረጡ",
+    "selectModel": "ይህን ሞዴል ምረጥ",
     "bulkSelected": "{count} ተመርጧል",
     "bulkEnable": "ሁሉንም አንቃ",
     "bulkDisable": "ሁሉንም አሰናክል",

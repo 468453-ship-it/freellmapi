@@ -614,6 +614,7 @@
     "cpKeyOnce": "Copia questa chiave adesso — non verrà più mostrata.",
     "cpEnabledAria": "Profilo abilitato",
     "selectKey": "Seleziona questa chiave",
+    "selectModel": "Seleziona questo modello",
     "bulkSelected": "{count} selezionate",
     "bulkEnable": "Abilita tutte",
     "bulkDisable": "Disabilita tutte",

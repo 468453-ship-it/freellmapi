@@ -614,6 +614,7 @@
     "cpKeyOnce": "Kopioi tämä avain nyt — sitä ei näytetä uudelleen.",
     "cpEnabledAria": "Profiili käytössä",
     "selectKey": "Valitse tämä avain",
+    "selectModel": "Valitse tämä malli",
     "bulkSelected": "{count} valittu",
     "bulkEnable": "Ota kaikki käyttöön",
     "bulkDisable": "Poista kaikki käytöstä",

@@ -614,6 +614,7 @@
     "cpKeyOnce": "Kopieer deze sleutel nu — hij wordt niet opnieuw getoond.",
     "cpEnabledAria": "Profiel ingeschakeld",
     "selectKey": "Selecteer deze sleutel",
+    "selectModel": "Dit model selecteren",
     "bulkSelected": "{count} geselecteerd",
     "bulkEnable": "Alles inschakelen",
     "bulkDisable": "Alles uitschakelen",

@@ -614,6 +614,7 @@
     "cpKeyOnce": "Salin kunci ini sekarang — tidak akan ditampilkan lagi.",
     "cpEnabledAria": "Profil aktif",
     "selectKey": "Pilih kunci ini",
+    "selectModel": "Pilih model ini",
     "bulkSelected": "{count} dipilih",
     "bulkEnable": "Aktifkan semua",
     "bulkDisable": "Nonaktifkan semua",

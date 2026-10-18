@@ -614,6 +614,7 @@
     "cpKeyOnce": "Bu açarı indi kopyalayın — bir daha göstərilməyəcək.",
     "cpEnabledAria": "Profil aktivdir",
     "selectKey": "Bu açarı seçin",
+    "selectModel": "Bu modeli seç",
     "bulkSelected": "{count} seçildi",
     "bulkEnable": "Hamısını aktiv et",
     "bulkDisable": "Hamısını deaktiv et",

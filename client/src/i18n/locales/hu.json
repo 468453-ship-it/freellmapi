@@ -614,6 +614,7 @@
     "cpKeyOnce": "Másolja ki most ezt a kulcsot — többé nem jelenik meg.",
     "cpEnabledAria": "Profil engedélyezve",
     "selectKey": "Válaszd ki ezt a kulcsot",
+    "selectModel": "Válassza ezt a modellt",
     "bulkSelected": "{count} kiválasztva",
     "bulkEnable": "Összes engedélyezése",
     "bulkDisable": "Összes letiltása",
