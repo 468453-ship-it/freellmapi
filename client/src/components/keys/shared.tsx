@@ -32,7 +32,6 @@ export function GetKeyLink({ url }: { url: string }) {
 export const PLATFORMS: { value: Platform; label: string; url: string; keyless?: boolean; hidden?: boolean }[] = [
   { value: 'aclide', label: 'ACLIDE (shared monthly credits)', url: 'https://aclide.com/en/dashboard/api-keys' },
   { value: 'speka', label: 'Speka ($1 shared monthly credits)', url: 'https://speka.me/dashboard/keys' },
-  { value: 'auray', label: 'Auray', url: 'https://app.auray.ai', hidden: true },
   { value: 'beatapi', label: 'BeatAPI (JEV decisions; temporary free offer)', url: 'https://beatapi.io' },
   { value: 'apinex', label: 'APINex (shared daily free chat and decisions)', url: 'https://apinex.bond/keys' },
   { value: 'typhoon', label: 'Typhoon (free research API)', url: 'https://playground.opentyphoon.ai' },

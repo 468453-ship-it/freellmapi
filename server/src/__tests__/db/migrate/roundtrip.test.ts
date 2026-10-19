@@ -48,6 +48,7 @@ const DECISION_REQUESTS_FILENAME = '20261016_000001_decision_requests.ts';
 const LLMTR_REENABLE_KEYS_FILENAME = '20261017_000001_llmtr_reenable_keys.ts';
 const REMOVE_GITHUB_PROVIDER_FILENAME = '20261017_000002_remove_github_provider.ts';
 const REQUEST_FAILURE_ATTRIBUTION_FILENAME = '20261017_233153_request_failure_attribution.ts';
+const REMOVE_AURAY_PROVIDER_FILENAME = '20261019_000001_remove_auray_provider.ts';
 
 interface SchemaRow {
   type: string;
@@ -142,6 +143,7 @@ describe('migration round trip', () => {
         LLMTR_REENABLE_KEYS_FILENAME,
         REMOVE_GITHUB_PROVIDER_FILENAME,
         REQUEST_FAILURE_ATTRIBUTION_FILENAME,
+        REMOVE_AURAY_PROVIDER_FILENAME,
       ]);
     } finally {
       db.close();

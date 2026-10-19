@@ -253,6 +253,14 @@ describe('applyCatalog', () => {
     expect(getDb().prepare("SELECT id FROM models WHERE platform = 'some-future-provider'").get()).toBeUndefined();
   });
 
+  it('skips Auray rows a catalog still carries after the provider was removed (#1583)', () => {
+    const models = existingAsCatalogModels();
+    models.push(baseModel({ platform: 'auray', modelId: 'kimi-k3' }));
+    const counts = applyCatalog(getDb(), catalogOf(models));
+    expect(counts.skippedUnknownPlatform).toBeGreaterThanOrEqual(1);
+    expect(getDb().prepare("SELECT id FROM models WHERE platform = 'auray'").get()).toBeUndefined();
+  });
+
   it('imports the new chat providers and keeps Speechify exclusively in audio', () => {
     const models = existingAsCatalogModels();
     models.push(baseModel({ platform: 'clod', modelId: 'test-clod' }));

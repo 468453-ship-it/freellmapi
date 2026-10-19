@@ -57,7 +57,7 @@ it('opens Add key preselected from ?add= and clears the param', async () => {
   expect(search()).toBe('')
 })
 
-it('ignores an unknown or hidden provider', async () => {
+it('ignores an unknown or removed provider', async () => {
   await mount('/keys?add=not-a-provider')
   expect(dialog()).toBe('closed')
   await mount('/keys?add=auray')

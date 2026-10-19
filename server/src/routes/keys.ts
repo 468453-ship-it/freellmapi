@@ -42,18 +42,18 @@ export const keysRouter = Router();
 // existing keys still work if the catalog re-enables them. The setup
 // checklist stops suggesting them to anyone who has no key yet; the dashboard
 // pickers hide them through `hidden` in client/src/components/keys/shared.tsx.
-// Auray: free accounts locked and API access charged (#1563).
-const UNLISTED_PLATFORMS = new Set<string>(['auray']);
+// Empty since Auray was removed outright (#1583).
+const UNLISTED_PLATFORMS = new Set<string>();
 
 // Active providers — must match providers/index.ts registrations + shared/types.ts Platform.
 // Moonshot and MiniMax direct integrations were dropped in V4. HuggingFace
 // was dropped in V4 and re-added in V13 via the router.huggingface.co route.
 // SambaNova was dropped in V23 (free tier permanently retired). GitHub Models
-// was dropped after its retirement on 30 July 2026 (#1557).
+// was dropped after its retirement on 30 July 2026 (#1557). Auray was removed
+// at the provider's request after it started charging for API access (#1583).
 const PLATFORMS = [
   'aclide',
   'speka',
-  'auray',
   'typhoon',
   'plugsky',
   'inferbase',

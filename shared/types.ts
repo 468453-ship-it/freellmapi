@@ -72,8 +72,6 @@ export type Platform =
   | 'aclide'
   // OpenAI-compatible chat and embeddings; one shared $1 monthly allowance.
   | 'speka'
-  // Built-in chat and embeddings share free monthly credits; catalog only.
-  | 'auray'
   // Decision-only JEV adapter; promotional availability is catalog-managed.
   | 'beatapi'
   // Free-category chat and decisions share one weighted daily allowance.
