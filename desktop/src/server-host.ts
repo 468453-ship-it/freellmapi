@@ -49,6 +49,9 @@ export interface StartOptions {
   preferredPort: number;
 }
 
+// main.ts registers Electron's net.fetch here (see setCatalogFallbackFetch).
+export { setCatalogFallbackFetch } from '../../server/src/services/catalog-sync.js';
+
 export interface ServerHandle {
   server: Server;
   port: number;

@@ -70,6 +70,43 @@ export function catalogBaseUrl(): string {
   return (process.env.CATALOG_BASE_URL ?? DEFAULT_BASE_URL).replace(/\/$/, '');
 }
 
+type FetchLike = (input: string | URL, init?: RequestInit) => Promise<Response>;
+
+let fallbackFetch: FetchLike | null = null;
+
+/**
+ * Register a second network stack for calls to the catalog service. The
+ * desktop app passes Electron's net.fetch (Chromium: the OS certificate
+ * verifier and system proxy, same as a browser). On some Windows PCs Node's
+ * fetch could not complete the TLS handshake to api.freellmapi.co, so license
+ * activation always showed "HTTP 502" while the same URL opened fine in a
+ * browser. Server and Docker installs never set this.
+ */
+export function setCatalogFallbackFetch(fn: FetchLike | null): void {
+  fallbackFetch = fn;
+}
+
+function describeFetchError(err: unknown): string {
+  const e = err as { message?: string; cause?: { code?: string; message?: string } } | undefined;
+  const cause = e?.cause?.code ?? e?.cause?.message;
+  return cause ? `${e?.message ?? 'fetch failed'} (${cause})` : String(e?.message ?? err);
+}
+
+/**
+ * fetch() for catalog-service calls. Tries Node's fetch first; when that
+ * fails at the network level (not a timeout) and a fallback is registered,
+ * retries once through it.
+ */
+export async function catalogFetch(input: string | URL, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(input, init);
+  } catch (err) {
+    if (!fallbackFetch || init?.signal?.aborted) throw err;
+    console.warn(`[catalog-sync] ${describeFetchError(err)}; retrying through the desktop network stack`);
+    return fallbackFetch(input, init);
+  }
+}
+
 function catalogPublicKey(): crypto.KeyObject {
   const pem = process.env.CATALOG_PUBKEY ? process.env.CATALOG_PUBKEY.replace(/\\n/g, '\n') : PINNED_CATALOG_PUBKEY;
   return crypto.createPublicKey({ key: pem, format: 'pem' });
@@ -1029,7 +1066,7 @@ export async function syncCatalog(force = false): Promise<SyncResult> {
     const url = new URL(`${catalogBaseUrl()}/v1/latest`);
     if (applied && !force) url.searchParams.set('since', applied);
 
-    const res = await fetch(url, { headers, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+    const res = await catalogFetch(url, { headers, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
 
     if (res.status === 304) {
       setSetting(SETTING_LAST_SYNC_MS, String(Date.now()));
@@ -1111,14 +1148,15 @@ export interface LicenseActivation {
  */
 export async function validateLicenseKey(key: string, timeoutMs = FETCH_TIMEOUT_MS): Promise<LicenseActivation | null> {
   try {
-    const res = await fetch(`${catalogBaseUrl()}/v1/license/activate`, {
+    const res = await catalogFetch(`${catalogBaseUrl()}/v1/license/activate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key }),
       signal: AbortSignal.timeout(timeoutMs),
     });
     return (await res.json()) as LicenseActivation;
-  } catch {
+  } catch (err) {
+    console.warn(`[catalog-sync] license activation unreachable: ${describeFetchError(err)}`);
     return null;
   }
 }
@@ -1128,7 +1166,7 @@ export async function refreshLicenseStatus(): Promise<LicenseStatus | null> {
   const key = getSetting(SETTING_LICENSE_KEY);
   if (!key) return null;
   try {
-    const res = await fetch(`${catalogBaseUrl()}/v1/license/check`, {
+    const res = await catalogFetch(`${catalogBaseUrl()}/v1/license/check`, {
       headers: { Authorization: `Bearer ${key}` },
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
