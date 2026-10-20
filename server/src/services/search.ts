@@ -15,6 +15,7 @@ import { randomUUID } from 'node:crypto';
 import { secondsUntilNextMonth } from './key-budget.js';
 import { reserveProviderCredential, type ReservedProviderCredential } from './provider-credential.js';
 import { isOnCooldown, setCooldown } from './ratelimit.js';
+import { markKeyHealthyFromRequest } from './health.js';
 
 // Web search over the key pool (#1174).
 //
@@ -513,6 +514,11 @@ export async function runSearch(query: string, opts: SearchOptions = {}): Promis
         const out = await ADAPTERS[row.platform]!(credential, query, opts, maxResults);
         if (out.results.length === 0) throw new SearchError('upstream returned no valid search hits', 502);
         logSearch(row, credential.id, 'ok', Date.now() - started, out.results.length, clientAgent, null);
+        // A served search is the evidence the key works, the same as a served
+        // chat request: it stamps last_healthy_at and lifts an 'unknown' or
+        // 'error' key. For SerpSearch, Exa and Parallel it is the only evidence
+        // after their one-time check (#1599, #1493).
+        markKeyHealthyFromRequest(credential.id);
         return {
           query,
           ...(out.answer ? { answer: out.answer } : {}),
