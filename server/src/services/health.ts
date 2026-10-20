@@ -33,6 +33,11 @@ const CHECK_INTERVAL_JITTER = 0.2;
 // short interval can never skip a whole pass' worth of keys.
 export const RECENT_CHECK_SKIP_MS = 3.5 * 60 * 1000;
 
+// #1599: how often the scheduled pass re-asks about a key parked at 'error' on
+// a provider that must not be polled (supportsKeyPolling === false). Healthy
+// and invalid keys on those providers are never re-validated on a schedule.
+export const NO_POLL_ERROR_REPROBE_MS = 60 * 60 * 1000;
+
 // Wall-clock ceiling for one pass. Per-provider spacing is compressed rather
 // than allowed to push a pass past this, so a large fleet still finishes well
 // inside the interval it is scheduled on and the dashboard never shows
@@ -381,6 +386,9 @@ export async function probeKeyValidity(keyId: number): Promise<KeyProbeOutcome> 
     // #1459: no probe for a provider that forbids them; the cooldown simply
     // runs out, as it would after an inconclusive probe.
     if (provider.supportsKeyValidation === false) return 'error';
+    // #1599: the probe would be the same empty search the health pass no
+    // longer sends on a schedule; let the cooldown run out instead.
+    if (provider.supportsKeyPolling === false) return 'error';
 
     const apiKey = decrypt(row.encrypted_key, row.iv, row.auth_tag);
     // Same reasoning as checkKeyHealth: probe through the key's own proxy (#590).
@@ -446,6 +454,10 @@ export interface HealthPassOptions {
    *  Used by the dashboard's "check all" button and the post-wake re-probe,
    *  where the point is an immediate, complete picture. */
   force?: boolean;
+  /** Someone pressed "Check all": also validate keys on providers that must
+   *  not be polled (#1599). The post-wake re-probe is forced but automatic, so
+   *  it leaves them alone. */
+  manual?: boolean;
   /** Test seams: injectable clock, sleep, probe and pool size, mirroring the
    *  cooldown-probe pass so a pacing test needs no real timers. */
   now?: () => number;
@@ -526,6 +538,16 @@ async function runHealthPass(opts: HealthPassOptions): Promise<HealthPassResult>
   const skippedKeyIds: number[] = [];
   const skipMs = opts.force ? 0 : getValidationRateLimitSkipMs();
   const due = rows.filter(row => {
+    // #1599: a provider whose key check is an empty search gets one check per
+    // new key, not one every pass. Applies to forced automatic passes too.
+    if (!opts.manual && resolveProvider(row.platform as Platform, row.base_url)?.supportsKeyPolling === false) {
+      const floorMs = row.status === 'error' ? NO_POLL_ERROR_REPROBE_MS : Infinity;
+      if (row.age_ms !== null && row.age_ms < floorMs) {
+        skippedKeyIds.push(row.id);
+        return false;
+      }
+      return true;
+    }
     if (opts.force) return true;
     // A key the provider just rate-limited stays out until the skip window
     // passes — even one parked at 'error'. A 429 is fresher, more specific

@@ -286,6 +286,19 @@ export abstract class BaseProvider {
     return true;
   }
 
+  /** Whether the scheduled health pass may re-validate this provider's keys
+   * every few minutes (#1599). A provider whose only key check is a malformed
+   * request to its billed endpoint (SerpSearch, Exa and keyed Parallel send a
+   * search with no query) returns false: to the provider those requests look
+   * like a script firing empty searches all day, and SerpSearch revoked a free
+   * account over them. The scheduled pass then validates such a key once, when
+   * it has never been checked, re-asks about a key parked at 'error' at most
+   * every NO_POLL_ERROR_REPROBE_MS, and leaves the rest to real traffic. The
+   * cooldown probe never validates it; "Check now" and "Check all" still do. */
+  get supportsKeyPolling(): boolean {
+    return true;
+  }
+
   /**
    * Turn a conventional 401/403 validation response into a diagnostic result.
    * Providers still return a simple boolean when no useful error body exists,

@@ -74,9 +74,9 @@ healthRouter.post('/check/:keyId', async (req: Request, res: Response) => {
 
 // Check all keys. Forced: someone pressed the button and wants an answer about
 // every key now, so the scheduled pass' recency skip and provider spacing (#553)
-// don't apply.
+// don't apply, and providers that must not be polled (#1599) are checked too.
 healthRouter.post('/check-all', async (_req: Request, res: Response) => {
-  await checkAllKeys({ force: true });
+  await checkAllKeys({ force: true, manual: true });
   res.json({ success: true });
 });
 

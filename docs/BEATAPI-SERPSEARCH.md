@@ -36,6 +36,9 @@ Sources: [decision API](https://docs.beatapi.io/decisions),
 - Key validation omits `query`. A valid key returns a missing-query HTTP 400
   with quota headers, an invalid key returns 401. Both were live checked, and
   the valid probe did not decrement quota. Unexpected responses are inconclusive.
+- That probe runs once per key, never on the 5-minute health schedule (#1599).
+  SerpSearch revoked a free account over empty searches every 5 minutes. After
+  the first check, real searches and "Check now" decide the key's status.
 - The adapter follows the existing no-hits fallback policy and result limit.
   It does not paginate automatically or consume extra credits to fill results.
 
