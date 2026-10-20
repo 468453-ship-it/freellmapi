@@ -12,10 +12,25 @@ import { sanitizeProviderErrorMessage } from '../lib/error-redaction.js';
 import { providerLog } from '../lib/server-logs.js';
 import { triggerBuiltinModelDiscovery } from './builtin-model-discovery.js';
 
-const CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+const DEFAULT_CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+// Floor of 60s: a misconfigured tiny interval turns the health pass into a
+// self-inflicted abuse-shaped flood, which is the exact traffic #553/#1599 are
+// about. Anything below the floor falls back to the default.
+const MIN_CHECK_INTERVAL_MS = 60 * 1000;
 const CONSECUTIVE_FAILURES_TO_DISABLE = 3;
 const DEFAULT_HEALTH_CHECK_CONCURRENCY = 8;
 const DEFAULT_MIN_SPACING_MS = 1000;
+
+/** Base cadence of the scheduled pass (jittered per run, see
+ *  nextHealthCheckDelayMs), tunable via HEALTH_CHECK_INTERVAL_MS (#1593):
+ *  fleets on providers that dislike frequent key checks
+ *  want a slower pass; a fresh install being shaken out wants a faster one.
+ *  Read once at module load — the scheduler re-arms from the same constant. */
+function getCheckIntervalMs(): number {
+  const n = positiveIntEnv(process.env.HEALTH_CHECK_INTERVAL_MS, DEFAULT_CHECK_INTERVAL_MS);
+  return n < MIN_CHECK_INTERVAL_MS ? DEFAULT_CHECK_INTERVAL_MS : n;
+}
+const CHECK_INTERVAL_MS = getCheckIntervalMs();
 
 /** Base cadence of the scheduled pass (jittered per run, see
  *  nextHealthCheckDelayMs). Exported for tests. */
@@ -29,9 +44,10 @@ const CHECK_INTERVAL_JITTER = 0.2;
 
 // A key validated more recently than this is skipped by the scheduled pass:
 // re-asking a provider about a credential it just answered for is exactly the
-// traffic #553 is about. Below the jittered minimum interval (4 minutes) so a
-// short interval can never skip a whole pass' worth of keys.
-export const RECENT_CHECK_SKIP_MS = 3.5 * 60 * 1000;
+// traffic #553 is about. Capped at 70% of the configured interval so a faster
+// HEALTH_CHECK_INTERVAL_MS can never skip a whole pass' worth of keys (the
+// invariant nextHealthCheckDelayMs asserts).
+export const RECENT_CHECK_SKIP_MS = Math.min(3.5 * 60 * 1000, CHECK_INTERVAL_MS * 0.7);
 
 // #1599: how often the scheduled pass re-asks about a key parked at 'error' on
 // a provider that must not be polled (supportsKeyPolling === false). Healthy
