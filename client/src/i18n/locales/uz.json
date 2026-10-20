@@ -542,6 +542,8 @@
     "providerActions": "Provayderning harakatlari",
     "routeViaProxy": "Proksi orqali marshrut",
     "checkNow": "Hozir tekshiring",
+    "lastWorkedHint": "Last worked: {when}",
+    "lastWorkedNever": "Has not served a request or passed a check yet",
     "noAutoCheckHint": "Bu provayder kalitlarni avtomatik tekshirishga ruxsat bermaydi. Kalit birinchi so‘roviga xizmat ko‘rsatgach, sog‘lom holatga o‘tadi.",
     "noModelsYetHint": "Katalogingizda hali bu provayderning modellari yo‘q, shuning uchun xizmat ko‘rsatadigan narsa yo‘q.",
     "proxyEnvHintBefore": "orqali ham sozlanishi mumkin",

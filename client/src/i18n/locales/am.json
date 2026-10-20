@@ -542,6 +542,8 @@
     "providerActions": "የአቅራቢዎች እርምጃዎች",
     "routeViaProxy": "በፕሮክሲ በኩል የሚደረግ መንገድ",
     "checkNow": "አሁን ይመልከቱ",
+    "lastWorkedHint": "Last worked: {when}",
+    "lastWorkedNever": "Has not served a request or passed a check yet",
     "noAutoCheckHint": "ይህ አቅራቢ ራስ-ሰር የቁልፍ ፍተሻዎችን አይፈቅድም። ቁልፉ የመጀመሪያ ጥያቄውን ካገለገለ በኋላ ጤናማ ይሆናል።",
     "noModelsYetHint": "ካታሎግዎ ከዚህ አቅራቢ እስካሁን ሞዴሎች የሉትም፣ ስለዚህ የሚያገለግለው ነገር የለም።",
     "proxyEnvHintBefore": "እንዲሁም በ በኩል ሊዋቀር ይችላል",

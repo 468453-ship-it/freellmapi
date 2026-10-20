@@ -542,6 +542,8 @@
     "providerActions": "Acciones del proveedor",
     "routeViaProxy": "Enrutar por proxy",
     "checkNow": "Comprobar ahora",
+    "lastWorkedHint": "Último funcionamiento: {when}",
+    "lastWorkedNever": "Aún no ha atendido solicitudes ni pasado una comprobación",
     "noAutoCheckHint": "Este proveedor no permite comprobaciones automáticas de claves. La clave pasa a estar sana cuando atiende su primera solicitud.",
     "noModelsYetHint": "Tu catálogo aún no tiene modelos de este proveedor, así que no tiene nada que atender.",
     "proxyEnvHintBefore": "También configurable mediante la variable de entorno ",

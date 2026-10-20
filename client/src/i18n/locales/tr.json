@@ -542,6 +542,8 @@
     "providerActions": "Sağlayıcı eylemleri",
     "routeViaProxy": "Proxy aracılığıyla yönlendirme",
     "checkNow": "Şimdi kontrol et",
+    "lastWorkedHint": "Son çalışma: {when}",
+    "lastWorkedNever": "Henüz bir istek karşılamadı ve kontrolden geçmedi",
     "noAutoCheckHint": "Bu sağlayıcı otomatik anahtar kontrollerine izin vermiyor. Anahtar ilk isteğini karşıladıktan sonra sağlıklı olur.",
     "noModelsYetHint": "Kataloğunuzda henüz bu sağlayıcıdan model yok, bu yüzden karşılayacağı bir istek yok.",
     "proxyEnvHintBefore": "Ayrıca ",

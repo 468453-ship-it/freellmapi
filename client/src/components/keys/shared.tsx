@@ -162,6 +162,6 @@ export interface HealthPlatform {
 
 export interface HealthData {
   platforms: HealthPlatform[]
-  keys: { id: number; platform: string; status: string; lastCheckedAt: string | null; lastHealthError: string | null }[]
+  keys: { id: number; platform: string; status: string; lastCheckedAt: string | null; lastHealthyAt?: string | null; lastHealthError: string | null }[]
   quotaStates: ProviderQuotaState[]
 }

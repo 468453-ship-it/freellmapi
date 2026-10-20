@@ -542,6 +542,8 @@
     "providerActions": "Palveluntarjoajan toimet",
     "routeViaProxy": "Reitti välityspalvelimen kautta",
     "checkNow": "Tarkista nyt",
+    "lastWorkedHint": "Viimeksi toiminnassa: {when}",
+    "lastWorkedNever": "Ei ole vielä palvellut pyyntöjä eikä läpäissyt tarkistusta",
     "noAutoCheckHint": "Tämä palveluntarjoaja ei salli avainten automaattisia tarkistuksia. Avain muuttuu terveeksi, kun se on palvellut ensimmäisen pyyntönsä.",
     "noModelsYetHint": "Katalogissasi ei ole vielä tämän palveluntarjoajan malleja, joten sillä ei ole mitään palveltavaa.",
     "proxyEnvHintBefore": "Myös konfiguroitavissa",

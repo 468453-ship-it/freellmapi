@@ -542,6 +542,8 @@
     "providerActions": "Akce poskytovatele",
     "routeViaProxy": "Trasa přes zástupce",
     "checkNow": "Zkontrolujte to teď",
+    "lastWorkedHint": "Naposledy fungoval: {when}",
+    "lastWorkedNever": "Zatím neobsloužil žádný požadavek ani neprošel kontrolou",
     "noAutoCheckHint": "Tento poskytovatel nepovoluje automatické kontroly klíčů. Klíč bude v pořádku, jakmile obslouží svůj první požadavek.",
     "noModelsYetHint": "Váš katalog zatím neobsahuje žádné modely tohoto poskytovatele, takže nemá co obsluhovat.",
     "proxyEnvHintBefore": "Také konfigurovatelné přes",

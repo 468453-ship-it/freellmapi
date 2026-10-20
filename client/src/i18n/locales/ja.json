@@ -542,6 +542,8 @@
     "providerActions": "プロバイダーのアクション",
     "routeViaProxy": "プロキシ経由のルート",
     "checkNow": "今すぐチェック",
+    "lastWorkedHint": "最終稼働: {when}",
+    "lastWorkedNever": "リクエストの処理もチェックの合格もまだありません",
     "noAutoCheckHint": "このプロバイダーはキーの自動チェックを許可していません。最初のリクエストを処理するとキーは正常になります。",
     "noModelsYetHint": "カタログにはまだこのプロバイダーのモデルがないため、処理するものがありません。",
     "proxyEnvHintBefore": "また、",

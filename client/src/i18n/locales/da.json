@@ -542,6 +542,8 @@
     "providerActions": "Udbyderhandlinger",
     "routeViaProxy": "Rute via proxy",
     "checkNow": "Tjek nu",
+    "lastWorkedHint": "Sidst fungerende: {when}",
+    "lastWorkedNever": "Har endnu ikke betjent en anmodning eller bestået et tjek",
     "noAutoCheckHint": "Denne udbyder tillader ikke automatiske nøgletjek. Nøglen bliver sund, når den har betjent sin første forespørgsel.",
     "noModelsYetHint": "Dit katalog har endnu ingen modeller fra denne udbyder, så der er intet for den at betjene.",
     "proxyEnvHintBefore": "Også konfigurerbar via",

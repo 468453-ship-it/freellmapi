@@ -542,6 +542,8 @@
     "providerActions": "Leverandørhandlinger",
     "routeViaProxy": "Rute via proxy",
     "checkNow": "Sjekk nå",
+    "lastWorkedHint": "Sist funksjonsdyktig: {when}",
+    "lastWorkedNever": "Har ennå ikke betjent en forespørsel eller bestått en sjekk",
     "noAutoCheckHint": "Denne leverandøren tillater ikke automatiske nøkkelsjekker. Nøkkelen blir frisk etter at den har betjent sin første forespørsel.",
     "noModelsYetHint": "Katalogen din har ennå ingen modeller fra denne leverandøren, så det er ingenting for den å betjene.",
     "proxyEnvHintBefore": "Også konfigurerbar via",

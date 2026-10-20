@@ -542,6 +542,8 @@
     "providerActions": "प्रदायक कार्यहरू",
     "routeViaProxy": "प्रोक्सी हुँदै मार्ग",
     "checkNow": "अहिले जाँच गर्नुहोस्",
+    "lastWorkedHint": "Last worked: {when}",
+    "lastWorkedNever": "Has not served a request or passed a check yet",
     "noAutoCheckHint": "यो प्रदायकले स्वचालित कुञ्जी जाँचलाई अनुमति दिँदैन। पहिलो अनुरोध पूरा गरेपछि कुञ्जी स्वस्थ हुन्छ।",
     "noModelsYetHint": "तपाईंको क्याटलगमा अझै यो प्रदायकको कुनै मोडेल छैन, त्यसैले पूरा गर्ने केही छैन।",
     "proxyEnvHintBefore": "मार्फत पनि कन्फिगर गर्न सकिने",

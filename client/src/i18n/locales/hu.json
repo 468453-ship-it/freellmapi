@@ -542,6 +542,8 @@
     "providerActions": "Szolgáltatói intézkedések",
     "routeViaProxy": "Útvonal proxyn keresztül",
     "checkNow": "Ellenőrizd most",
+    "lastWorkedHint": "Utolsó működés: {when}",
+    "lastWorkedNever": "Még nem szolgált le egyetlen kérést sem, és nem sikerült egy ellenőrzés sem",
     "noAutoCheckHint": "Ez a szolgáltató nem engedélyezi a kulcsok automatikus ellenőrzését. A kulcs az első kiszolgált kérése után lesz egészséges.",
     "noModelsYetHint": "A katalógusodban még nincs modell ettől a szolgáltatótól, így nincs mit kiszolgálnia.",
     "proxyEnvHintBefore": "Konfigurálható a",

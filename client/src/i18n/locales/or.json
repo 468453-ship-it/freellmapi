@@ -542,6 +542,8 @@
     "providerActions": "ପ୍ରଦାନକାରୀ କାର୍ଯ୍ୟ",
     "routeViaProxy": "ପ୍ରକ୍ସି ମାଧ୍ୟମରେ ମାର୍ଗ",
     "checkNow": "ବର୍ତ୍ତମାନ ଯାଞ୍ଚ କରନ୍ତୁ",
+    "lastWorkedHint": "Last worked: {when}",
+    "lastWorkedNever": "Has not served a request or passed a check yet",
     "noAutoCheckHint": "ଏହି ପ୍ରଦାନକାରୀ ସ୍ୱୟଂଚାଳିତ କି ଯାଞ୍ଚକୁ ଅନୁମତି ଦିଏ ନାହିଁ। ପ୍ରଥମ ଅନୁରୋଧ ପୂରଣ କରିବା ପରେ କି ସୁସ୍ଥ ହୁଏ।",
     "noModelsYetHint": "ଆପଣଙ୍କ କାଟାଲଗରେ ଏପର୍ଯ୍ୟନ୍ତ ଏହି ପ୍ରଦାନକାରୀଙ୍କ କୌଣସି ମଡେଲ ନାହିଁ, ତେଣୁ ପୂରଣ କରିବାକୁ କିଛି ନାହିଁ।",
     "proxyEnvHintBefore": "ମାଧ୍ୟମରେ ମଧ୍ୟ କନଫିଗର୍ କରାଯାଇପାରେ",

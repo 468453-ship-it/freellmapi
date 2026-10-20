@@ -542,6 +542,8 @@
     "providerActions": "ಪೂರೈಕೆದಾರರ ಕ್ರಮಗಳು",
     "routeViaProxy": "ಪ್ರಾಕ್ಸಿ ಮೂಲಕ ಮಾರ್ಗ",
     "checkNow": "ಈಗ ಪರಿಶೀಲಿಸಿ",
+    "lastWorkedHint": "Last worked: {when}",
+    "lastWorkedNever": "Has not served a request or passed a check yet",
     "noAutoCheckHint": "ಈ ಪೂರೈಕೆದಾರರು ಸ್ವಯಂಚಾಲಿತ ಕೀ ಪರಿಶೀಲನೆಗೆ ಅನುಮತಿಸುವುದಿಲ್ಲ. ಮೊದಲ ವಿನಂತಿಯನ್ನು ಪೂರೈಸಿದ ನಂತರ ಕೀ ಆರೋಗ್ಯಕರವಾಗುತ್ತದೆ.",
     "noModelsYetHint": "ನಿಮ್ಮ ಕ್ಯಾಟಲಾಗ್‌ನಲ್ಲಿ ಇನ್ನೂ ಈ ಪೂರೈಕೆದಾರರ ಯಾವುದೇ ಮಾದರಿಗಳಿಲ್ಲ, ಆದ್ದರಿಂದ ಪೂರೈಸಲು ಏನೂ ಇಲ್ಲ.",
     "proxyEnvHintBefore": "ಮೂಲಕ ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದು",

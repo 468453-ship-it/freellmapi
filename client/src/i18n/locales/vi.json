@@ -542,6 +542,8 @@
     "providerActions": "Hành động của nhà cung cấp",
     "routeViaProxy": "Định tuyến qua proxy",
     "checkNow": "Kiểm tra ngay",
+    "lastWorkedHint": "Lần hoạt động gần nhất: {when}",
+    "lastWorkedNever": "Chưa phục vụ yêu cầu nào và chưa qua lần kiểm tra nào",
     "noAutoCheckHint": "Nhà cung cấp này không cho phép kiểm tra khóa tự động. Khóa sẽ chuyển sang trạng thái tốt sau khi phục vụ yêu cầu đầu tiên.",
     "noModelsYetHint": "Danh mục của bạn chưa có mô hình nào từ nhà cung cấp này, nên chưa có gì để phục vụ.",
     "proxyEnvHintBefore": "Cũng có thể cấu hình thông qua",

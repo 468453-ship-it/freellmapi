@@ -542,6 +542,8 @@
     "providerActions": "Ações do provedor",
     "routeViaProxy": "Rotear pelo proxy",
     "checkNow": "Verificar agora",
+    "lastWorkedHint": "Último funcionamento: {when}",
+    "lastWorkedNever": "Ainda não atendeu nenhuma requisição nem passou em uma verificação",
     "noAutoCheckHint": "Este provedor não permite verificações automáticas de chave. A chave fica saudável depois de atender a primeira solicitação.",
     "noModelsYetHint": "Seu catálogo ainda não tem modelos deste provedor, então não há nada para ela atender.",
     "proxyEnvHintBefore": "Também configurável pela variável de ambiente ",

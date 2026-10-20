@@ -542,6 +542,8 @@
     "providerActions": "Anbieteraktionen",
     "routeViaProxy": "Route über Proxy",
     "checkNow": "Jetzt prüfen",
+    "lastWorkedHint": "Zuletzt funktionsfähig: {when}",
+    "lastWorkedNever": "Hat noch keine Anfrage bedient und keine Prüfung bestanden",
     "noAutoCheckHint": "Dieser Anbieter erlaubt keine automatischen Schlüsselprüfungen. Der Schlüssel wird gesund, sobald er seine erste Anfrage bedient hat.",
     "noModelsYetHint": "Dein Katalog enthält noch keine Modelle dieses Anbieters, daher gibt es nichts zu bedienen.",
     "proxyEnvHintBefore": "Auch konfigurierbar über die",

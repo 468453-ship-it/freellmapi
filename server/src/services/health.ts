@@ -290,7 +290,12 @@ export async function checkKeyHealth(keyId: number): Promise<KeyStatus> {
 
     const status: KeyStatus = isValid ? 'healthy' : 'invalid';
 
-    db.prepare("UPDATE api_keys SET status = ?, last_health_error = ?, last_checked_at = datetime('now') WHERE id = ?")
+    // #1493: stamp last_healthy_at only on a VALID verdict. A transport error
+    // (the catch below) refreshes last_checked_at but records no success, so
+    // "checked recently" and "worked recently" stay distinguishable.
+    db.prepare(isValid
+      ? "UPDATE api_keys SET status = ?, last_health_error = ?, last_checked_at = datetime('now'), last_healthy_at = datetime('now') WHERE id = ?"
+      : "UPDATE api_keys SET status = ?, last_health_error = ?, last_checked_at = datetime('now') WHERE id = ?")
       .run(status, lastError, keyId);
 
     if (isValid) {
@@ -409,6 +414,21 @@ export async function probeKeyValidity(keyId: number): Promise<KeyProbeOutcome> 
 }
 
 /**
+ * #1493: throttle for the last_healthy_at write from live traffic. The probe
+ * path already writes the column at most once per health pass, but this
+ * function runs on every successful proxied request, and an unthrottled UPDATE
+ * would put a DB write on the hot path. One stamp per key per minute is plenty
+ * for "last worked N ago".
+ */
+const lastHealthyStampedAt = new Map<number, number>();
+const LAST_HEALTHY_STAMP_INTERVAL_MS = 60_000;
+
+/** Test seam: drop the stamp throttle so a test can observe consecutive writes. */
+export function clearLastHealthyStampState(): void {
+  lastHealthyStampedAt.clear();
+}
+
+/**
  * Promote a key out of 'error' or 'unknown' after it successfully served a live
  * request.
  *
@@ -421,6 +441,18 @@ export async function probeKeyValidity(keyId: number): Promise<KeyProbeOutcome> 
  */
 export function markKeyHealthyFromRequest(keyId: number): void {
   try {
+    // #1493: a served request is the strongest "this key works" evidence there
+    // is — stamp last_healthy_at regardless of current status. This is the only
+    // success signal for providers with supportsKeyValidation === false (#1459),
+    // which never get a probe. Throttled in memory, not per request.
+    const now = Date.now();
+    const lastStamp = lastHealthyStampedAt.get(keyId);
+    if (lastStamp === undefined || now - lastStamp >= LAST_HEALTHY_STAMP_INTERVAL_MS) {
+      lastHealthyStampedAt.set(keyId, now);
+      getDb()
+        .prepare("UPDATE api_keys SET last_healthy_at = datetime('now') WHERE id = ?")
+        .run(keyId);
+    }
     getDb()
       .prepare("UPDATE api_keys SET status = 'healthy', last_health_error = NULL WHERE id = ? AND status IN ('error', 'unknown')")
       .run(keyId);

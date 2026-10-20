@@ -475,6 +475,10 @@ keysRouter.get('/', (_req: Request, res: Response) => {
       exportable: isExportableKey({ platform: row.platform, baseUrl: row.base_url ?? null, key: realKey }),
       createdAt: row.created_at,
       lastCheckedAt: row.last_checked_at,
+      // #1493: last time this key was proven to work (valid probe or served
+      // request) — distinct from lastCheckedAt, which a transport error also
+      // refreshes.
+      lastHealthyAt: row.last_healthy_at ?? null,
       lastHealthError: row.last_health_error ?? null,
       // The model_id list this key is limited to; null = serves everything (#657).
       modelScope: scope ? [...scope] : null,

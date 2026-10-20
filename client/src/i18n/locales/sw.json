@@ -542,6 +542,8 @@
     "providerActions": "Vitendo vya mtoaji",
     "routeViaProxy": "Njia kupitia seva mbadala",
     "checkNow": "Angalia sasa",
+    "lastWorkedHint": "Ilifanya kazi mara ya mwisho: {when}",
+    "lastWorkedNever": "Haijatumika kwa ombi wala kupitia ukaguzi bado",
     "noAutoCheckHint": "Mtoa huduma huyu haruhusu ukaguzi wa funguo wa kiotomatiki. Ufunguo unakuwa mzima baada ya kuhudumia ombi lake la kwanza.",
     "noModelsYetHint": "Katalogi yako bado haina modeli kutoka kwa mtoa huduma huyu, kwa hivyo hakuna cha kuhudumia.",
     "proxyEnvHintBefore": "Pia inaweza kusanidiwa kupitia",

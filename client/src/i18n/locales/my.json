@@ -542,6 +542,8 @@
     "providerActions": "ပံ့ပိုးသူ လုပ်ဆောင်ချက်များ",
     "routeViaProxy": "Proxy ဖြင့် လမ်းကြောင်းပြောင်းခြင်း",
     "checkNow": "ယခုစစ်ဆေးပါ",
+    "lastWorkedHint": "Last worked: {when}",
+    "lastWorkedNever": "Has not served a request or passed a check yet",
     "noAutoCheckHint": "ဤဝန်ဆောင်မှုပေးသူသည် key ကို အလိုအလျောက် စစ်ဆေးခြင်းကို ခွင့်မပြုပါ။ ပထမဆုံး တောင်းဆိုမှုကို ဆောင်ရွက်ပြီးနောက် key သည် ကောင်းမွန်သွားပါမည်။",
     "noModelsYetHint": "သင့်ကတ်တလောက်တွင် ဤဝန်ဆောင်မှုပေးသူ၏ မော်ဒယ်များ မရှိသေးသဖြင့် ဆောင်ရွက်စရာ မရှိပါ။",
     "proxyEnvHintBefore": "ထို့အပြင် ပြင်ဆင်နိုင်သော",

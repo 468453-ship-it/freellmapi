@@ -542,6 +542,8 @@
     "providerActions": "Akcije pružatelja",
     "routeViaProxy": "Ruta putem posrednika",
     "checkNow": "Provjeri sada",
+    "lastWorkedHint": "Last worked: {when}",
+    "lastWorkedNever": "Has not served a request or passed a check yet",
     "noAutoCheckHint": "Ovaj pružatelj ne dopušta automatske provjere ključeva. Ključ postaje ispravan nakon što posluži svoj prvi zahtjev.",
     "noModelsYetHint": "Vaš katalog još nema modele ovog pružatelja, pa nema što posluživati.",
     "proxyEnvHintBefore": "Također se može konfigurirati putem",

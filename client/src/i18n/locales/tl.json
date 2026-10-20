@@ -542,6 +542,8 @@
     "providerActions": "Mga aksyon ng provider",
     "routeViaProxy": "Ruta sa pamamagitan ng proxy",
     "checkNow": "Suriin ngayon",
+    "lastWorkedHint": "Last worked: {when}",
+    "lastWorkedNever": "Has not served a request or passed a check yet",
     "noAutoCheckHint": "Hindi pinapayagan ng provider na ito ang awtomatikong pagsusuri ng key. Magiging healthy ang key pagkatapos nitong pagsilbihan ang una nitong request.",
     "noModelsYetHint": "Wala pang model mula sa provider na ito ang iyong catalog, kaya wala pa itong mapagsisilbihan.",
     "proxyEnvHintBefore": "Maaari ring i-configure gamit ang",

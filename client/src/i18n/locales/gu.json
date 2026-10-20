@@ -542,6 +542,8 @@
     "providerActions": "પ્રદાતા ક્રિયાઓ",
     "routeViaProxy": "પ્રોક્સી મારફતે રૂટ",
     "checkNow": "હવે તપાસો",
+    "lastWorkedHint": "Last worked: {when}",
+    "lastWorkedNever": "Has not served a request or passed a check yet",
     "noAutoCheckHint": "આ પ્રદાતા સ્વચાલિત કી ચકાસણીની મંજૂરી આપતો નથી. પ્રથમ વિનંતી પૂરી કર્યા પછી કી સ્વસ્થ બને છે.",
     "noModelsYetHint": "તમારા કેટલોગમાં હજી આ પ્રદાતાના કોઈ મોડેલ નથી, તેથી પૂરું પાડવા માટે કંઈ નથી.",
     "proxyEnvHintBefore": "દ્વારા પણ રૂપરેખાંકિત કરી શકાય છે",

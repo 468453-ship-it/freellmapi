@@ -542,6 +542,8 @@
     "providerActions": "Действия на доставчика",
     "routeViaProxy": "Маршрут чрез прокси",
     "checkNow": "Провери сега",
+    "lastWorkedHint": "Last worked: {when}",
+    "lastWorkedNever": "Has not served a request or passed a check yet",
     "noAutoCheckHint": "Този доставчик не позволява автоматични проверки на ключове. Ключът става изправен, след като обслужи първата си заявка.",
     "noModelsYetHint": "Каталогът ви все още няма модели от този доставчик, така че няма какво да обслужва.",
     "proxyEnvHintBefore": "Също така може да се конфигурира чрез",

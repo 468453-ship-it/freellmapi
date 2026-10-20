@@ -542,6 +542,8 @@
     "providerActions": "Ações do fornecedor",
     "routeViaProxy": "Rota via procuração",
     "checkNow": "Confirme agora",
+    "lastWorkedHint": "Último funcionamento: {when}",
+    "lastWorkedNever": "Ainda não serviu nenhum pedido nem passou numa verificação",
     "noAutoCheckHint": "Este fornecedor não permite verificações automáticas de chaves. A chave fica saudável depois de servir o primeiro pedido.",
     "noModelsYetHint": "O seu catálogo ainda não tem modelos deste fornecedor, por isso não há nada para servir.",
     "proxyEnvHintBefore": "Também configurável através do",

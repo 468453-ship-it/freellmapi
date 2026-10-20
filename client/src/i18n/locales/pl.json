@@ -542,6 +542,8 @@
     "providerActions": "Działania dostawcy",
     "routeViaProxy": "Trasa przez proxy",
     "checkNow": "Sprawdź teraz",
+    "lastWorkedHint": "Ostatnie działanie: {when}",
+    "lastWorkedNever": "Nie obsłużył jeszcze żadnego żądania ani nie przeszedł sprawdzenia",
     "noAutoCheckHint": "Ten dostawca nie pozwala na automatyczne sprawdzanie kluczy. Klucz staje się sprawny po obsłużeniu pierwszego żądania.",
     "noModelsYetHint": "Twój katalog nie ma jeszcze modeli tego dostawcy, więc nie ma czego obsługiwać.",
     "proxyEnvHintBefore": "Możliwość konfiguracji również poprzez",

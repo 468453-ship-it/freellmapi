@@ -542,6 +542,8 @@
     "providerActions": "សកម្មភាពអ្នកផ្តល់សេវា",
     "routeViaProxy": "បញ្ជូនតាមរយៈប្រូកស៊ី",
     "checkNow": "ពិនិត្យឥឡូវនេះ",
+    "lastWorkedHint": "Last worked: {when}",
+    "lastWorkedNever": "Has not served a request or passed a check yet",
     "noAutoCheckHint": "អ្នកផ្ដល់សេវានេះមិនអនុញ្ញាតការពិនិត្យសោដោយស្វ័យប្រវត្តិទេ។ សោនឹងល្អ បន្ទាប់ពីវាបម្រើសំណើដំបូងរបស់វា។",
     "noModelsYetHint": "កាតាឡុករបស់អ្នកមិនទាន់មានម៉ូដែលពីអ្នកផ្ដល់សេវានេះនៅឡើយ ដូច្នេះមិនមានអ្វីត្រូវបម្រើទេ។",
     "proxyEnvHintBefore": "អាចកំណត់រចនាសម្ព័ន្ធបានតាមរយៈ",

@@ -542,6 +542,8 @@
     "providerActions": "Acțiuni ale furnizorului",
     "routeViaProxy": "Traseu prin procură",
     "checkNow": "Verifică acum",
+    "lastWorkedHint": "Ultima funcționare: {when}",
+    "lastWorkedNever": "Nu a servit încă nicio cerere și nu a trecut nicio verificare",
     "noAutoCheckHint": "Acest furnizor nu permite verificări automate ale cheilor. Cheia devine funcțională după ce servește prima cerere.",
     "noModelsYetHint": "Catalogul tău nu are încă modele de la acest furnizor, așa că nu are ce servi.",
     "proxyEnvHintBefore": "De asemenea, configurabil prin",

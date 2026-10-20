@@ -366,6 +366,10 @@ export interface ApiKey {
   exportable: boolean;
   createdAt: string;
   lastCheckedAt: string | null;
+  /** Last time the key was proven to work — a valid probe verdict or a served
+   *  live request (#1493). Unlike lastCheckedAt, a transport error does not
+   *  refresh it, so "checked recently but never worked" is visible. */
+  lastHealthyAt?: string | null;
   lastHealthError: string | null;
   /** Model ids this key is limited to; null = serves every model of its
    *  platform (#657). */

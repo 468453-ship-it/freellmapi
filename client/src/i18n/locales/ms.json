@@ -542,6 +542,8 @@
     "providerActions": "Tindakan penyedia",
     "routeViaProxy": "Laluan melalui proksi",
     "checkNow": "Semak sekarang",
+    "lastWorkedHint": "Last worked: {when}",
+    "lastWorkedNever": "Has not served a request or passed a check yet",
     "noAutoCheckHint": "Penyedia ini tidak membenarkan semakan kunci automatik. Kunci menjadi sihat selepas ia melayan permintaan pertamanya.",
     "noModelsYetHint": "Katalog anda belum mempunyai model daripada penyedia ini, jadi tiada apa untuk dilayan.",
     "proxyEnvHintBefore": "Juga boleh dikonfigurasikan melalui",

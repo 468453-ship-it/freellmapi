@@ -546,6 +546,8 @@
     "providerActions": "提供者操作",
     "routeViaProxy": "經由代理伺服器轉發",
     "checkNow": "立即檢查",
+    "lastWorkedHint": "上次可用：{when}",
+    "lastWorkedNever": "尚未處理請求，也尚未通過檢查",
     "noAutoCheckHint": "此供應商不允許自動檢查金鑰。金鑰在處理完第一個請求後會變為正常。",
     "noModelsYetHint": "你的目錄中還沒有此供應商的模型，因此暫時沒有可處理的請求。",
     "proxyEnvHintBefore": "也可透過 ",
