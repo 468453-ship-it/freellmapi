@@ -2006,7 +2006,13 @@ export interface FusionCandidate {
  */
 export function getOrderedFusionChain(estimatedTokens: number, exactOutputReserve = 0): FusionCandidate[] {
   const db = getDb();
-  const strategy = getRoutingStrategy();
+  // effectiveRoutingStrategy, not getRoutingStrategy (#1354): under the
+  // 'decision' strategy the fusion panel must draw from the same per-request
+  // ordering the auto-router just used for the chat half of the request. The
+  // raw setting value scores every decision-strategy request as plain Balanced,
+  // so a request the decision model routed 'smartest' got its chat answer from
+  // the big model and its panel slots auto-picked from the Balanced order.
+  const strategy = effectiveRoutingStrategy();
   if (strategy !== 'priority') refreshStatsCache(db);
   const chain = getActiveChain(db).filter(e => e.enabled);
 
