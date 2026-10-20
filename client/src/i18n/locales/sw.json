@@ -1184,7 +1184,8 @@
       "openclaw": "Msaidizi binafsi anayefanya kazi muda wote na kujibu kwenye WhatsApp, Telegram, Discord na zaidi kutoka kwenye mashine yako mwenyewe.",
       "hermes": "Wakala wa Nous Research anayejiboresha mwenyewe, mwenye kumbukumbu ya kudumu na ujuzi, kwenye terminal au kwenye programu za gumzo.",
       "pi": "Wakala mdogo wa terminal unaomuunda kwa viendelezi, ujuzi na violezo vya maagizo vyako mwenyewe.",
-      "reasonix": "Wakala wa kuandika msimbo kwenye terminal aliyejengwa kwa ajili ya DeepSeek, kwa msingi wa prefix caching ili vipindi virefu vibaki nafuu."
+      "reasonix": "Wakala wa kuandika msimbo kwenye terminal aliyejengwa kwa ajili ya DeepSeek, kwa msingi wa prefix caching ili vipindi virefu vibaki nafuu.",
+      "zcode": "Z.ai's coding agent for its GLM models, speaking any OpenAI-compatible endpoint through a provider registry."
     }
   },
   "update": {

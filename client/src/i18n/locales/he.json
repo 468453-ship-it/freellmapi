@@ -1184,7 +1184,8 @@
       "openclaw": "עוזר אישי שפועל תמיד ועונה ב-WhatsApp, Telegram, Discord ועוד מהמחשב שלכם.",
       "hermes": "הסוכן המשתפר-מעצמו של Nous Research עם זיכרון מתמשך וכישורים, בטרמינל או באפליקציות צ'אט.",
       "pi": "סוכן טרמינל מינימלי שאתם מעצבים בעזרת הרחבות, כישורים ותבניות פרומפט משלכם.",
-      "reasonix": "סוכן קוד לטרמינל שנבנה במיוחד עבור DeepSeek, סביב מטמון קידומות כדי שסשנים ארוכים יישארו זולים."
+      "reasonix": "סוכן קוד לטרמינל שנבנה במיוחד עבור DeepSeek, סביב מטמון קידומות כדי שסשנים ארוכים יישארו זולים.",
+      "zcode": "Z.ai's coding agent for its GLM models, speaking any OpenAI-compatible endpoint through a provider registry."
     }
   },
   "update": {

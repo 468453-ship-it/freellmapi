@@ -1184,7 +1184,8 @@
       "openclaw": "Visada veikiantis asmeninis asistentas, kuris iš jūsų kompiuterio atsako per WhatsApp, Telegram, Discord ir kitas programas.",
       "hermes": "Save tobulinantis Nous Research agentas su nuolatine atmintimi ir įgūdžiais, terminale arba pokalbių programose.",
       "pi": "Minimalistinis terminalo agentas, kurį pritaikote savais plėtiniais, įgūdžiais ir užklausų šablonais.",
-      "reasonix": "DeepSeek sukurtas terminalo programavimo agentas, paremtas prefiksų talpykla, kad ilgos sesijos liktų pigios."
+      "reasonix": "DeepSeek sukurtas terminalo programavimo agentas, paremtas prefiksų talpykla, kad ilgos sesijos liktų pigios.",
+      "zcode": "Z.ai's coding agent for its GLM models, speaking any OpenAI-compatible endpoint through a provider registry."
     }
   },
   "update": {

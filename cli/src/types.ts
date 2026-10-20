@@ -14,7 +14,14 @@ export interface GeneratedFile {
   /** Literal text, merged as a marked `# freellmapi:start/end` block (toml, yaml, env). */
   content?: string;
   sensitive?: boolean;
+  /** json only: arrays merged item by item instead of replaced whole, keyed by
+   *  the array's dotted path. `ownedBy` drops the existing items whose fields
+   *  all match it, then appends the patch's items; `union` keeps the existing
+   *  values and appends the patch's missing ones. */
+  arrays?: Record<string, JsonArrayMerge>;
 }
+
+export type JsonArrayMerge = { ownedBy: Record<string, string> } | { union: true };
 
 export interface GenerateContext {
   url: string;

@@ -597,6 +597,59 @@ describe('tool generators', () => {
     expect(config.content).toContain('display_name = "FreeLLMAPI (Work Box)"');
   });
 
+  it('writes ZCode as a custom provider in ~/.zcode/v2/provider_config.json', () => {
+    // ZCode has no env lookup for custom providers — the key has to live in
+    // the file, which the writer then protects with 0600 (sensitive: true).
+    const [config] = tools.find(tool => tool.id === 'zcode')!.generate(context).files;
+    expect(asPosix(config.path)).toBe('/home/tester/.zcode/v2/provider_config.json');
+    expect(config.format).toBe('json');
+    expect(config.sensitive).toBe(true);
+    const value = config.value as {
+      schemaVersion: number;
+      config: {
+        providerConfigRules: { providerRules: {
+          providerId: string; providerName: string;
+          config: { access: { type: string; apiKey: string }; api: { type: string; baseUrl: string }; personalModelIds: string[] };
+        }[] };
+        modelConfigRules: {
+          providerModelRules: { providerId: string; modelId: string; config: { properties: { contextWindow: number }; optionSpecs: { maxOutputTokens: { max: number; map: string } } } }[];
+          manualProviderModelRules: unknown[];
+        };
+        providerOrder: string[];
+        defaultModelSelection: { providerId: string; modelId: string };
+      };
+    };
+    expect(value.schemaVersion).toBe(1);
+    const [provider] = value.config.providerConfigRules.providerRules;
+    expect(provider.providerId).toBe('freellmapi');
+    expect(provider.providerName).toBe('FreeLLMAPI');
+    expect(provider.config.access).toEqual({ type: 'api-key', apiKey: 'freellmapi-test-key' });
+    expect(provider.config.api).toEqual({ type: 'openai-chat-completions', baseUrl: 'http://localhost:3000/v1' });
+    expect(provider.config.personalModelIds).toEqual(['fast-coder', 'reasoning-model']);
+    const rules = value.config.modelConfigRules.providerModelRules;
+    expect(rules.map(rule => rule.modelId)).toEqual(['fast-coder', 'reasoning-model']);
+    expect(rules[0].config.properties.contextWindow).toBe(131072);
+    expect(rules[0].config.optionSpecs.maxOutputTokens.map).toBe('{"max_tokens": maxOutputTokens}');
+    expect(value.config.modelConfigRules.manualProviderModelRules).toEqual([]);
+    expect(value.config.defaultModelSelection).toEqual({ providerId: 'freellmapi', modelId: 'fast-coder' });
+    // The rule arrays are merged per provider, never replaced whole.
+    expect(config.arrays?.['config.providerConfigRules.providerRules']).toEqual({ ownedBy: { providerId: 'freellmapi' } });
+  });
+
+  it('follows ZCODE_PERSONAL_PROVIDER_CONFIG_FILE for ZCode', () => {
+    vi.stubEnv('ZCODE_PERSONAL_PROVIDER_CONFIG_FILE', '/srv/zcode/provider_config.json');
+    const [config] = tools.find(tool => tool.id === 'zcode')!.generate(context).files;
+    expect(asPosix(config.path)).toBe('/srv/zcode/provider_config.json');
+  });
+
+  it('gives a named ZCode profile its own provider entry', () => {
+    const [config] = tools.find(tool => tool.id === 'zcode')!.generate({ ...context, profile: 'Work Box' }).files;
+    const value = config.value as { config: { providerConfigRules: { providerRules: { providerId: string; providerName: string }[] } } };
+    const [provider] = value.config.providerConfigRules.providerRules;
+    expect(provider.providerId).toBe('freellmapi-work-box');
+    expect(provider.providerName).toBe('FreeLLMAPI (Work Box)');
+  });
+
   it('writes AtomCode as default_provider plus a typed [providers.freellmapi] table', () => {
     // AtomCode ignores a bare `[provider]` table: it looks up the table named
     // by the root `default_provider` key, and only a `type = "openai"` table

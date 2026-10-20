@@ -1184,7 +1184,8 @@
       "openclaw": "Um assistente pessoal sempre ligado que responde no WhatsApp, Telegram, Discord e mais, a partir da sua própria máquina.",
       "hermes": "O agente da Nous Research que se aperfeiçoa a si próprio, com memória persistente e competências, no terminal ou em apps de chat.",
       "pi": "Um agente de terminal minimalista que molda com as suas próprias extensões, competências e modelos de prompt.",
-      "reasonix": "Um agente de programação para o terminal nativo do DeepSeek, construído em torno da cache de prefixos para que as sessões longas continuem baratas."
+      "reasonix": "Um agente de programação para o terminal nativo do DeepSeek, construído em torno da cache de prefixos para que as sessões longas continuem baratas.",
+      "zcode": "O agente de código da Z.ai para os seus modelos GLM, que fala com qualquer endpoint compatível com OpenAI através de um registo de fornecedores."
     }
   },
   "update": {

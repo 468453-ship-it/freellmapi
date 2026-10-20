@@ -1184,7 +1184,8 @@
       "openclaw": "Osobný asistent, ktorý je neustále k dispozícii a z vášho vlastného počítača odpovedá v aplikáciách WhatsApp, Telegram, Discord a ďalších.",
       "hermes": "Samozdokonaľujúci sa agent od Nous Research s trvalou pamäťou a zručnosťami, v termináli alebo v chatovacích aplikáciách.",
       "pi": "Minimalistický terminálový agent, ktorý si prispôsobíte vlastnými rozšíreniami, zručnosťami a šablónami promptov.",
-      "reasonix": "Terminálový agent na programovanie stavaný pre DeepSeek, postavený na cachovaní prefixov, aby dlhé relácie zostali lacné."
+      "reasonix": "Terminálový agent na programovanie stavaný pre DeepSeek, postavený na cachovaní prefixov, aby dlhé relácie zostali lacné.",
+      "zcode": "Z.ai's coding agent for its GLM models, speaking any OpenAI-compatible endpoint through a provider registry."
     }
   },
   "update": {

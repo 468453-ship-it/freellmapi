@@ -1184,7 +1184,8 @@
       "openclaw": "En ständigt tillgänglig personlig assistent som svarar på WhatsApp, Telegram, Discord med mera från din egen dator.",
       "hermes": "Nous Researchs självförbättrande agent med beständigt minne och färdigheter, i terminalen eller i chattappar.",
       "pi": "En minimal terminalagent som du formar med egna tillägg, färdigheter och promptmallar.",
-      "reasonix": "En terminalbaserad kodagent byggd för DeepSeek kring prefix-cachning, så att långa sessioner förblir billiga."
+      "reasonix": "En terminalbaserad kodagent byggd för DeepSeek kring prefix-cachning, så att långa sessioner förblir billiga.",
+      "zcode": "Z.ai's coding agent for its GLM models, speaking any OpenAI-compatible endpoint through a provider registry."
     }
   },
   "update": {

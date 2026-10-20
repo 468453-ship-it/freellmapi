@@ -1184,7 +1184,8 @@
       "openclaw": "Ein ständig verfügbarer persönlicher Assistent, der von deinem eigenen Rechner aus auf WhatsApp, Telegram, Discord und mehr antwortet.",
       "hermes": "Der selbstverbessernde Agent von Nous Research mit dauerhaftem Gedächtnis und Skills, im Terminal oder in Chat-Apps.",
       "pi": "Ein minimaler Terminal-Agent, den du mit eigenen Erweiterungen, Skills und Prompt-Vorlagen formst.",
-      "reasonix": "Ein für DeepSeek gebauter Coding-Agent fürs Terminal, ausgelegt auf Prefix-Caching, damit lange Sitzungen günstig bleiben."
+      "reasonix": "Ein für DeepSeek gebauter Coding-Agent fürs Terminal, ausgelegt auf Prefix-Caching, damit lange Sitzungen günstig bleiben.",
+      "zcode": "Der Coding-Agent von Z.ai für seine GLM-Modelle, der über ein Provider-Verzeichnis jede OpenAI-kompatible Endstelle anspricht."
     }
   },
   "update": {

@@ -1184,7 +1184,8 @@
       "openclaw": "Trợ lý cá nhân luôn sẵn sàng, trả lời trên WhatsApp, Telegram, Discord và nhiều nền tảng khác ngay từ máy của bạn.",
       "hermes": "Tác nhân tự cải thiện của Nous Research với bộ nhớ lâu dài và kỹ năng, trong dòng lệnh hoặc trên các ứng dụng chat.",
       "pi": "Một tác nhân dòng lệnh tối giản mà bạn định hình bằng tiện ích mở rộng, kỹ năng và mẫu prompt của riêng mình.",
-      "reasonix": "Tác tử lập trình trên terminal dành riêng cho DeepSeek, xây dựng quanh bộ nhớ đệm tiền tố để các phiên dài vẫn rẻ."
+      "reasonix": "Tác tử lập trình trên terminal dành riêng cho DeepSeek, xây dựng quanh bộ nhớ đệm tiền tố để các phiên dài vẫn rẻ.",
+      "zcode": "Tác nhân lập trình của Z.ai cho các mô hình GLM, kết nối mọi endpoint tương thích OpenAI qua sổ đăng ký nhà cung cấp."
     }
   },
   "update": {
