@@ -49,6 +49,7 @@ import {
   type FusionResult,
 } from '../services/fusion.js';
 import { applyDecisionRouting, routingStrategyHeader } from '../services/routing-decision.js';
+import { resolveListedClaudeAlias } from '../services/anthropic-map.js';
 
 export const responsesRouter = Router();
 
@@ -810,6 +811,12 @@ export async function handleResponses(req: Request, res: Response): Promise<void
     ?? req.headers['x-session-id'];
   const sessionIdHeader = Array.isArray(rawSessionId) ? rawSessionId[0] : rawSessionId;
   const requestedModelLabel = reqData.model ?? 'auto';
+  // What routing acts on. Usually the id the client sent; a Claude alias from
+  // GET /v1/models routes through the Claude family map instead (a pinned
+  // model, auto, or a tier pool), the same as on /v1/messages.
+  const claudeAlias = resolveListedClaudeAlias(reqData.model);
+  const routedModel = claudeAlias?.kind === 'model' ? claudeAlias.modelId : claudeAlias ? 'auto' : requestedModelLabel;
+  const aliasTierChain = claudeAlias?.kind === 'tier' ? resolveModelGroupCandidates(claudeAlias.dbIds) : [];
 
   // Explicit `model` field pins routing. If the catalog has no enabled row
   // matching the requested id, return 400 — silently auto-routing to a
@@ -823,9 +830,15 @@ export async function handleResponses(req: Request, res: Response): Promise<void
   // stays on the unscoped key so existing session affinity is unchanged.
   let stickyStrategyKey: string | undefined;
 
-  if (isAutoModel(requestedModelLabel)) {
+  if (aliasTierChain.length > 0) {
+    // Strict over the tier's pool; an empty tier falls through to plain auto.
+    groupChain = aliasTierChain;
+    stickyStrategyKey = `tier:${aliasTierChain[0]!.model_db_id}`;
+    const sticky = getStickyModel(messages, sessionIdHeader, stickyStrategyKey);
+    preferredModel = (sticky != null && groupChain.some(r => r.model_db_id === sticky)) ? sticky : undefined;
+  } else if (isAutoModel(routedModel)) {
     try {
-      resolvedChain = resolveRoutingChain(requestedModelLabel);
+      resolvedChain = resolveRoutingChain(routedModel);
     } catch (err: any) {
       if (err?.status === 400) {
         res.status(400).json({
@@ -840,12 +853,12 @@ export async function handleResponses(req: Request, res: Response): Promise<void
       getStickyModel(messages, sessionIdHeader, stickyStrategyKey),
       resolvedChain.chain,
     );
-  } else if (isFusionModel(requestedModelLabel)) {
+  } else if (isFusionModel(routedModel)) {
     // Fusion is a virtual model, not a row in the catalog. Its panel and
     // judge each resolve through the normal router inside runFusion below.
   } else {
     const db = getDb();
-    const resolved = isUnifyEnabled() ? resolveRequestedIdForDispatch(requestedModelLabel, getModelGroups()) : null;
+    const resolved = isUnifyEnabled() ? resolveRequestedIdForDispatch(routedModel, getModelGroups()) : null;
     const members = resolved?.memberDbIds ?? null;
     if (members && members.length > 0) {
       groupChain = resolveModelGroupCandidates(members, resolved!.demotedDbIds);
@@ -855,25 +868,25 @@ export async function handleResponses(req: Request, res: Response): Promise<void
         const reason = anyEnabled ? 'has no providers with an enabled key' : 'is disabled';
         res.status(400).json({
           error: {
-            message: `Model '${requestedModelLabel}' ${reason}. Use 'auto' (or omit the 'model' field) to auto-route, or call /v1/models for the available list.`,
+            message: `Model '${routedModel}' ${reason}. Use 'auto' (or omit the 'model' field) to auto-route, or call /v1/models for the available list.`,
             type: 'invalid_request_error',
             code: 'model_not_found',
           },
         });
         return;
       }
-      const sticky = getStickyModel(messages, sessionIdHeader, requestedModelLabel);
+      const sticky = getStickyModel(messages, sessionIdHeader, routedModel);
       preferredModel = (sticky != null && groupChain.some(r => r.model_db_id === sticky)) ? sticky : undefined;
     } else {
-      const enabled = db.prepare('SELECT id FROM models WHERE model_id = ? AND enabled = 1').get(requestedModelLabel) as { id: number } | undefined;
+      const enabled = db.prepare('SELECT id FROM models WHERE model_id = ? AND enabled = 1').get(routedModel) as { id: number } | undefined;
       if (enabled) {
         preferredModel = enabled.id;
       } else {
-        const disabled = db.prepare('SELECT id FROM models WHERE model_id = ?').get(requestedModelLabel) as { id: number } | undefined;
+        const disabled = db.prepare('SELECT id FROM models WHERE model_id = ?').get(routedModel) as { id: number } | undefined;
         const reason = disabled ? 'is disabled' : 'is not in the catalog';
         res.status(400).json({
           error: {
-            message: `Model '${requestedModelLabel}' ${reason}. Use 'auto' (or omit the 'model' field) to auto-route, or call /v1/models for the available list.`,
+            message: `Model '${routedModel}' ${reason}. Use 'auto' (or omit the 'model' field) to auto-route, or call /v1/models for the available list.`,
             type: 'invalid_request_error',
             code: 'model_not_found',
           },
@@ -930,7 +943,7 @@ export async function handleResponses(req: Request, res: Response): Promise<void
   // virtual id before normal model dispatch; do the same here after the common
   // Responses translation/guardrails so Codex and other Responses clients can
   // opt into the exact same panel + judge behavior.
-  if (isFusionModel(requestedModelLabel)) {
+  if (isFusionModel(routedModel)) {
     const fusionConfig = reqData.fusion ?? {};
     const fusionOptions = { ...dispatchOpts };
 
@@ -1166,7 +1179,7 @@ export async function handleResponses(req: Request, res: Response): Promise<void
   // model picks which preset (Smartest / Fastest / Balanced / Most reliable)
   // this turn routes with. Skipped when the client pinned a model or the
   // conversation is sticky to one. Any doubt routes as Balanced.
-  const routingPick = await applyDecisionRouting(messages, { pinned: !isAutoModel(requestedModelLabel) || preferredModel != null, signal: clientAbort.signal });
+  const routingPick = await applyDecisionRouting(messages, { pinned: !isAutoModel(routedModel) || preferredModel != null, signal: clientAbort.signal });
   if (routingPick && !res.headersSent) res.setHeader('X-FreeLLM-Routing-Strategy', routingStrategyHeader(routingPick));
 
   await runFallbackLoop({

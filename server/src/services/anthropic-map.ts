@@ -191,6 +191,29 @@ export const CLAUDE_FAMILY_ALIASES: { id: string; family: ClaudeFamily; label: s
   { id: 'claude-haiku-4-5', family: 'haiku', label: 'Haiku' },
 ];
 
+/** What an OpenAI-wire route should dispatch a listed Claude alias to. */
+export type ClaudeAliasDispatch =
+  | { kind: 'model'; modelId: string }
+  | { kind: 'auto' }
+  | { kind: 'tier'; dbIds: number[] };
+
+// GET /v1/models lists CLAUDE_FAMILY_ALIASES on the OpenAI-shaped listing too
+// (#880), so OpenAI-wire clients (agents seeded from that listing, ZCode,
+// Continue...) pick them, and /v1/chat/completions, /v1/completions and
+// /v1/responses used to answer 404 model_not_found. Resolve exactly the listed
+// ids through the same family map /v1/messages uses. Returns null for anything
+// else, including an alias id that is also a real catalog row (the listing
+// hides the alias then, and the catalog row wins).
+export function resolveListedClaudeAlias(model?: string): ClaudeAliasDispatch | null {
+  const id = (model ?? '').trim().toLowerCase();
+  if (!CLAUDE_FAMILY_ALIASES.some(alias => alias.id === id)) return null;
+  if (getDb().prepare('SELECT 1 FROM models WHERE model_id = ? LIMIT 1').get(model!.trim())) return null;
+  const resolved = resolveAnthropicModel(id);
+  if (resolved.modelId) return { kind: 'model', modelId: resolved.modelId };
+  if (resolved.tierDbIds?.length) return { kind: 'tier', dbIds: resolved.tierDbIds };
+  return { kind: 'auto' };
+}
+
 // Discovery entries for the family aliases, named after where each one routes:
 // the pinned catalog model when the operator pinned one, otherwise the router.
 export function claudeFamilyDiscoveryEntries(): { id: string; displayName: string }[] {

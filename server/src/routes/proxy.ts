@@ -38,7 +38,7 @@ import type { Platform } from '@freellmapi/shared/types.js';
 import { inferQuotaPoolKey, type QuotaObservationContext } from '../services/provider-quota.js';
 import { isUnifyEnabled, getModelGroups, resolveRequestedIdForDispatch } from '../services/model-groups.js';
 import { buildModelListing, type NormalizedModel } from '../services/model-listing.js';
-import { claudeFamilyDiscoveryEntries } from '../services/anthropic-map.js';
+import { claudeFamilyDiscoveryEntries, resolveListedClaudeAlias } from '../services/anthropic-map.js';
 import { compressRequest, formatCompressionHeader } from '../services/compression/pipeline.js';
 import { applyDecisionRouting, routingStrategyHeader } from '../services/routing-decision.js';
 
@@ -1304,8 +1304,12 @@ proxyRouter.post('/completions', async (req: Request, res: Response) => {
     return;
   }
 
-  const { model: requestedModel, prompt, suffix, temperature, top_p, stream } = parsed.data;
-  const requestedModelLabel = requestedModel ?? 'auto';
+  const { model: clientModel, prompt, suffix, temperature, top_p, stream } = parsed.data;
+  const requestedModelLabel = clientModel ?? 'auto';
+  // Claude alias from GET /v1/models → the Claude family map, as on /v1/chat/completions.
+  const claudeAlias = resolveListedClaudeAlias(clientModel);
+  const requestedModel = claudeAlias?.kind === 'model' ? claudeAlias.modelId : claudeAlias ? 'auto' : clientModel;
+  const aliasTierChain = claudeAlias?.kind === 'tier' ? resolveModelGroupCandidates(claudeAlias.dbIds) : [];
   const max_tokens = parsed.data.max_tokens != null && parsed.data.max_tokens > 0
     ? parsed.data.max_tokens : 128;
   const stop = providerSafeStop(parsed.data.stop);
@@ -1337,9 +1341,9 @@ proxyRouter.post('/completions', async (req: Request, res: Response) => {
   }
 
   let preferredModel: number | undefined;
-  let groupChain: ChainRow[] | undefined;
+  let groupChain: ChainRow[] | undefined = aliasTierChain.length > 0 ? aliasTierChain : undefined;
 
-  if (!isAutoModel(requestedModel) && requestedModel) {
+  if (!groupChain && !isAutoModel(requestedModel) && requestedModel) {
     const db = getDb();
     const resolved = isUnifyEnabled() ? resolveRequestedIdForDispatch(requestedModel, getModelGroups()) : null;
     const members = resolved?.memberDbIds ?? null;
@@ -1727,8 +1731,13 @@ proxyRouter.post('/chat/completions', async (req: Request, res: Response) => {
     return;
   }
 
-  const { model: requestedModel, temperature, top_p, stream } = parsed.data;
-  const requestedModelLabel = requestedModel ?? 'auto';
+  const { model: clientModel, temperature, top_p, stream } = parsed.data;
+  const requestedModelLabel = clientModel ?? 'auto';
+  // A Claude alias from GET /v1/models routes through the Claude family map
+  // (a pinned model, auto, or a tier pool), the same as on /v1/messages.
+  const claudeAlias = resolveListedClaudeAlias(clientModel);
+  const requestedModel = claudeAlias?.kind === 'model' ? claudeAlias.modelId : claudeAlias ? 'auto' : clientModel;
+  const aliasTierChain = claudeAlias?.kind === 'tier' ? resolveModelGroupCandidates(claudeAlias.dbIds) : [];
   // Agent-tolerant knob normalization (#200): max_tokens <= 0 means "no
   // limit" in several clients → unset; tool_choice 'any' is OpenAI's
   // 'required'; tool definitions get their 'function' type re-defaulted.
@@ -2256,7 +2265,14 @@ proxyRouter.post('/chat/completions', async (req: Request, res: Response) => {
   // successful provider without leaking stickiness across groups.
   let stickyStrategyKey: string | undefined = strategyKey;
 
-  if (isAutoModel(requestedModel)) {
+  if (aliasTierChain.length > 0) {
+    // A tier-mapped Claude alias routes STRICTLY over its tier's pool. An
+    // empty tier falls through to plain auto, as on /v1/messages.
+    groupChain = aliasTierChain;
+    stickyStrategyKey = `tier:${aliasTierChain[0]!.model_db_id}`;
+    const sticky = getStickyModel(messages, sessionIdHeader, stickyStrategyKey);
+    preferredModel = (sticky != null && groupChain.some(r => r.model_db_id === sticky)) ? sticky : undefined;
+  } else if (isAutoModel(requestedModel)) {
     preferredModel = resolveStickyPreference(getStickyModel(messages, sessionIdHeader, strategyKey), resolvedChain?.chain);
   } else if (requestedModel) {
     const db = getDb();
