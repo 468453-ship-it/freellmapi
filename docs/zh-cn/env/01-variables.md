@@ -68,6 +68,7 @@ FreeLLMAPI 从 `.env` 读取的全部变量，按主题分组。默认值和说�
 | `VALIDATE_TOOL_ARGUMENTS` | 关闭（`=1` 开启） | 对照调用方声明的 schema 校验工具调用参数，违反时触发故障转移。`lib/tool-args.ts` 已经修复它能确证可修的部分；这个开关负责剩下的漏网之鱼——它们如今到达 Anthropic 客户端时会是一个带 `input: {}` 的 `tool_use` 块。默认关闭，因为误报的代价是一跳故障转移——先打开它，盯着 `X-Fallback-Trail` 观察 `invalid_tool_arguments`，再决定去留。适用于回合仍可故障转移的所有场合（非流式端点，外加 `/v1/chat/completions`、`/v1/messages`、Gemini 与 Ollama 模拟）；`/v1/responses` 的流式在第一个工具调用增量上就已提交，属于例外。运行时通过 `validate_tool_arguments` 设置键调整。 |
 | `REQUEST_MAX_TOKENS_BUDGET` | `0`（关闭） | 按请求的词元护栏：估算输入词元加所请求的 max_tokens 必须落在这个上限之内，否则在任何提供方被尝试之前就以 413 拒绝请求；没有发送 max_tokens 的请求，其输出会被截断到剩余额度。可在运行时通过 `request_max_tokens_budget` 设置键调整（仪表盘 API `PUT /api/settings/guardrails`）。 |
 | `MAX_CONSECUTIVE_UPSTREAM_FAILS` | `0`（关闭） | 故障转移断路器：单个请求内连续上游失败达到这个次数后，以 503 终止故障转移链，而不是在一个不健康的池子里试遍每个剩余候选。可在运行时通过 `max_consecutive_upstream_fails` 设置键调整。 |
+| `HEALTH_CHECK_INTERVAL_MS` | `300000`（5 分钟） | 定期密钥健康检查的基本间隔，单位毫秒（#1593）。每轮带 ±20% 抖动；低于 60000 或无效的值回落到 5 分钟默认值，避免配置失误把检查变成洪水。调快会增加校验流量，在校验计费的提供方会消耗额度。启动时读取。 |
 | `MODELSCOPE_VALIDATE_CACHE_MS` | `86400000`（24 小时） | ModelScope（魔搭）用一次消耗额度的单词元聊天补全来校验 API 密钥（`GET /v1/models` 不做鉴权），每次探测都要花费魔粒额度——实测每个超档请求约 2 魔粒。为了不让每 5 分钟一轮的健康检查每天烧掉约 288 次付费探测，校验成功后会按密钥缓存这么长时间（毫秒）。`0` 表示每轮都探测；被撤销的密钥仍会被下一次真实请求的 401 抓住。 |
 | `FREELLMAPI_CONTEXT_HANDOFF` | 关闭 | 模型切换时的上下文交接。启用后（`on_model_switch`），每当一个会话从一个模型切换到另一个（例如发生故障转移之后），FreeLLMAPI 会向出站请求注入一条精简的系统消息。 |
 
