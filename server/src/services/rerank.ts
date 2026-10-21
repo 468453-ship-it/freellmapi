@@ -2,6 +2,7 @@ import { getDb } from '../db/index.js';
 import { decrypt } from '../lib/crypto.js';
 import { parseRetryAfterMs } from '../providers/base.js';
 import { secondsUntilNextMonth } from './key-budget.js';
+import { markKeyHealthyFromRequest } from './health.js';
 
 // Cohere-style rerank over the existing free-tier key pool (#1029). Deliberately
 // narrow first slice: platform='cohere' keys and custom OpenAI-compatible
@@ -101,6 +102,11 @@ export async function runRerank(model: string | undefined, query: string, docume
   for (const cand of chain) {
     try {
       const out = await callProvider(cand, model, query, documents, n);
+      // A served rerank is evidence the key works, the same as a served chat
+      // request (#1493) or a served search (#1612). Rerank candidates come
+      // from the same 'healthy'/'unknown' pool, so a key that only ever
+      // serves reranks had no success signal to lift it out of 'error'.
+      markKeyHealthyFromRequest(cand.id);
       return { platform: cand.platform, modelId: out.modelId, results: out.results };
     } catch (err: any) {
       lastError = err instanceof RerankError ? err : new RerankError(String(err?.message ?? err), 502);

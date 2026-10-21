@@ -8,6 +8,7 @@ import { proxyFetch } from '../lib/proxy.js';
 import { secondsUntilNextMonth } from './key-budget.js';
 import { reserveProviderCredential, type ReservedProviderCredential } from './provider-credential.js';
 import { isOnCooldown, setCooldown } from './ratelimit.js';
+import { markKeyHealthyFromRequest } from './health.js';
 
 // Decision models over the key pool.
 //
@@ -352,6 +353,11 @@ export async function runDecision(body: DecisionRequest, opts: DecisionOptions =
       try {
         const out = await ADAPTERS[row.platform]!(credential, row.model_id, body, opts.signal);
         logDecision(row, credential.id, 'ok', Date.now() - started, questionCount, out.usage.input_tokens, clientAgent, null);
+        // A served decision is evidence the key works, the same as a served
+        // chat request (#1493) or search (#1612). Decision routing fires every
+        // turn, so a decision key that serves fine but once got demoted to
+        // 'error' by a blip had no way back into the pool.
+        markKeyHealthyFromRequest(credential.id);
         return { model: row.model_id, provider: row.platform, answers: out.answers, usage: out.usage };
       } catch (err: any) {
         const e = err instanceof DecisionError ? err : new DecisionError(String(err?.message ?? err), 502);

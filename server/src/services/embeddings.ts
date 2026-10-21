@@ -15,6 +15,7 @@ import { getClientContext } from '../lib/client-context.js';
 import { reserveProviderCredential } from './provider-credential.js';
 import { proxyFetch } from '../lib/proxy.js';
 import { bearerAuthHeader } from '../lib/credential.js';
+import { markKeyHealthyFromRequest } from './health.js';
 import { customEndpointKeyIds } from './custom-endpoint.js';
 import type { Db } from '../db/types.js';
 import { SPEKA_BASE_URL } from '../providers/speka.js';
@@ -408,6 +409,11 @@ export async function runEmbeddings(model: string | undefined, inputs: string[],
       }
       const tokens = out.inputTokens ?? estimateTokens(inputs);
       logEmbeddingRequest(row, credential.id, 'success', tokens, Date.now() - started, null);
+      // A served embedding is evidence the key works, the same as a served
+      // chat request (#1493) or a served search (#1612): stamp last_healthy_at
+      // and lift an 'unknown'/'error' key. Embedding-only keys (and #1459-era
+      // providers that refuse probes) had no success signal at all otherwise.
+      markKeyHealthyFromRequest(credential.id);
       return {
         family,
         platform: row.platform,
