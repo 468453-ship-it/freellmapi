@@ -4,6 +4,7 @@ import { createApp } from '../../app.js';
 import { initDb, getDb, getUnifiedApiKey } from '../../db/index.js';
 import { encrypt } from '../../lib/crypto.js';
 import { listModerationModels, resolveModel } from '../../services/moderation.js';
+import { clearLastHealthyStampState } from '../../services/health.js';
 
 // POST /v1/moderations (#…): OpenAI-compatible content-moderation shim that
 // routes to the first enabled OpenAI/OpenRouter/NVIDIA key and fails over
@@ -185,5 +186,40 @@ describe('POST /v1/moderations route', () => {
     const { status, body } = await postModeration({ input: 'x' }, getUnifiedApiKey());
     expect(status).toBe(503);
     expect(body.error.message).toContain('No moderation providers available');
+  });
+
+  it('a served moderation marks the key as working (#1493)', async () => {
+    clearLastHealthyStampState();
+    const key = insertKey('openai');
+    getDb().prepare("UPDATE api_keys SET status = 'unknown' WHERE id = ?").run(key);
+    mockModeration([{ platform: 'openai', response: { results: [{ flagged: false }] } }]);
+    const { status } = await postModeration({ input: 'fine' }, getUnifiedApiKey());
+    expect(status).toBe(200);
+    expect(getDb().prepare('SELECT status, last_healthy_at FROM api_keys WHERE id = ?').get(key))
+      .toMatchObject({ status: 'healthy', last_healthy_at: expect.any(String) });
+  });
+
+  it('a key at its monthly cap is not used for moderation; the reply is 429 with Retry-After (#1158)', async () => {
+    const key = insertKey('openai');
+    getDb().prepare('UPDATE api_keys SET monthly_request_cap = 1 WHERE id = ?').run(key);
+    const month = new Date().toISOString().slice(0, 7);
+    getDb().prepare(
+      'INSERT INTO key_monthly_usage (key_id, month, requests, tokens) VALUES (?, ?, 1, 0)',
+    ).run(key, month);
+    const calls = mockModeration([{ platform: 'openai', response: { results: [{ flagged: false }] } }]);
+    const server = app.listen(0, '127.0.0.1');
+    if (!server.listening) await new Promise<void>(r => server.once('listening', () => r()));
+    const addr = server.address() as { port: number };
+    const res = await fetch(`http://127.0.0.1:${addr.port}/v1/moderations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getUnifiedApiKey()}` },
+      body: JSON.stringify({ input: 'x' }),
+    });
+    server.close();
+    expect(res.status).toBe(429);
+    expect(await res.json()).toMatchObject({ error: { type: 'rate_limit_error' } });
+    expect(Number(res.headers.get('retry-after'))).toBeGreaterThan(0);
+    // The capped key must never be called.
+    expect(calls).toEqual([]);
   });
 });

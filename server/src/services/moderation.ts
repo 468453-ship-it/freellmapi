@@ -15,6 +15,8 @@ import { getDb } from '../db/index.js';
 import { getClientContext } from '../lib/client-context.js';
 import { decrypt } from '../lib/crypto.js';
 import { proxyFetch } from '../lib/proxy.js';
+import { checkMonthlyBudget, secondsUntilNextMonth } from './key-budget.js';
+import { markKeyHealthyFromRequest } from './health.js';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -38,9 +40,12 @@ export interface ModerationResult {
 
 export class ModerationError extends Error {
   status: number;
-  constructor(message: string, status: number) {
+  /** Seconds the caller should wait before retrying (429 exhaustion). */
+  retryAfterSec?: number;
+  constructor(message: string, status: number, retryAfterSec?: number) {
     super(message);
     this.status = status;
+    this.retryAfterSec = retryAfterSec;
   }
 }
 
@@ -194,6 +199,11 @@ export async function runModerations(
   }
 
   let lastError: ModerationError | null = null;
+  // #1158: a moderation call spends real provider quota, so a key at its
+  // monthly cap must not serve one. Every other inference surface checks the
+  // caps before dispatch (router, embeddings, media, search); moderation was
+  // the only one that read api_keys directly and skipped the gate.
+  let budgetBlocked = false;
   for (const row of chain) {
     let apiKey: string;
     try {
@@ -201,10 +211,18 @@ export async function runModerations(
     } catch {
       continue;
     }
+    if (!checkMonthlyBudget(row.keyId, 0).allowed) {
+      budgetBlocked = true;
+      continue;
+    }
     const started = Date.now();
     try {
       const json = await callProvider(row, apiKey, inputs);
       logModerationRequest(row, 'success', Date.now() - started, null);
+      // A served moderation is the evidence the key works, the same as a
+      // served chat request (#1493): it stamps last_healthy_at and lifts an
+      // 'unknown' or 'error' key.
+      markKeyHealthyFromRequest(row.keyId);
       return {
         provider: row.platform,
         model: (json.model as string) ?? row.modelId,
@@ -217,8 +235,20 @@ export async function runModerations(
     }
   }
 
+  // A monthly-cap exhaustion outranks a transport failure in the reply: the
+  // caller needs the month-reset Retry-After, not a "try another provider" 502.
+  if (budgetBlocked && (!lastError || lastError.status === 429)) {
+    const exhausted = new ModerationError(
+      'Monthly key budget exhausted.',
+      429,
+      secondsUntilNextMonth(),
+    );
+    throw exhausted;
+  }
+
   throw new ModerationError(
     `All moderation providers failed${lastError ? ` (last: ${lastError.message.slice(0, 160)})` : ' (no usable keys)'}.`,
     lastError && lastError.status === 429 ? 429 : 502,
+    lastError?.retryAfterSec,
   );
 }
