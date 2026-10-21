@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { clientNotes, detectChatGptClient } from './detect.js';
 import type {
   CatalogModel,
   GenerateContext,
@@ -125,6 +126,7 @@ function codex(ctx: GenerateContext): Generation {
       content: content.join('\n'),
     }],
     notes: [
+      ...clientNotes(ctx.detectedClient ?? detectChatGptClient()),
       'Export FREELLMAPI_API_KEY before running codex; the key is not written to config.toml.',
       ...(ctx.profile === 'default'
         ? []
