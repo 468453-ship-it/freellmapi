@@ -326,17 +326,66 @@ proxyRouter.get('/models', (req: Request, res: Response) => {
   // "which models can this instance actually serve now". `available` is computed as
   // "enabled AND an enabled key can serve it"; dedup prefers an available
   // instance of a model id over a disabled/keyless one.
-  // Shared catalog listing (one source of truth for the OpenAI and Anthropic
-  // /v1/models endpoints — see services/model-listing.ts). `autoContextWindow`
-  // is the honest ceiling for the virtual "auto" model: the largest context
-  // window among models that can serve a request right now. Advertising null
-  // makes OpenAI-compatible clients (opencode, Continue) fall back to their own
-  // conservative default and truncate long inputs before they reach us (#282).
-  const { models: allListed, autoContextWindow } = buildModelListing();
-
   const q = String(req.query.available ?? req.query.connected ?? req.query.ready ?? '').toLowerCase();
   const onlyAvailable = q === '1' || q === 'true' || q === 'yes';
-  const listed = onlyAvailable ? allListed.filter(m => m.available === 1) : allListed;
+  const esValues: Record<string, NormalizedModel['executionStatus']> = {
+    ready: 'ready', needskey: 'needsKey', exhausted: 'exhausted',
+  };
+  const es = esValues[String(req.query.execution_status ?? '').toLowerCase()];
+
+  res.json({
+    object: 'list',
+    data: buildCatalogEntries({ onlyAvailable, executionStatus: es }),
+  });
+});
+
+// GET /v1/models/:id — OpenAI's `models.retrieve` (single-model lookup).
+// Without it, `client.models.retrieve(id)` and every gateway that validates a
+// model id before routing (LiteLLM proxy config checks, OpenAI Agents SDK
+// model caps, eval harnesses) answers 404 even though chat completions for
+// the same id work fine. Served from the SAME builder as the list, so what a
+// client lists is byte-for-byte what it retrieves; unknown ids get OpenAI's
+// error shape (type: invalid_request_error). The id may itself contain
+// slashes (openrouter-style ids): the wildcard capture rejoins them, and a
+// URL-encoded %2F arrives decoded through Express's plain :id capture.
+const MODEL_RETRIEVE_MAX_ID_LEN = 300;
+proxyRouter.get(['/models/:id', '/models/*rest'], (req: Request, res: Response) => {
+  if (!requireInferenceAuth(req, res)) return;
+  // Express 5 hands a wildcard capture as a string array; a plain :id capture
+  // as a string. Rejoin the segments so "vendor/ns/model" round-trips.
+  const capture = (req.params as Record<string, unknown>).id
+    ?? (req.params as Record<string, unknown>).rest;
+  const id = Array.isArray(capture) ? capture.join('/') : String(capture ?? '');
+  if (!id || id.length > MODEL_RETRIEVE_MAX_ID_LEN) {
+    res.status(404).json({
+      error: { message: `Model not found: ${id.slice(0, 80)}`, type: 'invalid_request_error', code: 'model_not_found', param: 'id' },
+    });
+    return;
+  }
+  const entry = buildCatalogEntries().find(m => m.id === id);
+  if (!entry) {
+    res.status(404).json({
+      error: { message: `Model not found: ${id}`, type: 'invalid_request_error', code: 'model_not_found', param: 'id' },
+    });
+    return;
+  }
+  res.json({ ...entry, object: 'model' });
+});
+
+// The whole OpenAI-shaped /v1/models body, as one array of entries: the two
+// router entries (`auto`, `fusion`), the Claude-family discovery aliases (#880),
+// one entry per named fallback chain (`auto:<name>`), then the catalog rows.
+// Shared by GET /v1/models and GET /v1/models/:id so a model a client can LIST
+// is a model it can RETRIEVE with the identical shape — the retrieve endpoint
+// is OpenAI's `models.retrieve`, which LiteLLM-style gateways and eval
+// harnesses (lm-evaluation-harness, OpenAI SDK `.models.retrieve()`) call
+// before routing; a 404 there breaks those clients even when chat works.
+// The `?available=` / `?execution_status=` filters narrow only the catalog
+// rows — `auto`, `fusion` and the named chains are router entries, not models
+// with keys of their own.
+function buildCatalogEntries(filters: { onlyAvailable?: boolean; executionStatus?: NormalizedModel['executionStatus'] } = {}): Array<Record<string, unknown>> {
+  const { models: allListed, autoContextWindow } = buildModelListing();
+  const listed = filters.onlyAvailable ? allListed.filter(m => m.available === 1) : allListed;
 
   // Named fallback chains (#960/#895): every user-defined profile is exposed
   // as an `auto:<name>` model so a client can pick a specific fallback chain
@@ -398,78 +447,78 @@ proxyRouter.get('/models', (req: Request, res: Response) => {
   // the value itself is camelCase; an unrecognised value filters nothing, the
   // same way an unrecognised `?available=` does. Like `?available=`, this
   // narrows only the catalog rows: `auto`, `fusion` and the named chains are
-  // router entries, not models with keys of their own.
-  const esValues: Record<string, NormalizedModel['executionStatus']> = {
-    ready: 'ready', needskey: 'needsKey', exhausted: 'exhausted',
-  };
-  const es = esValues[String(req.query.execution_status ?? '').toLowerCase()];
-  const esFiltered = es ? listed.filter(m => m.executionStatus === es) : listed;
+  // Machine-readable execution filter: `?execution_status=ready` narrows to
+  // models a request can actually serve RIGHT NOW (a key that is not scoped
+  // away, cooling down or out of window). `ready` implies available;
+  // `needsKey`/`exhausted` select the rest. Matched case-insensitively because
+  // the value itself is camelCase; an unrecognised value filters nothing, the
+  // same way an unrecognised `?available=` does.
+  const esFiltered = filters.executionStatus
+    ? listed.filter(m => m.executionStatus === filters.executionStatus)
+    : listed;
 
-  res.json({
-    object: 'list',
-    data: [
-      {
-        id: AUTO_MODEL_ID,
-        object: 'model',
-        created: 0,
-        owned_by: 'freellmapi',
-        name: 'Auto (router picks the best available model)',
-        context_window: autoContextWindow,
-        // `context_length` is OpenRouter's field name and the one most
-        // OpenAI-compatible clients read; emit both so whichever a client
-        // looks for is populated. Additive — clients ignore unknown fields.
-        context_length: autoContextWindow,
-        available: true,
-        unavailable_reason: null,
-      },
-      {
-        id: FUSION_MODEL_ID,
-        object: 'model',
-        created: 0,
-        owned_by: 'freellmapi',
-        name: 'Fusion (panel of models answer in parallel, a judge synthesizes one answer)',
-        context_window: autoContextWindow,
-        context_length: autoContextWindow,
-        // Available whenever auto is — fusion needs at least one routable model.
-        available: autoContextWindow != null,
-        unavailable_reason: autoContextWindow != null ? null : 'no_models',
-      },
-      ...claudeFamilyEntries,
-      ...profileRows.map(p => ({
-        id: `auto:${p.name.toLowerCase()}`,
-        object: 'model',
-        created: 0,
-        owned_by: 'freellmapi',
-        name: `Auto: ${p.name} (named fallback chain)`,
-        context_window: p.max_ctx,
-        context_length: p.max_ctx,
-        available: p.usable === 1,
-        unavailable_reason: p.usable === 1 ? null : 'no_models',
-      })),
-      ...esFiltered.map(m => ({
-        id: m.id,
-        object: 'model',
-        created: 0,
-        owned_by: m.ownedBy,
-        name: m.name,
-        context_window: m.contextWindow,
-        context_length: m.contextWindow,
-        // Non-standard but additive: OpenAI clients ignore unknown fields.
-        available: m.available === 1,
-        unavailable_reason: m.available === 1 ? null : (m.enabled === 1 ? 'no_key' : 'disabled'),
-        // Machine-readable dynamic status: 'ready' | 'needsKey' | 'exhausted'
-        // (see services/model-listing.ts). Agents can filter with
-        // ?execution_status=ready and route around exhausted models.
-        execution_status: m.executionStatus,
-        // OpenRouter's field name; agents use it to pick knobs per model. For
-        // a unify group this is the intersection over member platforms — a
-        // param is only advertised when every platform the router might pick
-        // honors it.
-        supported_parameters: supportedParametersForPlatforms(m.platforms, { tools: m.supportsTools }),
-      })),
-    ],
-  });
-});
+  return [
+    {
+      id: AUTO_MODEL_ID,
+      object: 'model',
+      created: 0,
+      owned_by: 'freellmapi',
+      name: 'Auto (router picks the best available model)',
+      context_window: autoContextWindow,
+      // `context_length` is OpenRouter's field name and the one most
+      // OpenAI-compatible clients read; emit both so whichever a client
+      // looks for is populated. Additive — clients ignore unknown fields.
+      context_length: autoContextWindow,
+      available: true,
+      unavailable_reason: null,
+    },
+    {
+      id: FUSION_MODEL_ID,
+      object: 'model',
+      created: 0,
+      owned_by: 'freellmapi',
+      name: 'Fusion (panel of models answer in parallel, a judge synthesizes one answer)',
+      context_window: autoContextWindow,
+      context_length: autoContextWindow,
+      // Available whenever auto is — fusion needs at least one routable model.
+      available: autoContextWindow != null,
+      unavailable_reason: autoContextWindow != null ? null : 'no_models',
+    },
+    ...claudeFamilyEntries,
+    ...profileRows.map(p => ({
+      id: `auto:${p.name.toLowerCase()}`,
+      object: 'model',
+      created: 0,
+      owned_by: 'freellmapi',
+      name: `Auto: ${p.name} (named fallback chain)`,
+      context_window: p.max_ctx,
+      context_length: p.max_ctx,
+      available: p.usable === 1,
+      unavailable_reason: p.usable === 1 ? null : 'no_models',
+    })),
+    ...esFiltered.map(m => ({
+      id: m.id,
+      object: 'model',
+      created: 0,
+      owned_by: m.ownedBy,
+      name: m.name,
+      context_window: m.contextWindow,
+      context_length: m.contextWindow,
+      // Non-standard but additive: OpenAI clients ignore unknown fields.
+      available: m.available === 1,
+      unavailable_reason: m.available === 1 ? null : (m.enabled === 1 ? 'no_key' : 'disabled'),
+      // Machine-readable dynamic status: 'ready' | 'needsKey' | 'exhausted'
+      // (see services/model-listing.ts). Agents can filter with
+      // ?execution_status=ready and route around exhausted models.
+      execution_status: m.executionStatus,
+      // OpenRouter's field name; agents use it to pick knobs per model. For
+      // a unify group this is the intersection over member platforms — a
+      // param is only advertised when every platform the router might pick
+      // honors it.
+      supported_parameters: supportedParametersForPlatforms(m.platforms, { tools: m.supportsTools }),
+    })),
+  ];
+}
 
 
 // GET /v1/usage — self-service consumption for inference clients (#1568).

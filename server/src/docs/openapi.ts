@@ -624,6 +624,40 @@ export const openapiSpec = {
         },
       },
     },
+    '/v1/models/{id}': {
+      get: {
+        tags: ['Models'],
+        operationId: 'retrieveModel',
+        summary: 'Retrieve a single model (OpenAI models.retrieve)',
+        description:
+          'Returns one catalog entry by id in the OpenAI model shape, so ' +
+          'OpenAI-SDK clients (``client.models.retrieve(id)``) can resolve a ' +
+          'model before routing. Includes the virtual `auto` and `fusion` ids ' +
+          'and any catalog id with a slash (URL-encode the slash). Served from ' +
+          'the same builder as the list, so the two never disagree.',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            description: 'Model id (e.g. `auto`, or `vendor/model` — slash URL-encoded).',
+            schema: { type: 'string' },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The model.',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Model' },
+              },
+            },
+          },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+          '404': { description: 'No model with this id (OpenAI error shape: `model_not_found`).' },
+        },
+      },
+    },
     '/v1/usage': {
       get: {
         tags: ['Models'],
