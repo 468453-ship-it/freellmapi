@@ -1,7 +1,7 @@
 import { getDb } from '../db/index.js';
 import { decrypt } from '../lib/crypto.js';
 import { parseRetryAfterMs } from '../providers/base.js';
-import { secondsUntilNextMonth } from './key-budget.js';
+import { checkMonthlyBudget, reserveMonthlyBudget, secondsUntilNextMonth } from './key-budget.js';
 import { markKeyHealthyFromRequest } from './health.js';
 import { getClientContext } from '../lib/client-context.js';
 
@@ -118,12 +118,20 @@ export async function runRerank(model: string | undefined, query: string, docume
     throw new RerankError('No rerank-capable key configured. Add a Cohere key or a custom rerank endpoint.', 503);
   }
   const n = topN ?? documents.length;
-  // Rough token estimate for the row (query + documents, ~4 chars/token) —
-  // same heuristic embeddings log when upstream reports no usage.
+  // Rough token estimate (query + documents, ~4 chars/token), the heuristic
+  // embeddings log when upstream reports no usage. It sizes both the request
+  // row and the monthly-budget admission check: rerank spends real provider
+  // quota, so a key at its monthly cap (#1158) must not serve one.
   const estTokens = Math.ceil((query.length + documents.reduce((s, d) => s + d.length, 0)) / 4);
 
+  let budgetBlocked = false;
   let lastError: RerankError | null = null;
   for (const cand of chain) {
+    // Check-and-reserve (the search/embeddings semantics): an in-flight rerank
+    // holds its estimate so two concurrent reranks can't both pass the gate on
+    // a nearly-spent cap. Released the moment the attempt settles.
+    const reservation = reserveMonthlyBudget(cand.id, estTokens);
+    if (!reservation.allowed) { budgetBlocked = true; continue; }
     const started = Date.now();
     try {
       const out = await callProvider(cand, model, query, documents, n);
@@ -138,7 +146,12 @@ export async function runRerank(model: string | undefined, query: string, docume
       lastError = err instanceof RerankError ? err : new RerankError(String(err?.message ?? err), 502);
       logRerankRequest(cand, cand.id, model ?? (cand.platform === 'cohere' ? 'rerank-v3.5' : 'rerank'),
         'error', 0, Date.now() - started, lastError.message.slice(0, 300));
+    } finally {
+      reservation.release();
     }
+  }
+  if (budgetBlocked && chain.every(c => !checkMonthlyBudget(c.id, estTokens).allowed)) {
+    throw new RerankError('All rerank keys are at their monthly budget.', 429, 'quota_exceeded');
   }
   throw new RerankError(
     `All rerank providers failed${lastError ? ` (last: ${lastError.message.slice(0, 160)})` : ''}.`,

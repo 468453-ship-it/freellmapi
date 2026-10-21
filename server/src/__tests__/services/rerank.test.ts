@@ -12,6 +12,9 @@ vi.mock('../../db/index.js', () => ({
         // a custom row without a base_url is not a candidate
         { id: 3, platform: 'custom', base_url: null, encrypted_key: 'e', iv: 'i', auth_tag: 'a' },
       ],
+      // The monthly-budget gate (#1158) reads api_keys caps and the ledger;
+      // no rows here means every key is uncapped (0 = unlimited).
+      get: () => undefined,
     }),
   }),
 }));
