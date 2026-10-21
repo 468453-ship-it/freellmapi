@@ -22,6 +22,7 @@ Any OpenAI-compatible client works (Anthropic / Claude clients too — see [Anth
 - [Response headers](#response-headers)
 - [Embeddings](#embeddings)
 - [Anthropic / Claude clients](#anthropic--claude-clients)
+- [Usage API (`GET /v1/usage`)](#usage-api-get-v1usage)
 - [Free-tier budget API](#free-tier-budget-api)
 - [Backups API](#backups-api)
 
@@ -379,6 +380,40 @@ claude
 ```
 
 > Use `ANTHROPIC_AUTH_TOKEN` (sent as a Bearer token), **not** `ANTHROPIC_API_KEY` — Claude Code treats a set `ANTHROPIC_API_KEY` as a conflicting first-party credential and refuses to start.
+
+## Usage API (`GET /v1/usage`)
+
+`GET /v1/usage` answers "what has this gateway actually burned this month?" from
+the durable `key_monthly_usage` ledger — the same numbers the monthly key caps
+enforce, so it never drifts from what a `429 quota_exceeded` was computed from.
+Authenticate with your unified proxy key (the same `Authorization: Bearer`
+every `/v1` route takes).
+
+```bash
+curl http://localhost:3001/v1/usage -H "Authorization: Bearer $FREELLMAPI_KEY"
+```
+
+```json
+{
+  "month": "2026-10",
+  "resetsAt": "2026-11-01T00:00:00.000Z",
+  "requests": 152,
+  "tokens": 104000000,
+  "byPlatform": [{ "platform": "opencode", "requests": 90, "tokens": 80000000 }],
+  "byKey": [
+    { "keyId": 3, "platform": "opencode", "label": "work laptop", "enabled": true,
+      "requests": 90, "tokens": 80000000, "requestCap": null, "tokenCap": 50000000 }
+  ]
+}
+```
+
+`byKey` is the per-provider-key breakdown — the row you need when one machine's
+agent config ate the month while the rest of the pool is untouched. `requestCap`
+/ `tokenCap` are the caps from [Monthly provider-key budgets](#monthly-provider-key-budgets)
+(`null` = unlimited); spend is **not** clamped at the cap, so a key can report
+above it — that is what trips the next request to `429`. Keys deleted since the
+month began report under platform `removed` with no caps. Only the **unified**
+proxy key may call this route; client-profile keys get `403`.
 
 ## Free-tier budget API
 
