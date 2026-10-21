@@ -5,6 +5,7 @@ import { runDecision, DECISION_PLATFORMS } from '../../services/decision.js';
 import { runSearch, SEARCH_ENGINE_PLATFORMS } from '../../services/search.js';
 import { clearAllCooldowns } from '../../services/ratelimit.js';
 import { applyCatalog } from '../../services/catalog-sync.js';
+import { checkAllKeys, checkKeyHealth, probeKeyValidity } from '../../services/health.js';
 
 const json = (body: unknown, status = 200, headers = {}) => new Response(JSON.stringify(body), { status, headers });
 const request = { state: 'Invoice charged twice', questions: { billing: { type: 'noul' as const, instructions: 'Billing issue?' } } };
@@ -51,6 +52,27 @@ describe('BeatAPI decision dispatch', () => {
     vi.spyOn(global, 'fetch').mockResolvedValue(json({ error: { retry_after_seconds: 60 } }, 429));
     await expect(runDecision(request, { model: 'jev-1.14-free' })).rejects.toMatchObject({ status: 429, retryAfterMs: 60_000 });
   });
+});
+
+// #1599: SerpSearch's maintainer asked for no empty-query requests, so no
+// health path may send one, and a real search is what marks the key working.
+it('never sends a request to check a SerpSearch key, and a real search marks it healthy', async () => {
+  seed('serpsearch', 'serpsearch-search', 'search');
+  const db = getDb();
+  db.prepare("UPDATE api_keys SET status = 'unknown' WHERE platform = 'serpsearch'").run();
+  const { id } = db.prepare("SELECT id FROM api_keys WHERE platform = 'serpsearch'").get() as { id: number };
+  const fetch = vi.spyOn(global, 'fetch');
+  vi.spyOn(console, 'log').mockImplementation(() => {});
+
+  expect(await checkKeyHealth(id)).toBe('unknown');
+  await checkAllKeys({ force: true, manual: true });
+  expect(await probeKeyValidity(id)).toBe('error');
+  expect(fetch).not.toHaveBeenCalled();
+
+  fetch.mockResolvedValue(json({ organic_results: [{ title: 'Cats', url: 'https://example.com/cats', description: 'Cats.' }] }));
+  await runSearch('cats', { engine: 'serpsearch-search', maxResults: 1 });
+  expect(String(fetch.mock.calls[0][0])).toContain('query=cats');
+  expect(db.prepare('SELECT status FROM api_keys WHERE id = ?').get(id)).toEqual({ status: 'healthy' });
 });
 
 describe('SerpSearch dispatch', () => {

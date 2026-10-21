@@ -33,12 +33,12 @@ Sources: [decision API](https://docs.beatapi.io/decisions),
   convert image/video search into generation models.
 - The Free plan shares 1,000 requests/month across endpoints, without a card;
   live response headers confirmed the allowance and one request/second.
-- Key validation omits `query`. A valid key returns a missing-query HTTP 400
-  with quota headers, an invalid key returns 401. Both were live checked, and
-  the valid probe did not decrement quota. Unexpected responses are inconclusive.
-- That probe runs once per key, never on the 5-minute health schedule (#1599).
-  SerpSearch revoked a free account over empty searches every 5 minutes. After
-  the first check, real searches and "Check now" decide the key's status.
+- SerpSearch keys are never validated with a request (#1599). It has no
+  account or usage endpoint, so the only possible check was a search with no
+  query. SerpSearch revoked free accounts over those empty searches, and its
+  maintainer asked that we send none. A new key shows as unchecked until its
+  first real search succeeds. A 401/403 on a real search benches the key.
+  "Check now" sends nothing for SerpSearch.
 - The adapter follows the existing no-hits fallback policy and result limit.
   It does not paginate automatically or consume extra credits to fill results.
 

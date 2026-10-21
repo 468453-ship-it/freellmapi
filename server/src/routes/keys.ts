@@ -469,7 +469,8 @@ keysRouter.get('/', (_req: Request, res: Response) => {
       // unexplained "unchecked". modelsAvailable says whether this install has
       // any of the provider's models to serve that first request with.
       autoHealthCheck: resolveProvider(row.platform)?.supportsKeyValidation !== false,
-      ...(resolveProvider(row.platform)?.supportsKeyValidation === false
+      // Search keys serve engines, not models, so they never count as missing models.
+      ...(resolveProvider(row.platform)?.supportsKeyValidation === false && !isSearchPlatform(row.platform)
         ? { modelsAvailable: modelCountFor(row.platform) }
         : {}),
       // Lets the export dialog count exactly what the export will write.
