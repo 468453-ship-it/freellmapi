@@ -76,6 +76,9 @@ export type Platform =
   | 'beatapi'
   // Free-category chat and decisions share one weighted daily allowance.
   | 'apinex'
+  // OpenAI-compatible gateway; free models share a 30-calls/5-hour account
+  // allowance on top of a site-wide pool (issue #1460).
+  | 'onomeo'
   // Ongoing free research API for chat and speech recognition; catalog only.
   | 'typhoon'
   // Permanent free chat aliases, shared fair-use quota; signed catalog only.

@@ -119,6 +119,9 @@ export function inferPoolForPlatform(platform: Platform, modelId?: string | null
   if (platform === 'aclide') return 'aclide::monthly-credit';
   if (platform === 'speka') return 'speka::monthly-credit';
   if (platform === 'apinex') return 'apinex::daily-free';
+  // onomeo: one 30-calls/5-hour account allowance across every free model,
+  // so one pool (issue #1460).
+  if (platform === 'onomeo') return 'onomeo::five-hour-free';
   if (platform === 'plugsky') return 'plugsky::fair-use';
   if (platform === 'inferbase') return 'inferbase::managed-free';
   if (platform === 'simplellm') return 'simplellm::free';
@@ -182,6 +185,7 @@ export function inferPoolForPlatform(platform: Platform, modelId?: string | null
 
 function isSharedPool(platform: Platform): boolean {
   if (platform === 'apinex') return true;
+  if (platform === 'onomeo') return true;
   if (platform === 'aclide') return true;
   if (platform === 'speka') return true;
   if (platform === 'plugsky') return true;
