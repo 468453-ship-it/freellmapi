@@ -66,6 +66,38 @@ describe('GET /v1/usage', () => {
     expect(body.requests).toBeUndefined();
   });
 
+  it('breaks usage down per provider key with its monthly caps (#1568 follow-up)', async () => {
+    // A second key WITH caps, plus spend, so the response must show both keys
+    // separately and echo the caps exactly as checkMonthlyBudget enforces them.
+    const db = getDb();
+    const secret = encrypt('synthetic-capped-key');
+    const keyId = Number(db.prepare(`INSERT INTO api_keys (platform, label, encrypted_key, iv, auth_tag, enabled, status, monthly_request_cap, monthly_token_cap)
+      VALUES ('openrouter', 'capped', ?, ?, ?, 1, 'healthy', 100, 250000)`).run(secret.encrypted, secret.iv, secret.authTag).lastInsertRowid);
+    const model = (db.prepare("SELECT model_id FROM models WHERE platform = 'openrouter' LIMIT 1").get() as { model_id: string }).model_id;
+    db.prepare(`INSERT INTO requests (platform, model_id, key_id, status, input_tokens, output_tokens, latency_ms)
+      VALUES ('openrouter', ?, ?, 'success', 50, 10, 1)`).run(model, keyId);
+
+    const res = await fetch(`${baseUrl}/v1/usage`, { headers: { Authorization: `Bearer ${token}` } });
+    expect(res.status).toBe(200);
+    const body = await res.json() as any;
+    const capped = body.byKey.find((k: any) => k.keyId === keyId);
+    expect(capped).toBeTruthy();
+    expect(capped.platform).toBe('openrouter');
+    expect(capped.label).toBe('capped');
+    expect(capped.enabled).toBe(true);
+    expect(capped.requests).toBe(1);
+    expect(capped.tokens).toBe(60);
+    expect(capped.requestCap).toBe(100);
+    expect(capped.tokenCap).toBe(250000);
+    // The uncapped groq key reports null caps, not 0 (0 would read as "cap of zero").
+    const uncapped = body.byKey.find((k: any) => k.platform === 'groq');
+    expect(uncapped.requestCap).toBeNull();
+    expect(uncapped.tokenCap).toBeNull();
+    // byKey sums to the same totals as byPlatform.
+    const sum = body.byKey.reduce((acc: number, k: any) => acc + k.tokens, 0);
+    expect(sum).toBe(body.tokens);
+  });
+
   it('rejects a missing or bogus key like every other /v1 route', async () => {
     const anonymous = await fetch(`${baseUrl}/v1/usage`);
     expect(anonymous.status).toBe(401);

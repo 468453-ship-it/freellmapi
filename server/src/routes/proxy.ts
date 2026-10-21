@@ -515,6 +515,30 @@ proxyRouter.get('/usage', (req: Request, res: Response) => {
     ORDER BY tokens DESC, requests DESC
   `).all(month) as { platform: string; requests: number; tokens: number }[];
 
+  // Per-provider-key rows (#1568 follow-up): "groq ate 90M" still doesn't say
+  // WHICH account did it, or whether that account is about to hit the monthly
+  // cap the caller keeps being 429'd on. LiteLLM's /key/info reports limits and
+  // spend together for the same reason. Caps echo api_keys (0 = unlimited), so
+  // the answer matches checkMonthlyBudget's verdict exactly. Deleted keys keep
+  // their ledger rows orphaned; they surface under the platform 'removed' with
+  // no caps, same as the platform roll-up above.
+  const byKey = db.prepare(`
+    SELECT u.key_id AS keyId,
+           COALESCE(k.platform, 'removed') AS platform,
+           COALESCE(k.label, '') AS label,
+           COALESCE(k.enabled, 0) AS enabled,
+           u.requests AS requests, u.tokens AS tokens,
+           COALESCE(k.monthly_request_cap, 0) AS requestCap,
+           COALESCE(k.monthly_token_cap, 0) AS tokenCap
+    FROM key_monthly_usage u
+    LEFT JOIN api_keys k ON k.id = u.key_id
+    WHERE u.month = ? AND (u.requests > 0 OR u.tokens > 0)
+    ORDER BY u.tokens DESC, u.requests DESC
+  `).all(month) as {
+    keyId: number; platform: string; label: string; enabled: number;
+    requests: number; tokens: number; requestCap: number; tokenCap: number;
+  }[];
+
   res.json({
     object: 'usage',
     month,
@@ -522,6 +546,18 @@ proxyRouter.get('/usage', (req: Request, res: Response) => {
     requests: totals.requests,
     tokens: totals.tokens,
     byPlatform,
+    byKey: byKey.map(k => ({
+      keyId: k.keyId,
+      platform: k.platform,
+      label: k.label,
+      enabled: k.enabled === 1,
+      requests: k.requests,
+      tokens: k.tokens,
+      // null = unlimited, matching how the dashboard renders "no cap" and
+      // sparing a script from treating 0 as "cap of zero requests".
+      requestCap: k.requestCap > 0 ? k.requestCap : null,
+      tokenCap: k.tokenCap > 0 ? k.tokenCap : null,
+    })),
   });
 });
 

@@ -636,7 +636,7 @@ export const openapiSpec = {
           'the per-key monthly caps enforce, so these numbers always agree with a 429 quota_exceeded ' +
           'response. Mirrors OpenRouter GET /api/v1/auth/key and LiteLLM /key/info.',
         responses: {
-          '200': { description: 'Usage roll-up: month, resetsAt, requests, tokens, byPlatform[].' },
+          '200': { description: 'Usage roll-up: month, resetsAt, requests, tokens, byPlatform[], byKey[] (per provider key: label, enabled, requests, tokens, requestCap, tokenCap; null cap = unlimited).' },
           '401': { $ref: '#/components/responses/Unauthorized' },
           '403': { description: 'Called with a client-profile key; usage is install-wide, so only the unified key may read it.' },
         },
