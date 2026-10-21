@@ -1779,6 +1779,11 @@ export function hasOtherUsableKey(modelDbId: number, excludingKeyId: number, ski
     // TPM/TPD ceiling.
     if (!canUseTokens(m.platform, m.model_id, k.id, 1, limits)) continue;
     if (!canUseProviderTokens(m.platform, k.id, m.model_id, 1)) continue;
+    // Monthly budget (#1158): selectKeyForModel refuses a key whose caps are
+    // spent for the month, so it is not a usable alternative either. Without
+    // this gate a fully capped model listed `ready` on /v1/models (#1100) and
+    // a capped sibling wrongly suppressed the model-level 429 penalty (#454).
+    if (!checkMonthlyBudget(k.id, 1).allowed) continue;
     return true;
   }
   return false;
