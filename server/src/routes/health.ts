@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import { getDb } from '../db/index.js';
 import { checkKeyHealth, checkAllKeys, pollKeyQuota, supportsQuotaPolling } from '../services/health.js';
 import { getDegradationStatus } from '../services/degradation.js';
+import { runModelProbePass } from '../services/model-probe.js';
 import { hasProvider, resolveProvider } from '../providers/index.js';
 import { getQuotaStateForKeys } from '../services/provider-quota.js';
 import type { Platform } from '@freellmapi/shared/types.js';
@@ -111,4 +112,28 @@ healthRouter.post('/quota/:keyId', async (req: Request, res: Response) => {
     q => q.keyId === keyId && q.source === 'quota_api',
   );
   res.json({ keyId, recorded, quotaStates: state });
+});
+
+// Run one proactive model-probe pass now (#1438 PR 1). The scheduled pass runs
+// every 30 minutes; this is the manual override — an operator wanting fresh
+// labels immediately instead of waiting for the next pass. Same shape as
+// POST /check-all: the operator pressed the button, so run a full pass.
+healthRouter.post('/probe-models', async (_req: Request, res: Response) => {
+  const result = await runModelProbePass();
+  res.json({
+    probed: result.probed.map(c => ({
+      platform: c.platform,
+      modelId: c.modelId,
+      keyId: c.keyId,
+      endpointScope: c.endpointScope,
+    })),
+    outcomes: result.outcomes.map(o => ({
+      platform: o.platform,
+      modelId: o.modelId,
+      keyId: o.keyId,
+      status: o.outcome.status,
+      latencyMs: o.outcome.latencyMs ?? null,
+      error: o.outcome.error ?? null,
+    })),
+  });
 });

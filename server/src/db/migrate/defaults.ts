@@ -38,6 +38,7 @@ import * as keyMonthlyUsage from '../migrations/20260914_000001_key_monthly_usag
 import * as quotaSnapshotFreshness from '../migrations/20260915_000001_quota_snapshot_freshness.js';
 import * as requestModelAttribution from '../migrations/20260913_000001_request_model_attribution.js';
 import * as customEndpointGroupLabel from '../migrations/20260930_000001_custom_endpoint_group_label.js';
+import * as modelProbeStatus from '../migrations/20261007_000001_model_probe_status.js';
 import * as searchEngines from '../migrations/20261013_000001_search_engines.js';
 import * as decisionRequests from '../migrations/20261016_000001_decision_requests.js';
 import * as llmtrReenableKeys from '../migrations/20261017_000001_llmtr_reenable_keys.js';
@@ -93,6 +94,7 @@ export const RESPONSE_CACHE_FILENAME = '20260903_000002_response_cache.ts';
 export const KEY_MONTHLY_BUDGET_FILENAME = '20260904_000001_key_monthly_budget.ts';
 export const REQUEST_MODEL_ATTRIBUTION_FILENAME = '20260913_000001_request_model_attribution.ts';
 export const CUSTOM_ENDPOINT_GROUP_LABEL_FILENAME = '20260930_000001_custom_endpoint_group_label.ts';
+export const MODEL_PROBE_STATUS_FILENAME = '20261007_000001_model_probe_status.ts';
 export const KEY_MONTHLY_USAGE_FILENAME = '20260914_000001_key_monthly_usage.ts';
 export const QUOTA_SNAPSHOT_FRESHNESS_FILENAME = '20260915_000001_quota_snapshot_freshness.ts';
 export const SEARCH_ENGINES_FILENAME = '20261013_000001_search_engines.ts';
@@ -143,6 +145,7 @@ export const DEFAULT_MIGRATIONS: readonly DefaultMigration[] = [
   { filename: KEY_MONTHLY_USAGE_FILENAME, module: keyMonthlyUsage },
   { filename: QUOTA_SNAPSHOT_FRESHNESS_FILENAME, module: quotaSnapshotFreshness },
   { filename: CUSTOM_ENDPOINT_GROUP_LABEL_FILENAME, module: customEndpointGroupLabel },
+  { filename: MODEL_PROBE_STATUS_FILENAME, module: modelProbeStatus },
   { filename: SEARCH_ENGINES_FILENAME, module: searchEngines },
   { filename: DECISION_REQUESTS_FILENAME, module: decisionRequests },
   { filename: LLMTR_REENABLE_KEYS_FILENAME, module: llmtrReenableKeys },
