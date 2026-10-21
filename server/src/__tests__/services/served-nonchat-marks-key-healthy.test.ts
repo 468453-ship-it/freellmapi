@@ -89,6 +89,22 @@ describe('a served non-chat request marks its key as working (#1493, #1612)', ()
     expect(keyState(keyId)).toMatchObject({ status: 'healthy', last_healthy_at: expect.any(String) });
   });
 
+  it('rerank: success and failure both land in the requests table', async () => {
+    addKey('cohere', 'healthy');
+    const requests = () => getDb().prepare(
+      "SELECT status, request_type, model_id, input_tokens FROM requests WHERE request_type = 'rerank' ORDER BY id",
+    ).all() as Array<{ status: string; request_type: string; model_id: string; input_tokens: number }>;
+
+    mockFetch(() => new Response(JSON.stringify({ results: [{ index: 0, relevance_score: 0.9 }] }), { status: 200 }));
+    await runRerank(undefined, 'query text', ['doc a', 'doc b'], 1);
+    expect(requests()).toEqual([{ status: 'success', request_type: 'rerank', model_id: 'rerank-v3.5', input_tokens: expect.any(Number) }]);
+
+    mockFetch(() => new Response('boom', { status: 500 }));
+    await expect(runRerank(undefined, 'q', ['a'])).rejects.toThrow();
+    expect(requests()).toHaveLength(2);
+    expect(requests()[1]).toMatchObject({ status: 'error', request_type: 'rerank', model_id: 'rerank-v3.5', input_tokens: 0 });
+  });
+
   it('decision: a served decision promotes an unknown key', async () => {
     seedDecisionModels();
     const keyId = addKey('cloudflare', 'unknown', undefined, 'acct123:cf-token');

@@ -12,8 +12,6 @@ import { hasOtherUsableKey, hasUsableKeyForModel, setRoutingStrategy } from '../
 // would immediately skip) and a 429 on a capped sibling failed to demote the
 // model, because the capped sibling counted as a "usable alternative".
 
-let sequence = 90000;
-
 function insertKey(overrides: { monthlyRequestCap?: number } = {}): number {
   const { encrypted, iv, authTag } = encrypt('sk-test');
   const result = getDb().prepare(`

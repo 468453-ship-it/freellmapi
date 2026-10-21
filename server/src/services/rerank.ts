@@ -3,6 +3,7 @@ import { decrypt } from '../lib/crypto.js';
 import { parseRetryAfterMs } from '../providers/base.js';
 import { secondsUntilNextMonth } from './key-budget.js';
 import { markKeyHealthyFromRequest } from './health.js';
+import { getClientContext } from '../lib/client-context.js';
 
 // Cohere-style rerank over the existing free-tier key pool (#1029). Deliberately
 // narrow first slice: platform='cohere' keys and custom OpenAI-compatible
@@ -58,6 +59,26 @@ async function upstreamError(r: Response): Promise<RerankError> {
   return new RerankError(`upstream ${r.status}: ${(await r.text()).slice(0, 200)}`, r.status, undefined, retryAfterMs);
 }
 
+// Every other inference surface writes its attempts to `requests` (chat via
+// logRequest, embeddings/media/decisions via their own loggers), which is
+// where the dashboard history and retention sweeper read from. Rerank was the
+// only one that served traffic without a row: invisible in analytics, outside
+// retention, and with no key attribution when debugging a bad upstream.
+// request_type='rerank' follows the media precedent of tagging non-chat
+// traffic; the analytics type-count endpoint ignores types it doesn't map.
+function logRerankRequest(cand: { platform: string }, keyId: number, modelId: string,
+  status: 'success' | 'error', inputTokens: number, latencyMs: number, error: string | null): void {
+  try {
+    const client = getClientContext();
+    getDb().prepare(`
+      INSERT INTO requests (platform, model_id, key_id, status, input_tokens, output_tokens, latency_ms, error, request_type, client_ip, client_user_agent, client_agent)
+      VALUES (?, ?, ?, ?, ?, 0, ?, ?, 'rerank', ?, ?, ?)
+    `).run(cand.platform, modelId, keyId, status, inputTokens, latencyMs, error, client.ip, client.userAgent, client.agent);
+  } catch (e) {
+    console.error('Failed to log rerank request:', e);
+  }
+}
+
 async function callProvider(cand: RerankCandidate, model: string | undefined, query: string,
   documents: string[], topN: number): Promise<{ modelId: string; results: RerankResult['results'] }> {
   // ponytail: cohere + jina-shaped custom only; per-provider adapters when a
@@ -97,9 +118,13 @@ export async function runRerank(model: string | undefined, query: string, docume
     throw new RerankError('No rerank-capable key configured. Add a Cohere key or a custom rerank endpoint.', 503);
   }
   const n = topN ?? documents.length;
+  // Rough token estimate for the row (query + documents, ~4 chars/token) —
+  // same heuristic embeddings log when upstream reports no usage.
+  const estTokens = Math.ceil((query.length + documents.reduce((s, d) => s + d.length, 0)) / 4);
 
   let lastError: RerankError | null = null;
   for (const cand of chain) {
+    const started = Date.now();
     try {
       const out = await callProvider(cand, model, query, documents, n);
       // A served rerank is evidence the key works, the same as a served chat
@@ -107,9 +132,12 @@ export async function runRerank(model: string | undefined, query: string, docume
       // from the same 'healthy'/'unknown' pool, so a key that only ever
       // serves reranks had no success signal to lift it out of 'error'.
       markKeyHealthyFromRequest(cand.id);
+      logRerankRequest(cand, cand.id, out.modelId, 'success', estTokens, Date.now() - started, null);
       return { platform: cand.platform, modelId: out.modelId, results: out.results };
     } catch (err: any) {
       lastError = err instanceof RerankError ? err : new RerankError(String(err?.message ?? err), 502);
+      logRerankRequest(cand, cand.id, model ?? (cand.platform === 'cohere' ? 'rerank-v3.5' : 'rerank'),
+        'error', 0, Date.now() - started, lastError.message.slice(0, 300));
     }
   }
   throw new RerankError(
