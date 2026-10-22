@@ -79,6 +79,9 @@ export type Platform =
   // OpenAI-compatible gateway; free models share a 30-calls/5-hour account
   // allowance on top of a site-wide pool (issue #1460).
   | 'onomeo'
+  // OpenAI-compatible gateway; the free tier is one account-wide monthly
+  // token allowance (30M, resets monthly; issue #1649).
+  | 'iteracompute'
   // Ongoing free research API for chat and speech recognition; catalog only.
   | 'typhoon'
   // Permanent free chat aliases, shared fair-use quota; signed catalog only.

@@ -65,6 +65,7 @@ const PLATFORMS = [
   'beatapi',
   'apinex',
   'onomeo',
+  'iteracompute',
   'serpsearch',
   'freeai',
   'google', 'groq', 'cerebras', 'sail', 'electronhub', 'experiential', 'router9', 'septor', 'clod', 'speechify', 'blaze', 'lucidity', 'airforce', 'dreamprompting', 'waterfall', 'logfare', 'bai', 'radeon', 'nvidia', 'mistral',

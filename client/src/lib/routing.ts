@@ -486,6 +486,7 @@ export const platformColors: Record<string, string> = {
   beatapi:     '#8b5cf6',
   apinex:      '#06b6d4',
   onomeo:      '#f97316',
+  iteracompute:'#f59e0b',
 }
 
 // ── Grouped (unified) rendering ──────────────────────────────────────────────

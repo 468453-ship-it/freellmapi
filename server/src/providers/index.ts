@@ -41,6 +41,7 @@ import { LogfareProvider } from './logfare.js';
 import { BeatApiProvider } from './beatapi.js';
 import { ApinexProvider } from './apinex.js';
 import { OnomeoProvider } from './onomeo.js';
+import { IteraComputeProvider } from './iteracompute.js';
 import { SerpSearchProvider } from './serpsearch.js';
 
 const providers = new Map<Platform, BaseProvider>();
@@ -88,6 +89,9 @@ register(new MoondreamProvider());
 register(new BeatApiProvider());
 register(new ApinexProvider());
 register(new OnomeoProvider());
+// IteraCompute (#1649): free OpenAI-compatible gateway, one account-wide
+// monthly token allowance; no free credential probe (see adapter docs).
+register(new IteraComputeProvider());
 register(new SerpSearchProvider());
 
 // Free-plan grants are shared wallets, not free credits per model. Eligibility
