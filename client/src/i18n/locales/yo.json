@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "Òpín token oṣooṣù",
     "capUnlimitedPlaceholder": "Kò ní òpín",
     "capEditHint": "A tún òpín ṣe ní ọjọ́ kìíní ní 00:00 UTC. Fi sílẹ̀ ṣófo fún aláìlópin.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} ìbéèrè, {tokens} token oṣù yìí",
     "quotaBalanceHint": "{remaining} nínú {limit} {metric} ló kù",
     "quotaBalanceLeft": "{remaining} ló kù"

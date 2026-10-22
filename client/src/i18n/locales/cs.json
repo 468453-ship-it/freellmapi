@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "Měsíční limit tokenů",
     "capUnlimitedPlaceholder": "Neomezeno",
     "capEditHint": "Limity se resetují 1. dne v 00:00 UTC. Nechte prázdné pro neomezeno.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} požadavků, {tokens} tokenů tento měsíc",
     "quotaBalanceHint": "Zbývá {remaining} z {limit} {metric}",
     "quotaBalanceLeft": "Zbývá {remaining}"

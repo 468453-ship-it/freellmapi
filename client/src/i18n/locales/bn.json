@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "মাসিক টোকেন সীমা",
     "capUnlimitedPlaceholder": "সীমাহীন",
     "capEditHint": "সীমা প্রতি মাসের ১ তারিখে ০০:০০ UTC-তে রিসেট হয়। সীমাহীন রাখতে খালি রাখুন।",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "এই মাসে {requests} অনুরোধ, {tokens} টোকেন",
     "quotaBalanceHint": "{limit} {metric}-এর মধ্যে {remaining} বাকি",
     "quotaBalanceLeft": "{remaining} বাকি"

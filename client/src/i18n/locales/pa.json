@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "ਮਹੀਨਾਵਾਰੀ ਟੋਕਨ ਸੀਮਾ",
     "capUnlimitedPlaceholder": "ਅਸੀਮਤ",
     "capEditHint": "ਸੀਮਾਵਾਂ ਹਰ ਮਹੀਨੇ 1 ਤਾਰੀਖ਼ ਨੂੰ 00:00 UTC 'ਤੇ ਰੀਸੈੱਟ ਹੁੰਦੀਆਂ ਹਨ। ਅਸੀਮਤ ਲਈ ਖਾਲੀ ਛੱਡੋ।",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "ਇਸ ਮਹੀਨੇ {requests} ਬੇਨਤੀਆਂ, {tokens} ਟੋਕਨ",
     "quotaBalanceHint": "{limit} {metric} ਵਿੱਚੋਂ {remaining} ਬਾਕੀ",
     "quotaBalanceLeft": "{remaining} ਬਾਕੀ"

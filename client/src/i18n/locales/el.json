@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "Μηνιαίο όριο tokens",
     "capUnlimitedPlaceholder": "Απεριόριστο",
     "capEditHint": "Τα όρια μηδενίζονται την 1η στις 00:00 UTC. Αφήστε κενό για απεριόριστο.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} αιτήματα, {tokens} tokens αυτόν τον μήνα",
     "quotaBalanceHint": "Απομένουν {remaining} από {limit} {metric}",
     "quotaBalanceLeft": "Απομένουν {remaining}"

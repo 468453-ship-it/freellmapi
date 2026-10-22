@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "Giới hạn token hàng tháng",
     "capUnlimitedPlaceholder": "Không giới hạn",
     "capEditHint": "Giới hạn đặt lại vào ngày 1 lúc 00:00 UTC. Để trống để không giới hạn.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} yêu cầu, {tokens} token tháng này",
     "quotaBalanceHint": "Còn {remaining}/{limit} {metric}",
     "quotaBalanceLeft": "Còn {remaining}"

@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "月間トークン上限",
     "capUnlimitedPlaceholder": "無制限",
     "capEditHint": "上限は毎月1日 00:00 UTC にリセットされます。無制限は空欄のままにしてください。",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "今月 {requests} リクエスト、{tokens} トークン",
     "quotaBalanceHint": "{limit} {metric}中 残り {remaining}",
     "quotaBalanceLeft": "残り {remaining}"

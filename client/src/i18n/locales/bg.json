@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "Месечен лимит на токени",
     "capUnlimitedPlaceholder": "Неограничен",
     "capEditHint": "Лимитите се нулират на 1-во число 00:00 UTC. Оставете празно за неограничен.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} заявки, {tokens} токени този месец",
     "quotaBalanceHint": "Остават {remaining} от {limit} {metric}",
     "quotaBalanceLeft": "Остават {remaining}"

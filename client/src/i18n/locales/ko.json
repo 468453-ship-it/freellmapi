@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "월 토큰 한도",
     "capUnlimitedPlaceholder": "무제한",
     "capEditHint": "한도는 매월 1일 00:00 UTC에 초기화됩니다. 무제한이려면 비워 두세요.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "이번 달 요청 {requests}회, 토큰 {tokens}",
     "quotaBalanceHint": "{limit} {metric} 중 {remaining} 남음",
     "quotaBalanceLeft": "{remaining} 남음"

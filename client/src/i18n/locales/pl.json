@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "Miesięczny limit tokenów",
     "capUnlimitedPlaceholder": "Bez limitu",
     "capEditHint": "Limity resetują się 1. dnia miesiąca o 00:00 UTC. Pozostaw puste, aby bez limitu.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} żądań, {tokens} tokenów w tym miesiącu",
     "quotaBalanceHint": "Pozostało {remaining} z {limit} {metric}",
     "quotaBalanceLeft": "Pozostało {remaining}"

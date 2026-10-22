@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "ขีดจำกัดโทเคนรายเดือน",
     "capUnlimitedPlaceholder": "ไม่จำกัด",
     "capEditHint": "ขีดจำกัดจะรีเซ็ตวันที่ 1 เวลา 00:00 UTC เว้นว่างไว้หากไม่จำกัด",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "เดือนนี้ {requests} คำขอ {tokens} โทเคน",
     "quotaBalanceHint": "เหลือ {remaining} จาก {limit} {metric}",
     "quotaBalanceLeft": "เหลือ {remaining}"

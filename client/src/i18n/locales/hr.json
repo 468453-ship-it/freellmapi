@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "Mjesečno ograničenje tokena",
     "capUnlimitedPlaceholder": "Neograničeno",
     "capEditHint": "Ograničenja se resetiraju 1. u 00:00 UTC. Ostavite prazno za neograničeno.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} zahtjeva, {tokens} tokena ovaj mjesec",
     "quotaBalanceHint": "Preostalo {remaining} od {limit} {metric}",
     "quotaBalanceLeft": "Preostalo {remaining}"

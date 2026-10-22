@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "मासिक टोकन सीमा",
     "capUnlimitedPlaceholder": "असीमित",
     "capEditHint": "सीमा हरेक महिनाको १ गते ००:०० UTC मा रिसेट हुन्छ। असीमितका लागि खाली राख्नुहोस्।",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "यस महिना {requests} अनुरोध, {tokens} टोकन",
     "quotaBalanceHint": "{limit} {metric} मध्ये {remaining} बाँकी",
     "quotaBalanceLeft": "{remaining} बाँकी"

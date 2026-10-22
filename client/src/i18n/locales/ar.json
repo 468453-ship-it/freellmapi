@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "الحد الشهري للرموز",
     "capUnlimitedPlaceholder": "غير محدود",
     "capEditHint": "تُصفَّر الحدود في 1 من الشهر 00:00 بتوقيت UTC. اتركه فارغًا بلا حد.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} طلبًا، {tokens} رمز هذا الشهر",
     "quotaBalanceHint": "متبقٍ {remaining} من {limit} {metric}",
     "quotaBalanceLeft": "متبقٍ {remaining}"

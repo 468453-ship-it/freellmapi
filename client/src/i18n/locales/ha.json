@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "Iyakar token ta wata",
     "capUnlimitedPlaceholder": "Ba iyaka ba",
     "capEditHint": "Ana saita iyakoki a ranar 1 00:00 UTC. Bara komai don mara iyaka.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "Buƙatotu {requests}, token {tokens} wannan wata",
     "quotaBalanceHint": "Saura {remaining} daga {limit} {metric}",
     "quotaBalanceLeft": "Saura {remaining}"

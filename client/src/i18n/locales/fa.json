@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "سقف ماهانه توکن‌ها",
     "capUnlimitedPlaceholder": "نامحدود",
     "capEditHint": "سقف‌ها در اول هر ماه ساعت ۰۰:۰۰ UTC بازنشانی می‌شوند. برای نامحدود خالی بگذارید.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} درخواست، {tokens} توکن در این ماه",
     "quotaBalanceHint": "{remaining} از {limit} {metric} باقی مانده",
     "quotaBalanceLeft": "{remaining} باقی مانده"

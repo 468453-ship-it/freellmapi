@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "மாத டோக்கன் வரம்பு",
     "capUnlimitedPlaceholder": "வரம்பற்றது",
     "capEditHint": "ஒவ்வொரு மாதம் 1ஆம் தேதி 00:00 UTC-ல் வரம்புகள் மீட்டமைக்கப்படும். வரம்பற்றதாக வெறியே விடவும்.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "இந்த மாதம் {requests} கோரிக்கைகள், {tokens} டோக்கன்கள்",
     "quotaBalanceHint": "{limit} {metric}-இல் {remaining} மீதம்",
     "quotaBalanceLeft": "{remaining} மீதம்"

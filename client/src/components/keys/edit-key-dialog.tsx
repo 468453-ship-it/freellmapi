@@ -18,6 +18,7 @@ type UpdateBody = {
   monthlyRequestCap?: number
   monthlyTokenCap?: number
   groupLabel?: string
+  proxyUrl?: string
 }
 
 /** Parse a budget-cap input: blank or 0 means unlimited (0); otherwise a
@@ -58,6 +59,11 @@ export function EditKeyDialog({
   // the dashboard at all; it shipped API-only. Empty = unlimited.
   const [requestCap, setRequestCap] = useState(capToInput(apiKey.monthlyRequestCap))
   const [tokenCap, setTokenCap] = useState(capToInput(apiKey.monthlyTokenCap))
+  // Per-key proxy (#590, #1526): shipped API-only. Like the credential, the
+  // field starts empty and the saved proxy shows masked beside it, so the
+  // masked password can never be submitted back over the real one.
+  const [proxyUrl, setProxyUrl] = useState('')
+  const [clearProxy, setClearProxy] = useState(false)
 
   const needsAccountId = apiKey.platform === 'cloudflare'
   // Every row takes a credential, including the anonymous row of a
@@ -80,7 +86,8 @@ export function EditKeyDialog({
   const requestCapChanged = requestCapValue !== (apiKey.monthlyRequestCap || 0)
   const tokenCapChanged = tokenCapValue !== (apiKey.monthlyTokenCap || 0)
   const groupLabelChanged = isCustom && groupLabel.trim() !== (apiKey.groupLabel ?? '')
-  const hasChanges = label !== apiKey.label || Boolean(credential) || requestCapChanged || tokenCapChanged || groupLabelChanged
+  const proxyChanged = Boolean(proxyUrl.trim()) || clearProxy
+  const hasChanges = label !== apiKey.label || Boolean(credential) || requestCapChanged || tokenCapChanged || groupLabelChanged || proxyChanged
 
   const updateKey = useMutation({
     mutationFn: (body: UpdateBody) =>
@@ -104,6 +111,8 @@ export function EditKeyDialog({
     if (requestCapChanged && requestCapValue !== null) body.monthlyRequestCap = requestCapValue
     if (tokenCapChanged && tokenCapValue !== null) body.monthlyTokenCap = tokenCapValue
     if (groupLabelChanged) body.groupLabel = groupLabel.trim()
+    // '' clears the override; a typed URL replaces it (and wins over Remove).
+    if (proxyChanged) body.proxyUrl = proxyUrl.trim()
     if (Object.keys(body).length > 0) updateKey.mutate(body)
     else onOpenChange(false)
   }
@@ -179,6 +188,38 @@ export function EditKeyDialog({
             {attempted && <FieldError error={credentialError} />}
             <p className="text-[11px] text-muted-foreground">
               {apiKey.keyless ? t('keys.keyOptionalHint') : t('keys.editCredentialHint')}
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <Label className="text-xs" htmlFor="edit-key-proxy">{t('keys.keyProxyLabel')}</Label>
+              {apiKey.maskedProxyUrl && (
+                <div className="flex min-w-0 items-center gap-2">
+                  <code className={`truncate font-mono text-[11px] text-muted-foreground${clearProxy ? ' line-through' : ''}`}>
+                    {apiKey.maskedProxyUrl}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => setClearProxy(c => !c)}
+                    className="shrink-0 text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                  >
+                    {clearProxy ? t('keys.keyProxyUndo') : t('common.remove')}
+                  </button>
+                </div>
+              )}
+            </div>
+            <Input
+              id="edit-key-proxy"
+              autoComplete="off"
+              spellCheck={false}
+              value={proxyUrl}
+              onChange={e => setProxyUrl(e.target.value)}
+              placeholder="socks5://user:pass@host:1080"
+              className="font-mono text-xs"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              {clearProxy && !proxyUrl.trim() ? t('keys.keyProxyRemoved') : t('keys.keyProxyHint')}
             </p>
           </div>
 

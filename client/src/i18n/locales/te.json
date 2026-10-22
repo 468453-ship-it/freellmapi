@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "నెలవారీ టోకెన్ పరిమితి",
     "capUnlimitedPlaceholder": "అపరిమితం",
     "capEditHint": "ప్రతి నెలా 1వ తేదీన 00:00 UTCకు పరిమితులు రీసెట్ అవుతాయి. అపరిమితంగా కావాలంటే ఖాళీగా వదిలండి.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "ఈ నెల {requests} అభ్యర్థనలు, {tokens} టోకెన్లు",
     "quotaBalanceHint": "{limit} {metric}లో {remaining} మిగిలింది",
     "quotaBalanceLeft": "{remaining} మిగిలింది"

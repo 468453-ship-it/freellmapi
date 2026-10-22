@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "Mėnesinis žetonų limitas",
     "capUnlimitedPlaceholder": "Neribota",
     "capEditHint": "Limitai atstatomi 1 d. 00:00 UTC. Palikite tuščią neribotam.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} užklausos, {tokens} žetonai šį mėnesį",
     "quotaBalanceHint": "Liko {remaining} iš {limit} {metric}",
     "quotaBalanceLeft": "Liko {remaining}"

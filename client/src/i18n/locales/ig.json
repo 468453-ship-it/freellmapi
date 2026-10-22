@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "Oke token ọnwa",
     "capUnlimitedPlaceholder": "Enweghị oke",
     "capEditHint": "A na-ebugharị oke ụbọchị nke 1, 00:00 UTC. Hapụ oghere maka enweghị oke.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "Arịrịọ {requests}, token {tokens} ọnwa a",
     "quotaBalanceHint": "{remaining} n'ime {limit} {metric} fọdụrụ",
     "quotaBalanceLeft": "{remaining} fọdụrụ"

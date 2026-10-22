@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "ወርሃዊ የቶከን ገደብ",
     "capUnlimitedPlaceholder": "ወሰን የለሽ",
     "capEditHint": "ገደቦች በእያንዳንዱ ወር 1 ቀን 00:00 UTC ዳግም ይጀምራሉ። ለወሰን አልባ ባዶ ይተዉ።",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "በዚህ ወር {requests} ጥያቄዎች፣ {tokens} ቶከኖች",
     "quotaBalanceHint": "ከ{limit} {metric} {remaining} ቀርቷል",
     "quotaBalanceLeft": "{remaining} ቀርቷል"

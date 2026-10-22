@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "Månadslimit för tokens",
     "capUnlimitedPlaceholder": "Obegränsat",
     "capEditHint": "Gränserna nollställs den 1:a kl 00:00 UTC. Lämna tomt för obegränsat.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} förfrågningar, {tokens} tokens denna månad",
     "quotaBalanceHint": "{remaining} av {limit} {metric} kvar",
     "quotaBalanceLeft": "{remaining} kvar"

@@ -125,6 +125,38 @@ describe('editing provider credentials', () => {
     expect(apiFetch).not.toHaveBeenCalled()
     expect(container.querySelector('#edit-key-request-cap')!.getAttribute('aria-invalid')).toBe('true')
   })
+  it('sets a per-key proxy on a custom endpoint (#1526)', async () => {
+    // A custom key also renders GroupLabelField, which lists /api/keys.
+    vi.mocked(apiFetch).mockImplementation(async path => path === '/api/keys' ? [] : { success: true })
+    mount(<EditKeyDialog apiKey={{ ...key, platform: 'custom', baseUrl: 'https://api.example.com/v1' }} onOpenChange={onOpenChange} />)
+    enter('#edit-key-proxy', ' socks5://user:pass@10.0.0.2:1080 ')
+    await submit()
+    expect(apiFetch).toHaveBeenCalledWith('/api/keys/7', { method: 'PATCH', body: JSON.stringify({ proxyUrl: 'socks5://user:pass@10.0.0.2:1080' }) })
+  })
+  it('shows the saved proxy masked and never submits it back', async () => {
+    mount(<EditKeyDialog apiKey={{ ...key, platform: 'groq', maskedProxyUrl: 'http://user:***@proxy:8080' }} onOpenChange={onOpenChange} />)
+    expect(container.textContent).toContain('http://user:***@proxy:8080')
+    expect(container.querySelector<HTMLInputElement>('#edit-key-proxy')!.value).toBe('')
+    enter('#edit-key-label', 'Renamed')
+    await submit()
+    expect(apiFetch).toHaveBeenCalledWith('/api/keys/7', { method: 'PATCH', body: JSON.stringify({ label: 'Renamed' }) })
+  })
+  it('Remove clears the saved proxy with an empty proxyUrl', async () => {
+    mount(<EditKeyDialog apiKey={{ ...key, platform: 'groq', maskedProxyUrl: 'http://proxy:8080' }} onOpenChange={onOpenChange} />)
+    const toggle = [...container.querySelectorAll('button')].find(b => b.textContent === 'Remove')!
+    act(() => { toggle.click() })
+    expect(toggle.textContent).toBe('Undo')
+    await submit()
+    expect(apiFetch).toHaveBeenCalledWith('/api/keys/7', { method: 'PATCH', body: JSON.stringify({ proxyUrl: '' }) })
+  })
+  it('Undo after Remove leaves the proxy alone', async () => {
+    mount(<EditKeyDialog apiKey={{ ...key, platform: 'groq', maskedProxyUrl: 'http://proxy:8080' }} onOpenChange={onOpenChange} />)
+    const toggle = [...container.querySelectorAll('button')].find(b => b.textContent === 'Remove')!
+    act(() => { toggle.click() })
+    act(() => { toggle.click() })
+    await submit()
+    expect(apiFetch).not.toHaveBeenCalled()
+  })
   it('loads model choices from the full catalog instead of a limited active chain', async () => {
     vi.mocked(apiFetch).mockImplementation(async path => path === '/api/models'
       ? [{ platform: 'cloudflare', modelId: 'outside-chain', displayName: 'Outside active chain', sizeLabel: 'Small', contextWindow: 1000 }]

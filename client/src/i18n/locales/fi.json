@@ -714,6 +714,10 @@
     "monthlyTokenCapLabel": "Kuukausittainen tokenraja",
     "capUnlimitedPlaceholder": "Rajoittamaton",
     "capEditHint": "Rajat nollautuvat kuun 1. päivänä 00:00 UTC. Jätä tyhjäksi rajoittamattomaan.",
+    "keyProxyLabel": "Proxy for this key",
+    "keyProxyHint": "Leave blank to keep the current setting. Requests made with this key use this proxy instead of the global one; local and LAN addresses still connect directly.",
+    "keyProxyRemoved": "The proxy is removed when you save, and this key goes back to the global proxy.",
+    "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} pyyntöä, {tokens} tokenia tässä kuussa",
     "quotaBalanceHint": "{remaining}/{limit} {metric} jäljellä",
     "quotaBalanceLeft": "{remaining} jäljellä"
