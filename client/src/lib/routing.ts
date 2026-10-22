@@ -482,6 +482,7 @@ export const platformColors: Record<string, string> = {
   linkup:      '#10b981',
   parallel:    '#0ea5e9',
   serpsearch:  '#2563eb',
+  keenable:    '#7c3aed',
   beatapi:     '#8b5cf6',
   apinex:      '#06b6d4',
   onomeo:      '#f97316',

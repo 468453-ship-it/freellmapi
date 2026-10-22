@@ -4,6 +4,7 @@ import { ExaProvider } from '../../providers/exa.js';
 import { FirecrawlProvider } from '../../providers/firecrawl.js';
 import { LinkupProvider } from '../../providers/linkup.js';
 import { ParallelProvider } from '../../providers/parallel.js';
+import { KeenableProvider } from '../../providers/keenable.js';
 import { getProvider } from '../../providers/index.js';
 
 // Search platforms (#1174) validate keys without spending search credits and
@@ -27,6 +28,7 @@ const cases = [
   { provider: new FirecrawlProvider(), url: 'https://api.firecrawl.dev/v2/team/credit-usage', method: 'GET' },
   { provider: new LinkupProvider(), url: 'https://api.linkup.so/v1/credits/balance', method: 'GET' },
   { provider: new ParallelProvider(), url: 'https://api.parallel.ai/v1/search', method: 'POST' },
+  { provider: new KeenableProvider(), url: 'https://api.keenable.ai/v1/search', method: 'POST' },
 ];
 
 describe.each(cases)('$provider.name key validation', ({ provider, url, method }) => {
@@ -81,8 +83,33 @@ describe('Parallel keyless validation', () => {
   });
 });
 
+describe('Keenable keyless validation', () => {
+  it('is keyless', () => {
+    expect(new KeenableProvider().keyless).toBe(true);
+  });
+
+  it('checks the stored sentinel on the public endpoint with the app title, sending no key', async () => {
+    const fn = respond(400);
+    expect(await new KeenableProvider().validateKey('no-key')).toBe(true);
+    const [calledUrl, init] = (fn.mock.calls as unknown as [string, RequestInit][])[0];
+    expect(calledUrl).toBe('https://api.keenable.ai/v1/search/public');
+    expect((init.headers as Record<string, string>)['X-Keenable-Title']).toBe('freellmapi');
+    expect((init.headers as Record<string, string>)['X-API-Key']).toBeUndefined();
+    expect(init.body).toBe('{}');
+  });
+
+  it('sends a real key as X-API-Key with an empty body, which runs no search', async () => {
+    const fn = respond(400);
+    expect(await new KeenableProvider().validateKey(' real-key ')).toBe(true);
+    const [calledUrl, init] = (fn.mock.calls as unknown as [string, RequestInit][])[0];
+    expect(calledUrl).toBe('https://api.keenable.ai/v1/search');
+    expect((init.headers as Record<string, string>)['X-API-Key']).toBe('real-key');
+    expect(init.body).toBe('{}');
+  });
+});
+
 describe('registry', () => {
   it('registers every search platform', () => {
-    for (const p of ['tavily', 'exa', 'firecrawl', 'linkup', 'parallel'] as const) expect(getProvider(p)?.platform).toBe(p);
+    for (const p of ['tavily', 'exa', 'firecrawl', 'linkup', 'parallel', 'keenable'] as const) expect(getProvider(p)?.platform).toBe(p);
   });
 });

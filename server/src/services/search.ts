@@ -10,6 +10,7 @@ import { EXA_BASE_URL } from '../providers/exa.js';
 import { FIRECRAWL_BASE_URL } from '../providers/firecrawl.js';
 import { LINKUP_BASE_URL } from '../providers/linkup.js';
 import { PARALLEL_BASE_URL, PARALLEL_MCP_URL } from '../providers/parallel.js';
+import { KEENABLE_APP_TITLE, KEENABLE_BASE_URL } from '../providers/keenable.js';
 import { isAnonymousCredential } from '../lib/credential.js';
 import { randomUUID } from 'node:crypto';
 import { secondsUntilNextMonth } from './key-budget.js';
@@ -408,6 +409,28 @@ const ADAPTERS: Record<string, Adapter> = {
     }));
     return { results: keepHits(hits) };
   },
+
+  // Keyless: the stored `no-key` sentinel calls the public endpoint, which
+  // only needs the app title; a real key calls the keyed endpoint. Both return
+  // the same result shape, with the page text in `snippet`.
+  keenable: async (cred, query, opts, n) => {
+    const anonymous = isAnonymousCredential(cred.key);
+    const parsed = await upstream(`${KEENABLE_BASE_URL}/search${anonymous ? '/public' : ''}`, 'keenable', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Keenable-Title': KEENABLE_APP_TITLE,
+        ...(anonymous ? {} : { 'X-API-Key': cred.key.trim() }),
+      },
+      body: JSON.stringify({ query, max_results: n }),
+    }, opts.signal) as { results?: Array<Record<string, unknown>> };
+    const hits = (Array.isArray(parsed?.results) ? parsed.results : []).slice(0, n).map(r => ({
+      title: str(r.title) || str(r.url),
+      url: str(r.url),
+      content: str(r.snippet) || str(r.description),
+    }));
+    return { results: keepHits(hits) };
+  },
 };
 
 /** Platforms with a search adapter. catalog-sync gates searchEngines rows on
@@ -572,7 +595,7 @@ export async function runSearch(query: string, opts: SearchOptions = {}): Promis
       );
     }
     throw new SearchError(
-      'No search key configured. Enable Parallel (no key needed) or add a Tavily, Exa, Firecrawl or Linkup key on the Keys page.',
+      'No search key configured. Enable Parallel or Keenable (no key needed) or add a Tavily, Exa, Firecrawl or Linkup key on the Keys page.',
       503,
       'no_search_keys',
     );

@@ -233,6 +233,64 @@ describe('search service', () => {
     });
   });
 
+  describe('Keenable (keyless)', () => {
+    function seedKeenable(): void {
+      getDb().prepare(`
+        INSERT INTO media_models (platform, model_id, display_name, modality, priority, enabled, quota_label, meta_json)
+        VALUES ('keenable', 'keenable-search', 'Keenable Search', 'search', 5, 1, 'Free, no key needed', '{}')
+      `).run();
+    }
+    const hits = { results: [
+      { url: 'https://a', title: 'A &amp; B', description: '', snippet: 'one', published_at: '2026-05-05T00:00:00Z' },
+      { url: 'https://b', title: '', description: '', snippet: 'x'.repeat(2_000) },
+      { url: '', title: 'dropped', description: '', snippet: 'x' },
+    ] };
+
+    it('searches the public endpoint with the stored sentinel and maps snippets', async () => {
+      seedKeenable();
+      addKey('keenable', 'no-key');
+      expect(searchAvailable()).toBe(true);
+      const fn = mockFetch(() => json(hits));
+      const out = await runSearch('node version');
+      const [url, init] = calls(fn)[0];
+      expect(url).toBe('https://api.keenable.ai/v1/search/public');
+      expect((init.headers as Record<string, string>)['X-Keenable-Title']).toBe('freellmapi');
+      expect((init.headers as Record<string, string>)['X-API-Key']).toBeUndefined();
+      expect(bodyOf(calls(fn)[0])).toEqual({ query: 'node version', max_results: 5 });
+      expect(out).toMatchObject({ provider: 'keenable', engine: 'keenable-search' });
+      expect(out.results).toEqual([
+        { title: 'A & B', url: 'https://a', content: 'one', score: 1 },
+        { title: 'https://b', url: 'https://b', content: `${'x'.repeat(1_500)}…`, score: 0.5 },
+      ]);
+    });
+
+    it('uses the keyed endpoint with X-API-Key when a real key is stored', async () => {
+      seedKeenable();
+      addKey('keenable', 'real-keenable-key');
+      const fn = mockFetch(() => json(hits));
+      const out = await runSearch('q', { maxResults: 1 });
+      const [url, init] = calls(fn)[0];
+      expect(url).toBe('https://api.keenable.ai/v1/search');
+      expect((init.headers as Record<string, string>)['X-API-Key']).toBe('real-keenable-key');
+      expect(bodyOf(calls(fn)[0])).toEqual({ query: 'q', max_results: 1 });
+      expect(out.results).toHaveLength(1);
+    });
+
+    it('cools a rate-limited keyless row down and fails over to the next engine', async () => {
+      seedKeenable();
+      addKey('keenable', 'no-key');
+      addKey('tavily');
+      updateSearchEngine(listSearchEngines().find(e => e.engineId === 'keenable-search')!.id, { priority: 0 });
+      const fn = mockFetch(url => url.startsWith('https://api.keenable.ai')
+        ? json({ error: 'Too many requests' }, 429, { 'retry-after': '30' })
+        : json({ results: [{ title: 'T', url: 'https://t', content: 'c' }] }));
+      expect((await runSearch('q')).provider).toBe('tavily');
+      // The benched Keenable row is skipped on the next search.
+      await runSearch('q2');
+      expect(calls(fn).map(c => new URL(c[0]).host)).toEqual(['api.keenable.ai', 'api.tavily.com', 'api.tavily.com']);
+    });
+  });
+
   it('tries a custom relay before the catalog engines', async () => {
     addKey('tavily');
     addCustomRelay('https://relay.example/v1');
