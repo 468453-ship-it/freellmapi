@@ -416,7 +416,7 @@ export const SEARCH_ENGINE_PLATFORMS = new Set(Object.keys(ADAPTERS).filter(p =>
 
 // ── Routing ─────────────────────────────────────────────────────────────────
 
-function logSearch(row: SearchEngineRow, keyId: number | null, status: 'ok' | 'error', latencyMs: number, resultCount: number, clientAgent: string | null, error: string | null): void {
+function logSearch(row: SearchEngineRow, keyId: number | null, status: 'ok' | 'error', latencyMs: number, resultCount: number, clientAgent: string | null, error: string | null, estimatedTokens: number): void {
   try {
     getDb()
       .prepare(`INSERT INTO search_requests (engine_id, platform, key_id, status, latency_ms, result_count, client_agent, error)
@@ -424,6 +424,21 @@ function logSearch(row: SearchEngineRow, keyId: number | null, status: 'ok' | 'e
       .run(row.model_id, row.platform, keyId, status, latencyMs, resultCount, clientAgent, error);
   } catch (e) {
     console.error('Failed to log search request:', e);
+  }
+  // The per-key monthly caps (#1158) and GET /v1/usage read the
+  // key_monthly_usage ledger, which the requests_key_monthly_usage trigger
+  // feeds from `requests`. Search only wrote search_requests, so a served
+  // search spent provider quota the cap never saw — the exact rerank gap
+  // (#1621/#1627). request_type='search' follows the rerank/embeddings
+  // precedent; the dashboard's Search page keeps reading search_requests.
+  try {
+    const client = getClientContext();
+    getDb().prepare(`
+      INSERT INTO requests (platform, model_id, key_id, status, input_tokens, output_tokens, latency_ms, error, request_type, client_ip, client_user_agent, client_agent)
+      VALUES (?, ?, ?, ?, ?, 0, ?, ?, 'search', ?, ?, ?)
+    `).run(row.platform, row.model_id, keyId, status === 'ok' ? 'success' : 'error', estimatedTokens, latencyMs, error, client.ip, client.userAgent, client.agent ?? clientAgent);
+  } catch (e) {
+    console.error('Failed to log search request to requests table:', e);
   }
 }
 
@@ -485,6 +500,10 @@ export async function runSearch(query: string, opts: SearchOptions = {}): Promis
   const chain = searchChain(opts.engine);
   const maxResults = Math.min(Math.max(1, Math.floor(opts.maxResults ?? DEFAULT_RESULTS)), MAX_RESULTS);
   const clientAgent = opts.clientAgent !== undefined ? opts.clientAgent : getClientContext().agent;
+  // Rough token estimate for the ledger row (~4 chars/token), the same
+  // heuristic rerank uses. It sizes the requests-table row so the monthly
+  // caps (#1158) and /v1/usage see search spend.
+  const estTokens = Math.ceil(query.length / 4);
 
   let lastError: SearchError | null = null;
   let attempted = 0;
@@ -513,7 +532,7 @@ export async function runSearch(query: string, opts: SearchOptions = {}): Promis
       try {
         const out = await ADAPTERS[row.platform]!(credential, query, opts, maxResults);
         if (out.results.length === 0) throw new SearchError('upstream returned no valid search hits', 502);
-        logSearch(row, credential.id, 'ok', Date.now() - started, out.results.length, clientAgent, null);
+        logSearch(row, credential.id, 'ok', Date.now() - started, out.results.length, clientAgent, null, estTokens);
         // A served search is the evidence the key works, the same as a served
         // chat request: it stamps last_healthy_at and lifts an 'unknown' or
         // 'error' key. For SerpSearch, Exa and Parallel it is the only evidence
@@ -528,7 +547,7 @@ export async function runSearch(query: string, opts: SearchOptions = {}): Promis
         };
       } catch (err: any) {
         const e = err instanceof SearchError ? err : new SearchError(String(err?.message ?? err), 502);
-        logSearch(row, credential.id, 'error', Date.now() - started, 0, clientAgent, e.message.slice(0, 300));
+        logSearch(row, credential.id, 'error', Date.now() - started, 0, clientAgent, e.message.slice(0, 300), estTokens);
         coolDown(row, credential.id, e);
         lastError = e;
         hints.record(e.status, e.retryAfterMs);
