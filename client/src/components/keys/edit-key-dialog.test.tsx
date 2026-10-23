@@ -7,6 +7,7 @@ import { I18nProvider } from '@/i18n'
 import { apiFetch } from '@/lib/api'
 import type { ApiKey } from '../../../../shared/types'
 import { EditKeyDialog } from './edit-key-dialog'
+import { capUsage } from './cap-usage'
 import { EditModelsDialog } from './edit-models-dialog'
 
 vi.mock('@/lib/api', () => ({ apiFetch: vi.fn() }))
@@ -117,6 +118,39 @@ describe('editing provider credentials', () => {
   it('opens the budget when a cap is already set', async () => {
     mount(<EditKeyDialog apiKey={{ ...key, platform: 'groq', monthlyRequestCap: 50 }} onOpenChange={onOpenChange} />)
     expect(document.querySelector('details')!.open).toBe(true)
+  })
+  it('renders a usage bar with the 80% warning once a capped key crosses it', async () => {
+    mount(<EditKeyDialog apiKey={{ ...key, platform: 'groq', monthlyRequestCap: 100, monthlyTokenCap: 0,
+      monthlyUsage: { requests: 85, tokens: 10, resetsAt: '2026-11-01T00:00:00.000Z' } }} onOpenChange={onOpenChange} />)
+    const bars = container.querySelectorAll('[role="progressbar"]')
+    // Only the capped dimension gets a bar (token cap = unlimited).
+    expect(bars.length).toBe(1)
+    expect(bars[0]!.getAttribute('aria-valuenow')).toBe('85')
+    expect(container.textContent).toContain('85 of 100 (85%)')
+    expect(container.textContent).toContain('Over 80% of this cap')
+  })
+  it('shows the exhausted warning at 100% and no warning below 80%', async () => {
+    mount(<EditKeyDialog apiKey={{ ...key, platform: 'groq', monthlyRequestCap: 100,
+      monthlyUsage: { requests: 100, tokens: 0, resetsAt: '2026-11-01T00:00:00.000Z' } }} onOpenChange={onOpenChange} />)
+    expect(container.textContent).toContain('Cap reached')
+    // Tear the first root down properly: clearing innerHTML before unmount
+    // leaves React removing nodes that are no longer children (NOT_FOUND_ERR).
+    act(() => root.unmount())
+    container.remove()
+    container = document.createElement('div')
+    document.body.appendChild(container)
+    root = createRoot(container)
+    mount(<EditKeyDialog apiKey={{ ...key, platform: 'groq', monthlyRequestCap: 100,
+      monthlyUsage: { requests: 79, tokens: 0, resetsAt: '2026-11-01T00:00:00.000Z' } }} onOpenChange={onOpenChange} />)
+    expect(container.textContent).not.toContain('Over 80%')
+    expect(container.textContent).toContain('79 of 100 (79%)')
+  })
+  it('capUsage: uncapped is null, cap <= 0 never divides', () => {
+    expect(capUsage(5, 0)).toBeNull()
+    expect(capUsage(5, -1)).toBeNull()
+    expect(capUsage(80, 100)).toEqual({ fraction: 0.8, overWarning: true })
+    expect(capUsage(79, 100)).toEqual({ fraction: 0.79, overWarning: false })
+    expect(capUsage(150, 100)!.overWarning).toBe(true)
   })
   it('does not submit a non-numeric cap', async () => {
     mount(<EditKeyDialog apiKey={{ ...key, platform: 'groq' }} onOpenChange={onOpenChange} />)

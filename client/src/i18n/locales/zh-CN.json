@@ -727,7 +727,10 @@
     "groupHandleHint": "在模型 id 后加 #{handle} 可只路由到该分组,例如 custom:<model>#{handle}",
     "copyGroupHandle": "复制分组标识",
     "groupHandleCopied": "已复制 {handle}",
-    "groupHandleCopyFailed": "无法复制到剪贴板"
+    "groupHandleCopyFailed": "无法复制到剪贴板",
+    "capUsagePercent": "{used} of {cap} ({pct}%)",
+    "capWarning80": "Over 80% of this cap — the server logs a budget alert at this point.",
+    "capExhaustedWarning": "Cap reached — new requests are rejected until the monthly reset."
   },
   "backups": {
     "title": "备份",

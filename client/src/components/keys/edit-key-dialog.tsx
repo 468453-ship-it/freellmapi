@@ -11,6 +11,7 @@ import type { ApiKey } from '../../../../shared/types'
 import { useI18n } from '@/i18n'
 import { PLATFORMS } from './shared'
 import { GroupLabelField } from './group-label-field'
+import { capUsage } from './cap-usage'
 
 type UpdateBody = {
   label?: string
@@ -34,6 +35,47 @@ function parseCap(raw: string): number | null {
 /** Format a cap for the input: 0 (unlimited) shows as empty. */
 function capToInput(cap: number | undefined): string {
   return cap && cap > 0 ? String(cap) : ''
+}
+
+/** A slim progress bar for one cap: neutral normally, amber at the 80% soft
+ *  alert, red at the cap itself (the state where the server 429s). Mirrors
+ *  the budget-alert thresholds so the dialog and the Logs page never
+ *  disagree about "how close is this key to running out". */
+function CapUsageBar({ label, used, cap }: { label: string; used: number; cap: number }) {
+  const { t } = useI18n()
+  const usage = capUsage(used, cap)
+  if (!usage) return null
+  const pctShown = Math.floor(usage.fraction * 100)
+  const tone = usage.fraction >= 1
+    ? 'bg-destructive'
+    : usage.overWarning
+      ? 'bg-amber-500'
+      : 'bg-primary/60'
+  return (
+    <div className="space-y-1">
+      <div className="flex items-baseline justify-between gap-2 text-[11px] text-muted-foreground">
+        <span>{label}</span>
+        <span className={usage.overWarning ? 'font-medium text-foreground' : undefined}>
+          {t('keys.capUsagePercent', { used: used.toLocaleString(), cap: cap.toLocaleString(), pct: pctShown })}
+        </span>
+      </div>
+      <div
+        role="progressbar"
+        aria-label={label}
+        aria-valuenow={pctShown}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        className="h-1 w-full overflow-hidden rounded-full bg-muted"
+      >
+        <div className={`h-full rounded-full ${tone}`} style={{ width: `${Math.min(100, pctShown)}%` }} />
+      </div>
+      {usage.overWarning && (
+        <p className={`text-[11px] ${usage.fraction >= 1 ? 'text-destructive' : 'text-amber-600 dark:text-amber-500'}`}>
+          {usage.fraction >= 1 ? t('keys.capExhaustedWarning') : t('keys.capWarning80')}
+        </p>
+      )}
+    </div>
+  )
 }
 
 /** Edit the mutable parts of a key without deleting its stable endpoint
@@ -261,6 +303,20 @@ export function EditKeyDialog({
               </div>
             </div>
             <p className="mt-1.5 text-[11px] text-muted-foreground">{t('keys.capEditHint')}</p>
+            {apiKey.monthlyUsage && (apiKey.monthlyRequestCap || apiKey.monthlyTokenCap) ? (
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <CapUsageBar
+                  label={t('keys.monthlyRequestCapLabel')}
+                  used={apiKey.monthlyUsage.requests}
+                  cap={apiKey.monthlyRequestCap ?? 0}
+                />
+                <CapUsageBar
+                  label={t('keys.monthlyTokenCapLabel')}
+                  used={apiKey.monthlyUsage.tokens}
+                  cap={apiKey.monthlyTokenCap ?? 0}
+                />
+              </div>
+            ) : null}
           </details>
 
           {updateKey.isError && (
