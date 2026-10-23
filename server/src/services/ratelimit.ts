@@ -1463,14 +1463,22 @@ export function getRateLimitStatus(
 // stop us BEFORE the next 413 instead of re-discovering it on every request.
 // (Fork-validated: andersmmg's updateLimitsFromError parses the same Groq shape.)
 
-export type LearnedLimitKind = 'tpm' | 'tpd' | 'rpm' | 'rpd';
+// 'itpm' / 'otpm' are the directional per-minute limits some Groq orgs carry
+// on top of the combined TPM: "input tokens per minute (ITPM)" counts prompt
+// tokens only, "output tokens per minute (OTPM)" counts expected completion
+// tokens only.
+export type LearnedLimitKind = 'tpm' | 'itpm' | 'otpm' | 'tpd' | 'rpm' | 'rpd';
 export interface LearnedLimit { kind: LearnedLimitKind; limit: number; }
 
 // Order matters: check the per-DAY axes before per-MINUTE so "tokens per day"
-// isn't shadowed by the "tpm" word-boundary alternative, and tokens before
-// requests so a body mentioning both lands on the more specific token ceiling.
+// isn't shadowed by the "tpm" word-boundary alternative, the directional
+// ITPM/OTPM axes before the combined TPM so "output tokens per minute" isn't
+// read as TPM, and tokens before requests so a body mentioning both lands on
+// the more specific token ceiling.
 const LIMIT_AXIS_PATTERNS: Array<{ kind: LearnedLimitKind; re: RegExp }> = [
   { kind: 'tpd', re: /tokens?\s*per\s*day|\btpd\b/i },
+  { kind: 'otpm', re: /output\s+tokens?\s*per\s*min(?:ute)?|\botpm\b/i },
+  { kind: 'itpm', re: /input\s+tokens?\s*per\s*min(?:ute)?|\bitpm\b/i },
   { kind: 'tpm', re: /tokens?\s*per\s*min(?:ute)?|\btpm\b/i },
   { kind: 'rpd', re: /requests?\s*per\s*day|\brpd\b/i },
   { kind: 'rpm', re: /requests?\s*per\s*min(?:ute)?|\brpm\b/i },
@@ -1496,8 +1504,15 @@ export function parseProviderLimit(message: string | undefined | null): LearnedL
 
 // Whitelisted column names — the only values ever interpolated into the UPDATE
 // below, so there is no injection surface despite the template literal.
-const LIMIT_COLUMN: Record<LearnedLimitKind, string> = {
-  tpm: 'tpm_limit', tpd: 'tpd_limit', rpm: 'rpm_limit', rpd: 'rpd_limit',
+// The router's tpm_limit gate scores input estimate + output reserve, so an
+// ITPM ceiling is a safe (slightly conservative) bound for it. An OTPM ceiling
+// has no column: it bounds the completion alone, and writing it into tpm_limit
+// would size out every request whose PROMPT exceeds it — one OTPM 1000
+// rejection permanently capped a 7000-ITPM Groq model at 1000 tokens. The
+// rejected request is already skipped for this model (context-too-large path),
+// which is all an OTPM rejection calls for.
+const LIMIT_COLUMN: Record<LearnedLimitKind, string | null> = {
+  tpm: 'tpm_limit', itpm: 'tpm_limit', otpm: null, tpd: 'tpd_limit', rpm: 'rpm_limit', rpd: 'rpd_limit',
 };
 
 /**
@@ -1512,6 +1527,7 @@ export function learnLimitFromError(modelDbId: number, err: { message?: string }
   const parsed = parseProviderLimit(err?.message);
   if (!parsed) return null;
   const col = LIMIT_COLUMN[parsed.kind];
+  if (col == null) return null;
   const result = withDb(db =>
     db.prepare(
       `UPDATE models SET ${col} = ? WHERE id = ? AND (${col} IS NULL OR ${col} > ?)`,
