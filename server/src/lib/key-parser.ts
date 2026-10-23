@@ -292,6 +292,12 @@ export function parseDotEnv(content: string): Array<{ key: string; value: string
       const commentIndex = value.indexOf(' #');
       if (commentIndex !== -1) value = value.slice(0, commentIndex);
       value = value.trimEnd();
+      // A dropped closing quote (`KEY="sk-abc`, typically from editor auto-
+      // quoting or a truncated paste) left the `"` glued to the credential,
+      // and every request with it failed upstream 401 with a message that
+      // never mentions the stray quote. No API key starts with a quote
+      // character, so dropping the opener is always safe.
+      if (quote) value = value.slice(1);
     }
 
     result.set(key, value);

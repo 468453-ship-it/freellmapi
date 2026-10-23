@@ -45,6 +45,26 @@ describe('key parser', () => {
     ]);
   });
 
+  it('drops an opening quote whose closing quote was lost', () => {
+    // Editor auto-quoting or a truncated paste yields `KEY="sk-abc` — the
+    // credential must not import with the `"` glued to its front.
+    expect(parseDotEnv('OPENAI_API_KEY="sk-abc123')).toEqual([
+      { key: 'OPENAI_API_KEY', value: 'sk-abc123' },
+    ]);
+    expect(parseDotEnv("GROQ_API_KEY='gsk-abc123")).toEqual([
+      { key: 'GROQ_API_KEY', value: 'gsk-abc123' },
+    ]);
+    // ...and the same line with a trailing inline comment.
+    expect(parseDotEnv('OPENAI_API_KEY="sk-abc123 # primary')).toEqual([
+      { key: 'OPENAI_API_KEY', value: 'sk-abc123' },
+    ]);
+    // The end-to-end import path: the value feeds the router as-is.
+    const result = parseKeysFromFile('GROQ_API_KEY="gsk_te...7890', '.env');
+    expect(result.keys).toEqual([
+      expect.objectContaining({ rawKey: 'GROQ_API_KEY=gsk_te...7890', platform: 'groq' }),
+    ]);
+  });
+
   it('parses flat JSON string values', () => {
     expect(parseJson(JSON.stringify({ MISTRAL_API_KEY: 'mist-test', PORT: 3001 }))).toEqual([
       { key: 'MISTRAL_API_KEY', value: 'mist-test' },
