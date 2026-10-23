@@ -541,6 +541,15 @@ function buildCatalogEntries(filters: { onlyAvailable?: boolean; executionStatus
 // (sk-cp-...) is handed to a downstream client and must not see what every
 // other client spent.
 proxyRouter.get('/usage', (req: Request, res: Response) => {
+  // A URL-token request carries the injected unified key (routes/url-tokens.ts)
+  // — which is precisely why it must not pass a unified-key gate. The token is
+  // handed to a headerless client (a teammate, a widget, a phone app); the
+  // ledger behind this route is every provider key's spend. Same reasoning as
+  // the client-profile refusal below.
+  if ((req as Request & { urlTokenAuthenticated?: boolean }).urlTokenAuthenticated) {
+    res.status(403).json({ error: { message: 'Usage is only available to the unified API key', type: 'permission_error' } });
+    return;
+  }
   const auth = requireInferenceAuth(req, res);
   if (!auth) return;
   if (auth.kind !== 'unified') {
