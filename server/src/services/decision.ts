@@ -5,7 +5,7 @@ import { parseRetryAfterMs, parseStatedRetryMs } from '../providers/base.js';
 import { RetryHintTracker } from '../lib/retry-hint.js';
 import { getClientContext } from '../lib/client-context.js';
 import { proxyFetch } from '../lib/proxy.js';
-import { secondsUntilNextMonth } from './key-budget.js';
+import { recordMonthlyUsage, secondsUntilNextMonth } from './key-budget.js';
 import { reserveProviderCredential, type ReservedProviderCredential } from './provider-credential.js';
 import { isOnCooldown, setCooldown } from './ratelimit.js';
 import { markKeyHealthyFromRequest } from './health.js';
@@ -283,6 +283,19 @@ function logDecision(row: DecisionModelRow, keyId: number | null, status: 'ok' |
       .run(row.model_id, row.platform, keyId, status, latencyMs, questionCount, inputTokens, clientAgent, error);
   } catch (e) {
     console.error('Failed to log decision request:', e);
+  }
+  // The per-key monthly caps (#1158) and GET /v1/usage read the
+  // key_monthly_usage ledger. Chat, embeddings, media, rerank, moderation and
+  // search settle into it through their `requests` rows; decisions log to
+  // decision_requests, so a served decision settles its spend directly here.
+  // Not a `requests` row: decisions fire every routing turn, and one there
+  // would double every chat turn in the dashboard's request analytics.
+  if (status === 'ok' && keyId != null) {
+    try {
+      recordMonthlyUsage(keyId, inputTokens);
+    } catch (e) {
+      console.error('Failed to settle decision spend:', e);
+    }
   }
 }
 
