@@ -41,6 +41,7 @@ import { buildModelListing, type NormalizedModel } from '../services/model-listi
 import { claudeFamilyDiscoveryEntries, resolveListedClaudeAlias } from '../services/anthropic-map.js';
 import { compressRequest, formatCompressionHeader } from '../services/compression/pipeline.js';
 import { applyDecisionRouting, routingStrategyHeader } from '../services/routing-decision.js';
+import { startStreamKeepalive, streamKeepaliveMs } from '../lib/stream-keepalive.js';
 
 export const proxyRouter = Router();
 
@@ -1558,6 +1559,24 @@ proxyRouter.post('/completions', async (req: Request, res: Response) => {
         let sawText = false;
         let upstreamFinish: string | null = null;
         const buffered: unknown[] = [];
+        // True once this attempt is over (success, committed error, or thrown)
+        // — the keep-alive interval polls it and stops itself.
+        let streamSettled = false;
+
+        // Send the SSE headers once. Split out of flushHeaders so the
+        // #1642 keep-alive can commit the response with a content-free ping
+        // while the hold window is still open, without dumping the buffered
+        // (possibly reasoning-bearing) frames early.
+        let headersSentEarly = false;
+        const sendSseHeaders = () => {
+          if (headersSentEarly) return;
+          res.setHeader('Content-Type', 'text/event-stream');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.setHeader('Connection', 'keep-alive');
+          res.setHeader('X-Routed-Via', routedViaValue(route.platform, route.modelId));
+          setFallbackHeaders(res, attempt, attemptLog);
+          headersSentEarly = true;
+        };
 
         const flushHeaders = () => {
           if (headerSent) return;
@@ -1565,11 +1584,7 @@ proxyRouter.post('/completions', async (req: Request, res: Response) => {
           // reasoning) in the pump loop below; this call only backfills streams
           // that reached the commit point without one.
           if (ttfbMs === null) ttfbMs = Date.now() - start;
-          res.setHeader('Content-Type', 'text/event-stream');
-          res.setHeader('Cache-Control', 'no-cache');
-          res.setHeader('Connection', 'keep-alive');
-          res.setHeader('X-Routed-Via', routedViaValue(route.platform, route.modelId));
-          setFallbackHeaders(res, attempt, attemptLog);
+          sendSseHeaders();
           headerSent = true;
           // Committed: the answer is on its way, so the retry budget must no
           // longer cancel this attempt (it could not fail over now anyway).
@@ -1577,6 +1592,18 @@ proxyRouter.post('/completions', async (req: Request, res: Response) => {
           for (const frame of buffered) res.write(`data: ${JSON.stringify(frame)}\n\n`);
           buffered.length = 0;
         };
+
+        // #1642: optional heartbeat for the silent reasoning window. A bare
+        // SSE comment resets client idle watchdogs without committing content.
+        const keepaliveStop = startStreamKeepalive(streamKeepaliveMs(),
+          () => streamSettled,
+          () => {
+            sendSseHeaders();
+            // Bytes on the wire = the response can no longer fail over
+            // invisibly; stop the retry budget from cancelling it.
+            ctx.disarmHedge();
+            res.write(': keepalive\n\n');
+          });
 
         try {
           const gen = route.provider.streamChatCompletion(
@@ -1658,7 +1685,10 @@ proxyRouter.post('/completions', async (req: Request, res: Response) => {
           // client-abort branch stops the ladder without benching or an
           // error log row (the socket is gone; nothing to render).
           if (isClientAbortError(streamErr)) throw streamErr;
-          if (headerSent) {
+          // headerSent = real content went out. headersSentEarly also counts:
+          // a #1642 keep-alive ping flushed the SSE headers, so the response
+          // is on the wire and this attempt can no longer fail over invisibly.
+          if (headerSent || headersSentEarly) {
             console.error(`[Proxy] Mid-stream legacy completion error from ${route.displayName}:`, streamErr.message);
             const payload = { error: { message: `Provider error (${route.displayName}): stream interrupted`, type: 'stream_error' } };
             try { res.write(`data: ${JSON.stringify(payload)}\n\n`); } catch { /* socket gone */ }
@@ -1676,6 +1706,11 @@ proxyRouter.post('/completions', async (req: Request, res: Response) => {
             return 'committed';
           }
           throw streamErr;
+        } finally {
+          // #1642: this attempt is over whichever path it left by — the
+          // keep-alive interval must not outlive it.
+          streamSettled = true;
+          keepaliveStop();
         }
       }
 
@@ -2579,17 +2614,28 @@ proxyRouter.post('/chat/completions', async (req: Request, res: Response) => {
           streamFrames.push(frame);
         };
 
-        const flushHeaders = () => {
-          if (headerSent) return;
-          // #764: backfill only — the pump loop already records ttfb on the
-          // first token (content or reasoning) it sees.
-          if (ttfbMs === null) ttfbMs = Date.now() - start;
+        // Send the SSE headers once. Split out of flushHeaders so the
+        // #1642 keep-alive can commit the response with a content-free ping
+        // while the hold window is still open, without dumping the held
+        // preamble frames early.
+        let headersSentEarly = false;
+        const sendSseHeaders = () => {
+          if (headersSentEarly) return;
           res.setHeader('Content-Type', 'text/event-stream');
           res.setHeader('Cache-Control', 'no-cache');
           res.setHeader('Connection', 'keep-alive');
           res.setHeader('X-Routed-Via', routedViaValue(route.platform, route.modelId));
           res.setHeader('X-FreeLLM-Cache', cacheKey ? 'MISS' : 'OFF');
           setFallbackHeaders(res, attempt, attemptLog);
+          headersSentEarly = true;
+        };
+
+        const flushHeaders = () => {
+          if (headerSent) return;
+          // #764: backfill only — the pump loop already records ttfb on the
+          // first token (content or reasoning) it sees.
+          if (ttfbMs === null) ttfbMs = Date.now() - start;
+          sendSseHeaders();
           headerSent = true;
           // Committed: the answer is on its way, so the retry budget must no
           // longer cancel this attempt (it could not fail over now anyway).
@@ -2613,6 +2659,19 @@ proxyRouter.post('/chat/completions', async (req: Request, res: Response) => {
           collectFrame(frame);
           res.write(frame);
         };
+
+        // #1642: optional heartbeat for the silent reasoning window. A bare
+        // SSE comment resets client idle watchdogs without committing content.
+        let streamSettled = false;
+        const keepaliveStop = startStreamKeepalive(streamKeepaliveMs(),
+          () => streamSettled,
+          () => {
+            sendSseHeaders();
+            // Bytes on the wire = the response can no longer fail over
+            // invisibly; stop the retry budget from cancelling it.
+            ctx.disarmHedge();
+            res.write(': keepalive\n\n');
+          });
 
         try {
           const gen = route.provider.streamChatCompletion(
@@ -2977,7 +3036,10 @@ proxyRouter.post('/chat/completions', async (req: Request, res: Response) => {
           // client-abort branch stops the ladder without benching or an
           // error log row (the socket is gone; nothing to render).
           if (isClientAbortError(streamErr)) throw streamErr;
-          if (headerSent) {
+          // headerSent = real content went out. headersSentEarly also counts:
+          // a #1642 keep-alive ping flushed the SSE headers, so the response
+          // is on the wire and this attempt can no longer fail over invisibly.
+          if (headerSent || headersSentEarly) {
             // Mid-stream error after real payload reached the client — finish
             // the SSE response honestly instead of leaving the client hanging.
             console.error(`[Proxy] Mid-stream error from ${route.displayName}:`, streamErr.message);
@@ -3001,6 +3063,11 @@ proxyRouter.post('/chat/completions', async (req: Request, res: Response) => {
           // error frames, abrupt EOF, stalls, empty completions, and unparseable
           // dialect turns alike.
           throw streamErr;
+        } finally {
+          // #1642: this attempt is over whichever path it left by — the
+          // keep-alive interval must not outlive it.
+          streamSettled = true;
+          keepaliveStop();
         }
       } else {
         const result = await route.provider.chatCompletion(

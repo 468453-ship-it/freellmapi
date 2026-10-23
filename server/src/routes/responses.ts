@@ -32,6 +32,7 @@ import {
 } from './proxy.js';
 import { runFallbackLoop, newFallbackState, fallbackRoutingTokens, recordUpstreamSuccess, setFallbackHeaders, exhaustionErrorPayload, setExhaustionHeaders, type AttemptRecord } from '../lib/fallback-loop.js';
 import { routedViaValue, safeHeaderValue } from '../lib/header-value.js';
+import { startStreamKeepalive, streamKeepaliveMs } from '../lib/stream-keepalive.js';
 import { applyTokenBudget, tokenBudgetMessage } from '../lib/guardrails.js';
 import { samplingParamSchemaFields, pickSamplingParams, type ResponseFormat } from '../lib/sampling-params.js';
 import { enforceJsonContent } from '../lib/structured-output.js';
@@ -1250,11 +1251,7 @@ export async function handleResponses(req: Request, res: Response): Promise<void
         const commit = () => {
           if (streamStarted) return;
           if (ttfbMs === null) ttfbMs = Date.now() - start;
-          res.setHeader('Content-Type', 'text/event-stream');
-          res.setHeader('Cache-Control', 'no-cache');
-          res.setHeader('Connection', 'keep-alive');
-          res.setHeader('X-Routed-Via', routedViaValue(route.platform, route.modelId));
-          setFallbackHeaders(res, attempt, attemptLog);
+          sendSseHeaders();
           const skeleton = {
             id: responseId, object: 'response', created_at: nowUnix(),
             status: 'in_progress', model: route.modelId, output: [], output_text: '',
@@ -1266,6 +1263,34 @@ export async function handleResponses(req: Request, res: Response): Promise<void
           // longer cancel this attempt (it could not fail over now anyway).
           ctx.disarmHedge();
         };
+
+        // Send the SSE headers once. Split out of commit so the #1642
+        // keep-alive can commit the response with a content-free ping while
+        // the hold window is still open, without sending the event skeleton
+        // early.
+        let headersSentEarly = false;
+        const sendSseHeaders = () => {
+          if (headersSentEarly) return;
+          res.setHeader('Content-Type', 'text/event-stream');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.setHeader('Connection', 'keep-alive');
+          res.setHeader('X-Routed-Via', routedViaValue(route.platform, route.modelId));
+          setFallbackHeaders(res, attempt, attemptLog);
+          headersSentEarly = true;
+        };
+
+        // #1642: optional heartbeat for the silent reasoning window. A bare
+        // SSE comment resets client idle watchdogs without committing content.
+        let streamSettled = false;
+        const keepaliveStop = startStreamKeepalive(streamKeepaliveMs(),
+          () => streamSettled,
+          () => {
+            sendSseHeaders();
+            // Bytes on the wire = the response can no longer fail over
+            // invisibly; stop the retry budget from cancelling it.
+            ctx.disarmHedge();
+            res.write(': keepalive\n\n');
+          });
 
         // Open the text output item and stream `text` as its first delta.
         // The text item takes the next free output index (it is NOT always 0 —
@@ -1509,7 +1534,10 @@ export async function handleResponses(req: Request, res: Response): Promise<void
           // A committed stream can't fail over (bytes already sent) — surface a
           // response.failed event honestly and stop. A pre-commit failure throws
           // through to the shared loop for cooldown + failover.
-          if (streamStarted) {
+          // streamStarted = real events went out. headersSentEarly also counts:
+          // a #1642 keep-alive ping flushed the SSE headers, so this attempt is
+          // on the wire and can no longer fail over invisibly.
+          if (streamStarted || headersSentEarly) {
             const safe = sanitizeProviderErrorMessage(streamErr.message);
             traceRouteEvent('Responses', {
               event: 'fail',
@@ -1526,6 +1554,11 @@ export async function handleResponses(req: Request, res: Response): Promise<void
             return 'committed';
           }
           throw streamErr;
+        } finally {
+          // #1642: this attempt is over whichever path it left by — the
+          // keep-alive interval must not outlive it.
+          streamSettled = true;
+          keepaliveStop();
         }
       }
 
