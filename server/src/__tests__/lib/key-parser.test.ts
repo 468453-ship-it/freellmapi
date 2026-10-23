@@ -263,6 +263,18 @@ describe('key parser', () => {
     ]);
   });
 
+  it('strips the formula-guard quote from base_url as well as the label', () => {
+    // What GET /api/keys/export?format=csv writes when a custom endpoint's
+    // base_url opens with '=' — the importer has to undo the guard on the
+    // fourth column too, or the endpoint re-imports as a broken "'=..." URL.
+    const csv = 'platform,key,label,base_url\n' +
+      '"custom","sk-local","\'=HYPERLINK(""x"")","\'=HYPERLINK(""http://evil"")"\n';
+    const rows = parseCsv(csv);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.label).toBe('=HYPERLINK("x")');
+    expect(rows[0]!.baseUrl).toBe('=HYPERLINK("http://evil")');
+  });
+
   it('round-trips a full export through parseKeysFromFile', () => {
     // Exactly what GET /api/keys/export?format=csv writes for three keys.
     const csv = 'platform,key,label,base_url\n' +

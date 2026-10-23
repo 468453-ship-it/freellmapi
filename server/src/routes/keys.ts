@@ -633,9 +633,11 @@ keysRouter.get('/export', (req: Request, res: Response) => {
     // CSV formula-injection guard: a spreadsheet treats a cell that starts with
     // =, +, -, @, tab or CR as a live formula, so a label like `=HYPERLINK(...)`
     // would execute on open. Prefix such cells with a single quote to force them
-    // to be read as text. Applied only to free-text fields the user controls
-    // (labels); the key value must round-trip verbatim for re-import, and the
-    // platform is one of our own fixed enum values.
+    // to be read as text. Applied to the free-text fields the user controls
+    // (labels AND base_url — the custom endpoint column is free text too, and
+    // the importer strips the guard quote back off both); the key value must
+    // round-trip verbatim for re-import, and the platform is one of our own
+    // fixed enum values.
     const neutralize = (v: string) => (/^[=+\-@\t\r]/.test(v) ? `'${v}` : v);
     // base_url is the fourth column: a custom row is an ENDPOINT, and without
     // its URL the key cannot be re-imported (#687). Blank for every other
@@ -643,7 +645,7 @@ keysRouter.get('/export', (req: Request, res: Response) => {
     // written by older builds still load.
     const header = 'platform,key,label,base_url';
     const lines = decryptedKeys.map(k =>
-      [escCsv(k.platform), escCsv(k.key), escCsv(neutralize(k.label)), escCsv(k.baseUrl ?? '')].join(',')
+      [escCsv(k.platform), escCsv(k.key), escCsv(neutralize(k.label)), escCsv(neutralize(k.baseUrl ?? ''))].join(',')
     );
     const content = [header, ...lines].join('\n') + '\n';
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');

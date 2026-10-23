@@ -537,9 +537,10 @@ export function parseCsv(content: string): KeyPair[] {
     const platform = (fields[0] ?? '').trim();
     const key = (fields[1] ?? '').trim();
     // Undo the export's CSV formula guard (a leading ' before =, +, -, @, tab
-    // or CR) so a guarded label comes back as the user typed it.
-    const label = (fields[2] ?? '').trim().replace(/^'(?=[=+\-@\t\r])/, '');
-    const baseUrl = (fields[3] ?? '').trim();
+    // or CR) so a guarded label or base_url comes back as the user typed it.
+    const unguard = (v: string) => v.replace(/^'(?=[=+\-@\t\r])/, '');
+    const label = unguard((fields[2] ?? '').trim());
+    const baseUrl = unguard((fields[3] ?? '').trim());
 
     if (!key || !platform) continue;
 
