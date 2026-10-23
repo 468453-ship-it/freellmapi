@@ -22,7 +22,7 @@ import { convertDocumentBlock, documentRejectionMessage } from '../lib/anthropic
 import { isClientAbortError, newClientAbortError, newHedgeAbortError, isUpstreamClassificationOutput } from '../lib/error-classify.js';
 import { logRequest } from '../lib/request-log.js';
 import { extractApiToken, timingSafeStringEqual, getStickyModel, setStickyModel } from './proxy.js';
-import { runFallbackLoop, newFallbackState, fallbackRoutingTokens, recordUpstreamSuccess, type ExhaustionBody, setFallbackHeaders, setExhaustionHeaders, type AttemptRecord, type FallbackState } from '../lib/fallback-loop.js';
+import { runFallbackLoop, newFallbackState, fallbackRoutingTokens, recordUpstreamSuccess, type ExhaustionBody, setFallbackHeaders, setExhaustionHeaders, type AttemptRecord, type FallbackState, REASONING_HOLD_MAX_MS } from '../lib/fallback-loop.js';
 import { routedViaValue } from '../lib/header-value.js';
 import { applyTokenBudget, tokenBudgetMessage } from '../lib/guardrails.js';
 import { resolveAnthropicModel, claudeFamilyDiscoveryEntries } from '../services/anthropic-map.js';
@@ -906,6 +906,7 @@ async function streamCompletion(
   // point where it was: a stream that produces ONLY reasoning and dies still
   // fails over invisibly, exactly like the OpenAI surface's preamble hold.
   let reasoningBuf = '';
+  let quietSince = Date.now(); // last time the client heard from this attempt
   const flushThinking = () => {
     if (reasoningBuf.length === 0) return;
     const idx = nextIndex++;
@@ -969,6 +970,12 @@ async function streamCompletion(
       // `reasoning`); the shared <think> extractor emits reasoning_content.
       const reasoningDelta = choice.delta?.reasoning_content ?? choice.delta?.reasoning;
       if (typeof reasoningDelta === 'string' && reasoningDelta.length > 0) reasoningBuf += reasoningDelta;
+      // #1642: long reasoning with nothing streamed yet: commit and ping.
+      if (reasoningBuf.length > 0 && !textBlockOpen && Date.now() - quietSince >= REASONING_HOLD_MAX_MS) {
+        ensureMessageStart();
+        writeSse(res, 'ping', { type: 'ping' });
+        quietSince = Date.now();
+      }
 
       const text = typeof choice.delta?.content === 'string' ? choice.delta.content : '';
       if (text.length === 0) continue;
@@ -1034,10 +1041,11 @@ async function streamCompletion(
     // Opt-in schema verdict, same rule as the non-streaming surface above and
     // as /chat/completions: this is the surface the silent failure hurt most,
     // and Claude Code streams. Placed after the dialect rescue so a rescued
-    // call is judged too, and gated on `!messageStarted` — once message_start
-    // has gone out there is no failing over, and tearing the SSE stream down
-    // would be worse for the client than a tool_use the schema dislikes.
-    if (isToolArgumentValidationEnabled() && !messageStarted && completedCalls.length > 0) {
+    // call is judged too, and gated on `!textBlockOpen`: once text has gone
+    // out there is no failing over, and tearing the SSE stream down would be
+    // worse for the client than a tool_use the schema dislikes. A #1642 early
+    // commit sent only pings, so a bad call there ends in the catch's error event.
+    if (isToolArgumentValidationEnabled() && !textBlockOpen && completedCalls.length > 0) {
       const invalid = invalidToolCallReasons(
         completedCalls.map(c => ({ function: { name: c.name, arguments: c.arguments } })),
         schemas,
@@ -1045,9 +1053,10 @@ async function streamCompletion(
       if (invalid.length > 0) throw invalidToolArgumentsError(route.displayName, invalid);
     }
 
-    // Nothing usable came out — fail over (message_start was never sent, so the
-    // client never saw this attempt).
-    if (!messageStarted && completedCalls.length === 0) {
+    // Nothing usable came out — fail over (normally message_start was never sent,
+    // so the client never saw this attempt; after a #1642 early commit the
+    // catch below turns this into the mid-stream error event).
+    if (!textBlockOpen && completedCalls.length === 0) {
       // Disconnect before the commit point: the pump loop broke with nothing
       // accumulated because the CLIENT left, not because the provider failed —
       // benching a healthy model+key for it was wrong. StreamAlreadyStarted
