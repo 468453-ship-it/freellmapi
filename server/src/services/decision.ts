@@ -6,6 +6,7 @@ import { RetryHintTracker } from '../lib/retry-hint.js';
 import { getClientContext } from '../lib/client-context.js';
 import { proxyFetch } from '../lib/proxy.js';
 import { recordMonthlyUsage, secondsUntilNextMonth } from './key-budget.js';
+import { noteBudgetAlerts } from './budget-alerts.js';
 import { reserveProviderCredential, type ReservedProviderCredential } from './provider-credential.js';
 import { isOnCooldown, setCooldown } from './ratelimit.js';
 import { markKeyHealthyFromRequest } from './health.js';
@@ -293,6 +294,7 @@ function logDecision(row: DecisionModelRow, keyId: number | null, status: 'ok' |
   if (status === 'ok' && keyId != null) {
     try {
       recordMonthlyUsage(keyId, inputTokens);
+      noteBudgetAlerts(keyId);
     } catch (e) {
       console.error('Failed to settle decision spend:', e);
     }

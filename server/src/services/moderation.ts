@@ -16,6 +16,7 @@ import { getClientContext } from '../lib/client-context.js';
 import { decrypt } from '../lib/crypto.js';
 import { proxyFetch } from '../lib/proxy.js';
 import { checkMonthlyBudget, secondsUntilNextMonth } from './key-budget.js';
+import { noteBudgetAlerts } from './budget-alerts.js';
 import { markKeyHealthyFromRequest } from './health.js';
 
 /* ------------------------------------------------------------------ */
@@ -161,6 +162,9 @@ function logModerationRequest(
       INSERT INTO requests (platform, model_id, key_id, status, input_tokens, output_tokens, latency_ms, error, request_type, client_ip, client_user_agent, client_agent)
       VALUES (?, ?, ?, ?, 0, 0, ?, ?, 'moderation', ?, ?, ?)
     `).run(row.platform, row.modelId, row.keyId, status, latencyMs, error, client.ip, client.userAgent, client.agent);
+    // Soft budget alert (#1158 follow-on): the ledger trigger fired with this
+    // row, so compare the caps once. No-op for uncapped keys.
+    if (status === 'success' && row.keyId != null) noteBudgetAlerts(row.keyId);
   } catch (e) {
     console.error('Failed to log moderation request:', e);
   }

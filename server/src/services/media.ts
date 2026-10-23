@@ -11,6 +11,7 @@ import { getDb } from '../db/index.js';
 import { parseRetryAfterMs } from '../providers/base.js';
 import { RetryHintTracker } from '../lib/retry-hint.js';
 import { secondsUntilNextMonth } from './key-budget.js';
+import { noteBudgetAlerts } from './budget-alerts.js';
 import { getClientContext } from '../lib/client-context.js';
 import { reserveProviderCredential } from './provider-credential.js';
 import { proxyFetch } from '../lib/proxy.js';
@@ -823,6 +824,8 @@ function logMedia(row: Pick<MediaModelRow, 'platform' | 'model_id' | 'modality'>
     // chat request (#1493) or a served search (#1612): stamp last_healthy_at
     // and lift an 'unknown'/'error' key out of the pool's cold corner.
     if (status === 'success' && keyId != null) markKeyHealthyFromRequest(keyId);
+    // Soft budget alert (#1158 follow-on), same hook as the chat path.
+    if (status === 'success' && keyId != null) noteBudgetAlerts(keyId);
   } catch (e) {
     console.error('Failed to log media request:', e);
   }

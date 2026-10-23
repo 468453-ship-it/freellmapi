@@ -2,6 +2,7 @@ import { getDb } from '../db/index.js';
 import { decrypt } from '../lib/crypto.js';
 import { parseRetryAfterMs } from '../providers/base.js';
 import { checkMonthlyBudget, reserveMonthlyBudget, secondsUntilNextMonth } from './key-budget.js';
+import { noteBudgetAlerts } from './budget-alerts.js';
 import { markKeyHealthyFromRequest } from './health.js';
 import { getClientContext } from '../lib/client-context.js';
 
@@ -74,6 +75,9 @@ function logRerankRequest(cand: { platform: string }, keyId: number, modelId: st
       INSERT INTO requests (platform, model_id, key_id, status, input_tokens, output_tokens, latency_ms, error, request_type, client_ip, client_user_agent, client_agent)
       VALUES (?, ?, ?, ?, ?, 0, ?, ?, 'rerank', ?, ?, ?)
     `).run(cand.platform, modelId, keyId, status, inputTokens, latencyMs, error, client.ip, client.userAgent, client.agent);
+    // Soft budget alert (#1158 follow-on): the ledger trigger fired with this
+    // row, so compare the caps once. No-op for uncapped keys.
+    if (status === 'success' && keyId != null) noteBudgetAlerts(keyId);
   } catch (e) {
     console.error('Failed to log rerank request:', e);
   }

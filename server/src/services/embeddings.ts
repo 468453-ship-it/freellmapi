@@ -9,6 +9,7 @@
 // cross-provider redundancy for free.
 import { getDb, getSetting } from '../db/index.js';
 import { secondsUntilNextMonth } from './key-budget.js';
+import { noteBudgetAlerts } from './budget-alerts.js';
 import { parseRetryAfterMs } from '../providers/base.js';
 import { RetryHintTracker, retryAfterSeconds } from '../lib/retry-hint.js';
 import { getClientContext } from '../lib/client-context.js';
@@ -359,6 +360,9 @@ function logEmbeddingRequest(
       INSERT INTO requests (platform, model_id, key_id, status, input_tokens, output_tokens, latency_ms, error, request_type, client_ip, client_user_agent, client_agent)
       VALUES (?, ?, ?, ?, ?, 0, ?, ?, 'embedding', ?, ?, ?)
     `).run(row.platform, row.model_id, keyId, status, inputTokens, latencyMs, error, client.ip, client.userAgent, client.agent);
+    // Soft budget alert (#1158 follow-on): the ledger trigger fired with this
+    // row, so compare the caps once. No-op for uncapped keys.
+    if (status === 'success' && keyId != null) noteBudgetAlerts(keyId);
   } catch (e) {
     console.error('Failed to log embedding request:', e);
   }

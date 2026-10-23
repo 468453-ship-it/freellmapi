@@ -14,6 +14,7 @@ import { KEENABLE_APP_TITLE, KEENABLE_BASE_URL } from '../providers/keenable.js'
 import { isAnonymousCredential } from '../lib/credential.js';
 import { randomUUID } from 'node:crypto';
 import { secondsUntilNextMonth } from './key-budget.js';
+import { noteBudgetAlerts } from './budget-alerts.js';
 import { reserveProviderCredential, type ReservedProviderCredential } from './provider-credential.js';
 import { isOnCooldown, setCooldown } from './ratelimit.js';
 import { markKeyHealthyFromRequest } from './health.js';
@@ -460,6 +461,9 @@ function logSearch(row: SearchEngineRow, keyId: number | null, status: 'ok' | 'e
       INSERT INTO requests (platform, model_id, key_id, status, input_tokens, output_tokens, latency_ms, error, request_type, client_ip, client_user_agent, client_agent)
       VALUES (?, ?, ?, ?, ?, 0, ?, ?, 'search', ?, ?, ?)
     `).run(row.platform, row.model_id, keyId, status === 'ok' ? 'success' : 'error', estimatedTokens, latencyMs, error, client.ip, client.userAgent, client.agent ?? clientAgent);
+    // Soft budget alert (#1158 follow-on): the ledger trigger fired with this
+    // row, so compare the caps once. No-op for uncapped keys.
+    if (status === 'ok' && keyId != null) noteBudgetAlerts(keyId);
   } catch (e) {
     console.error('Failed to log search request to requests table:', e);
   }

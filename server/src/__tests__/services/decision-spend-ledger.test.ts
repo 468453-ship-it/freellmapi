@@ -5,6 +5,7 @@ import { clearAllCooldowns } from '../../services/ratelimit.js';
 import { runDecision, DecisionError } from '../../services/decision.js';
 import { getMonthlyUsage } from '../../services/key-budget.js';
 import { seedDecisionModels } from '../helpers/decision-models.js';
+import { ringSnapshot, clearLogs } from '../../lib/server-logs.js';
 
 // POST /v1/decisions spends real provider quota on every routing turn, but
 // logDecision only wrote decision_requests. The per-key monthly caps (#1158)
@@ -96,6 +97,19 @@ describe('decision spend lands in the monthly ledger (#1158)', () => {
     const err = await runDecision(REQUEST).catch(e => e) as DecisionError;
     expect(err.status).toBe(429);
     expect(err.code).toBe('quota_exceeded');
+  });
+
+  it('a decision that crosses 80% of the cap logs the budget alert', async () => {
+    clearLogs();
+    const key = addKey('cloudflare', 5);
+    spendRequests(key, 3);
+    globalThis.fetch = vi.fn(async () => okResponse()) as unknown as typeof fetch;
+
+    await runDecision(REQUEST);
+
+    const alerts = ringSnapshot().filter(e => e.event === 'key_budget_threshold');
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0]!.message).toContain('80% of its monthly requests cap (4/5)');
   });
 
   it('a key at its cap is skipped without touching upstream', async () => {
