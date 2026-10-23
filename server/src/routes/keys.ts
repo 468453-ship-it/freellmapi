@@ -17,7 +17,7 @@ import { resolveCustomEndpointKey, customEndpointKeyIds, siblingEndpointKeyId, e
 import { registerCustomModels, registerCustomChatModels } from '../services/custom-model-register.js';
 import { registerCustomMediaModel } from '../services/custom-media-register.js';
 import { isSearchPlatform } from '../lib/search-platforms.js';
-import { discoverEndpointModels, probeEndpointModel, classifyModelId, ModelDiscoveryError } from '../services/model-discovery.js';
+import { discoverEndpointModels, probeEndpointModel, classifyModelId, ModelDiscoveryError, type DiscoveredModelKind } from '../services/model-discovery.js';
 import { probeEmbeddingDimensions, registerCustomEmbeddingModel } from '../services/embeddings.js';
 import { endpointScopeForBaseUrl, normalizeBaseUrl } from '../lib/endpoint-scope.js';
 import { recordCustomModelTombstone } from '../services/custom-model-tombstone.js';
@@ -825,6 +825,11 @@ const modelEntrySchema = z.union([
     displayName: z.string().optional(),
     supportsTools: z.boolean().optional(),
     supportsVision: z.boolean().optional(),
+    // #1506: a kind forwarded from discovery metadata (the endpoint's own
+    // `type`/metadata) so an id with no media keyword still routes to the
+    // table that can serve it. Absent, the handler falls back to the
+    // id-based classifier (#1051).
+    kind: z.enum(['embedding', 'image', 'audio', 'transcription', 'video']).optional(),
   }),
 ]);
 // `baseUrl` and `keyId` are both optional but at least one is required: the
@@ -1309,9 +1314,9 @@ keysRouter.post('/custom', async (req: Request, res: Response) => {
   // whatever name it already has on re-registration (see the upsert below).
   const topTools = parsed.data.supportsTools;
   const topVision = parsed.data.supportsVision;
-  const entries: { modelId: string; displayName: string | null; supportsTools?: boolean; supportsVision?: boolean }[] = [];
+  const entries: { modelId: string; displayName: string | null; supportsTools?: boolean; supportsVision?: boolean; kind?: DiscoveredModelKind }[] = [];
   const seen = new Set<string>();
-  const addEntry = (rawId: string, rawDisplay?: string, tools?: boolean, vision?: boolean) => {
+  const addEntry = (rawId: string, rawDisplay?: string, tools?: boolean, vision?: boolean, kind?: DiscoveredModelKind) => {
     const modelId = rawId.trim();
     if (!modelId || seen.has(modelId)) return;
     seen.add(modelId);
@@ -1320,12 +1325,13 @@ keysRouter.post('/custom', async (req: Request, res: Response) => {
       displayName: rawDisplay?.trim() || null,
       supportsTools: tools ?? topTools,
       supportsVision: vision ?? topVision,
+      kind,
     });
   };
   if (parsed.data.model?.trim()) addEntry(parsed.data.model, parsed.data.displayName);
   for (const m of parsed.data.models ?? []) {
     if (typeof m === 'string') addEntry(m);
-    else addEntry(m.model, m.displayName, m.supportsTools, m.supportsVision);
+    else addEntry(m.model, m.displayName, m.supportsTools, m.supportsVision, m.kind);
   }
   // A lone model submitted through the plural `models` also carries its name in
   // the top-level `displayName` — that is exactly what the dashboard's custom
@@ -1380,7 +1386,14 @@ keysRouter.post('/custom', async (req: Request, res: Response) => {
   // on the entry is an operator override: someone who says "this is a chat
   // model with vision/tools" wins over the keyword guess.
   const overridden = (e: typeof entries[number]) => e.supportsTools !== undefined || e.supportsVision !== undefined;
-  const kindOf = (e: typeof entries[number]) => overridden(e) ? undefined : classifyModelId(e.modelId);
+  const kindOf = (e: typeof entries[number]) => {
+    // #1506: a forwarded discovery kind is authoritative for a generic-id
+    // model; an explicit capability flag forces chat over both the kind and
+    // the id guess (#1051).
+    if (overridden(e)) return undefined;
+    if (e.kind !== undefined) return e.kind;
+    return classifyModelId(e.modelId);
+  };
   const chatEntries = entries.filter(e => kindOf(e) === undefined || kindOf(e) === 'embedding');
   const embedEntries = chatEntries.filter(e => kindOf(e) === 'embedding');
   const pureChatEntries = chatEntries.filter(e => kindOf(e) !== 'embedding');
