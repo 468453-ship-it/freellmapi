@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "เดือนนี้ {requests} คำขอ {tokens} โทเคน",
     "quotaBalanceHint": "เหลือ {remaining} จาก {limit} {metric}",
-    "quotaBalanceLeft": "เหลือ {remaining}"
-,
+    "quotaBalanceLeft": "เหลือ {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "รายการจะปรากฏที่นี่เมื่อเซิร์ฟเวอร์เขียนบันทึก หากคาดว่าควรมีผลลัพธ์ ให้ขยายตัวกรองระดับ ผู้ให้บริการ หรือคำค้นหา",
     "noLevelsTitle": "ยังไม่ได้เลือกระดับ",
     "noLevelsDescription": "เปิดอย่างน้อยหนึ่งระดับเพื่อดูผลลัพธ์ในบันทึก",
-    "loadFailed": "ไม่สามารถโหลดบันทึกเซิร์ฟเวอร์ได้"
+    "loadFailed": "ไม่สามารถโหลดบันทึกเซิร์ฟเวอร์ได้",
+    "eventFilter": "เหตุการณ์",
+    "allEvents": "เหตุการณ์ทั้งหมด"
   },
   "playground": {
     "title": "สนามเด็กเล่น",

@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "ഈ മാസം {requests} അഭ്യർത്ഥനകൾ, {tokens} ടോക്കണുകൾ",
     "quotaBalanceHint": "{limit} {metric}-ൽ {remaining} ശേഷിക്കുന്നു",
-    "quotaBalanceLeft": "{remaining} ശേഷിക്കുന്നു"
-,
+    "quotaBalanceLeft": "{remaining} ശേഷിക്കുന്നു",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "സെർവർ എഴുതുന്നതിനനുസരിച്ച് എൻട്രികൾ ഇവിടെ ദൃശ്യമാകും. ഔട്ട്പുട്ട് പ്രതീക്ഷിച്ചിരുന്നെങ്കിൽ ലെവൽ, ദാതാവ് അല്ലെങ്കിൽ തിരയൽ ഫിൽട്ടറുകൾ വിശാലമാക്കുക.",
     "noLevelsTitle": "ലെവലുകളൊന്നും തിരഞ്ഞെടുത്തിട്ടില്ല",
     "noLevelsDescription": "ലോഗ് ഔട്ട്പുട്ട് കാണാൻ ചുരുങ്ങിയത് ഒരു ലെവലെങ്കിലും ഓണാക്കുക.",
-    "loadFailed": "സെർവർ ലോഗ് ലോഡ് ചെയ്യാനായില്ല."
+    "loadFailed": "സെർവർ ലോഗ് ലോഡ് ചെയ്യാനായില്ല.",
+    "eventFilter": "ഇവന്റ്",
+    "allEvents": "എല്ലാ ഇവന്റുകളും"
   },
   "playground": {
     "title": "കളിസ്ഥലം",

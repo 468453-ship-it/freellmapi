@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "यस महिना {requests} अनुरोध, {tokens} टोकन",
     "quotaBalanceHint": "{limit} {metric} मध्ये {remaining} बाँकी",
-    "quotaBalanceLeft": "{remaining} बाँकी"
-,
+    "quotaBalanceLeft": "{remaining} बाँकी",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "सर्भरले लेख्दै जाँदा प्रविष्टिहरू यहाँ देखिनेछन्। आउटपुटको अपेक्षा गर्नुभएको थियो भने स्तर, प्रदायक वा खोज फिल्टरको दायरा बढाउनुहोस्।",
     "noLevelsTitle": "कुनै स्तर चयन गरिएको छैन",
     "noLevelsDescription": "लग आउटपुट हेर्न कम्तीमा एउटा स्तर चालु गर्नुहोस्।",
-    "loadFailed": "सर्भर लग लोड गर्न सकिएन।"
+    "loadFailed": "सर्भर लग लोड गर्न सकिएन।",
+    "eventFilter": "इभेन्ट",
+    "allEvents": "सबै इभेन्ट"
   },
   "playground": {
     "title": "खेल मैदान[सम्पादन गर्ने]",

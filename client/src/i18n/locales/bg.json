@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} заявки, {tokens} токени този месец",
     "quotaBalanceHint": "Остават {remaining} от {limit} {metric}",
-    "quotaBalanceLeft": "Остават {remaining}"
-,
+    "quotaBalanceLeft": "Остават {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Записите се появяват тук, докато сървърът ги записва. Разширете филтрите по ниво, доставчик или търсене, ако очаквате изход.",
     "noLevelsTitle": "Няма избрани нива",
     "noLevelsDescription": "Включете поне едно ниво, за да видите изхода от лога.",
-    "loadFailed": "Логът на сървъра не можа да бъде зареден."
+    "loadFailed": "Логът на сървъра не можа да бъде зареден.",
+    "eventFilter": "Събитие",
+    "allEvents": "Всички събития"
   },
   "playground": {
     "title": "Детска площадка",

@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "આ મહિને {requests} વિનંતીઓ, {tokens} ટોકન",
     "quotaBalanceHint": "{limit} {metric}માંથી {remaining} બાકી",
-    "quotaBalanceLeft": "{remaining} બાકી"
-,
+    "quotaBalanceLeft": "{remaining} બાકી",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "સર્વર લખે તેમ એન્ટ્રીઓ અહીં દેખાશે. જો તમને આઉટપુટની અપેક્ષા હોય તો સ્તર, પ્રદાતા કે શોધ ફિલ્ટરનો વ્યાપ વધારો.",
     "noLevelsTitle": "કોઈ સ્તર પસંદ કર્યું નથી",
     "noLevelsDescription": "લોગ આઉટપુટ જોવા માટે ઓછામાં ઓછું એક સ્તર ચાલુ કરો.",
-    "loadFailed": "સર્વર લોગ લોડ થઈ શક્યો નહીં."
+    "loadFailed": "સર્વર લોગ લોડ થઈ શક્યો નહીં.",
+    "eventFilter": "ઇવેન્ટ",
+    "allEvents": "બધા ઇવેન્ટ"
   },
   "playground": {
     "title": "રમતનું મેદાન",

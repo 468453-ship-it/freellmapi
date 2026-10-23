@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} yêu cầu, {tokens} token tháng này",
     "quotaBalanceHint": "Còn {remaining}/{limit} {metric}",
-    "quotaBalanceLeft": "Còn {remaining}"
-,
+    "quotaBalanceLeft": "Còn {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Các mục sẽ xuất hiện ở đây khi máy chủ ghi nhật ký. Hãy nới rộng bộ lọc mức, nhà cung cấp hoặc tìm kiếm nếu bạn mong có kết quả.",
     "noLevelsTitle": "Chưa chọn mức nào",
     "noLevelsDescription": "Bật ít nhất một mức để xem nội dung nhật ký.",
-    "loadFailed": "Không thể tải nhật ký máy chủ."
+    "loadFailed": "Không thể tải nhật ký máy chủ.",
+    "eventFilter": "Sự kiện",
+    "allEvents": "Tất cả sự kiện"
   },
   "playground": {
     "title": "Sân chơi",

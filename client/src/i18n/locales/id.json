@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} permintaan, {tokens} token bulan ini",
     "quotaBalanceHint": "Tersisa {remaining} dari {limit} {metric}",
-    "quotaBalanceLeft": "Tersisa {remaining}"
-,
+    "quotaBalanceLeft": "Tersisa {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Entri muncul di sini saat server menuliskannya. Perlebar filter level, penyedia, atau pencarian jika Anda mengharapkan ada keluaran.",
     "noLevelsTitle": "Tidak ada level yang dipilih",
     "noLevelsDescription": "Aktifkan setidaknya satu level untuk melihat keluaran log.",
-    "loadFailed": "Tidak dapat memuat log server."
+    "loadFailed": "Tidak dapat memuat log server.",
+    "eventFilter": "Event",
+    "allEvents": "Semua event"
   },
   "playground": {
     "title": "Taman bermain",

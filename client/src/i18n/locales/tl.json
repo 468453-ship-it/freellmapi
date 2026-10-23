@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} kahilingan, {tokens} token ngayong buwan",
     "quotaBalanceHint": "{remaining} sa {limit} {metric} ang natitira",
-    "quotaBalanceLeft": "{remaining} ang natitira"
-,
+    "quotaBalanceLeft": "{remaining} ang natitira",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Lumilitaw dito ang mga entry habang isinusulat ang mga ito ng server. Palawakin ang mga filter ng antas, provider o paghahanap kung umaasa ka ng output.",
     "noLevelsTitle": "Walang napiling antas",
     "noLevelsDescription": "Mag-on ng kahit isang antas para makita ang output ng log.",
-    "loadFailed": "Hindi ma-load ang server log."
+    "loadFailed": "Hindi ma-load ang server log.",
+    "eventFilter": "Kaganapan",
+    "allEvents": "Lahat ng kaganapan"
   },
   "playground": {
     "title": "Palaruan",

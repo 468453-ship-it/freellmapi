@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} pyyntöä, {tokens} tokenia tässä kuussa",
     "quotaBalanceHint": "{remaining}/{limit} {metric} jäljellä",
-    "quotaBalanceLeft": "{remaining} jäljellä"
-,
+    "quotaBalanceLeft": "{remaining} jäljellä",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Merkinnät ilmestyvät tähän sitä mukaa kun palvelin kirjoittaa niitä. Laajenna taso-, palveluntarjoaja- tai hakusuodattimia, jos odotit tulostetta.",
     "noLevelsTitle": "Ei valittuja tasoja",
     "noLevelsDescription": "Valitse vähintään yksi taso nähdäksesi lokitulosteen.",
-    "loadFailed": "Palvelimen lokia ei voitu ladata."
+    "loadFailed": "Palvelimen lokia ei voitu ladata.",
+    "eventFilter": "Tapahtuma",
+    "allEvents": "Kaikki tapahtumat"
   },
   "playground": {
     "title": "Leikkipaikka",

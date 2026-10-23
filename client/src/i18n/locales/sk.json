@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} požiadaviek, {tokens} tokenov tento mesiac",
     "quotaBalanceHint": "Zostáva {remaining} z {limit} {metric}",
-    "quotaBalanceLeft": "Zostáva {remaining}"
-,
+    "quotaBalanceLeft": "Zostáva {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Záznamy sa tu objavia, hneď ako ich server zapíše. Ak ste čakali výstup, rozšírte filtre úrovne, poskytovateľa alebo hľadania.",
     "noLevelsTitle": "Nie je vybraná žiadna úroveň",
     "noLevelsDescription": "Zapnite aspoň jednu úroveň, aby ste videli výstup logu.",
-    "loadFailed": "Log servera sa nepodarilo načítať."
+    "loadFailed": "Log servera sa nepodarilo načítať.",
+    "eventFilter": "Udalosť",
+    "allEvents": "Všetky udalosti"
   },
   "playground": {
     "title": "Ihrisko",

@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "இந்த மாதம் {requests} கோரிக்கைகள், {tokens} டோக்கன்கள்",
     "quotaBalanceHint": "{limit} {metric}-இல் {remaining} மீதம்",
-    "quotaBalanceLeft": "{remaining} மீதம்"
-,
+    "quotaBalanceLeft": "{remaining} மீதம்",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "சேவையகம் எழுதும்போது பதிவுகள் இங்கே தோன்றும். வெளியீட்டை எதிர்பார்த்திருந்தால் நிலை, வழங்குபவர் அல்லது தேடல் வடிப்பான்களை விரிவுபடுத்தவும்.",
     "noLevelsTitle": "நிலை எதுவும் தேர்ந்தெடுக்கப்படவில்லை",
     "noLevelsDescription": "பதிவு வெளியீட்டைப் பார்க்க குறைந்தது ஒரு நிலையையாவது இயக்கவும்.",
-    "loadFailed": "சேவையகப் பதிவை ஏற்ற முடியவில்லை."
+    "loadFailed": "சேவையகப் பதிவை ஏற்ற முடியவில்லை.",
+    "eventFilter": "நிகழ்வு",
+    "allEvents": "அனைத்து நிகழ்வுகள்"
   },
   "playground": {
     "title": "விளையாட்டு மைதானம்",

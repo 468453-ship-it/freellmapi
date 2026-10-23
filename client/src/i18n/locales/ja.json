@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "今月 {requests} リクエスト、{tokens} トークン",
     "quotaBalanceHint": "{limit} {metric}中 残り {remaining}",
-    "quotaBalanceLeft": "残り {remaining}"
-,
+    "quotaBalanceLeft": "残り {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "サーバーが書き込むと、ここにエントリが表示されます。出力があるはずの場合は、レベル・プロバイダー・検索のフィルターを広げてください。",
     "noLevelsTitle": "レベルが選択されていません",
     "noLevelsDescription": "ログ出力を表示するには、レベルを 1 つ以上オンにしてください。",
-    "loadFailed": "サーバーログを読み込めませんでした。"
+    "loadFailed": "サーバーログを読み込めませんでした。",
+    "eventFilter": "イベント",
+    "allEvents": "すべてのイベント"
   },
   "playground": {
     "title": "遊び場",

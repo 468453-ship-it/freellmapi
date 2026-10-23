@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} požadavků, {tokens} tokenů tento měsíc",
     "quotaBalanceHint": "Zbývá {remaining} z {limit} {metric}",
-    "quotaBalanceLeft": "Zbývá {remaining}"
-,
+    "quotaBalanceLeft": "Zbývá {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Záznamy se zde objeví, jakmile je server zapíše. Pokud jste čekali výstup, rozšiřte filtry úrovně, poskytovatele nebo hledání.",
     "noLevelsTitle": "Není vybrána žádná úroveň",
     "noLevelsDescription": "Zapněte alespoň jednu úroveň, abyste viděli výstup logu.",
-    "loadFailed": "Log serveru se nepodařilo načíst."
+    "loadFailed": "Log serveru se nepodařilo načíst.",
+    "eventFilter": "Událost",
+    "allEvents": "Všechny události"
   },
   "playground": {
     "title": "Hřiště",

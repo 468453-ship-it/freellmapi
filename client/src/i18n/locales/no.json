@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} forespørsler, {tokens} tokens denne måneden",
     "quotaBalanceHint": "{remaining} av {limit} {metric} igjen",
-    "quotaBalanceLeft": "{remaining} igjen"
-,
+    "quotaBalanceLeft": "{remaining} igjen",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Oppføringer vises her etter hvert som serveren skriver dem. Utvid filtrene for nivå, leverandør eller søk hvis du ventet utdata.",
     "noLevelsTitle": "Ingen nivåer valgt",
     "noLevelsDescription": "Slå på minst ett nivå for å se loggutdata.",
-    "loadFailed": "Kunne ikke laste inn serverloggen."
+    "loadFailed": "Kunne ikke laste inn serverloggen.",
+    "eventFilter": "Hendelse",
+    "allEvents": "Alle hendelser"
   },
   "playground": {
     "title": "Lekeplass",

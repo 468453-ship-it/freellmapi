@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "Bu ay {requests} istek, {tokens} token",
     "quotaBalanceHint": "{limit} {metric} içinden {remaining} kaldı",
-    "quotaBalanceLeft": "{remaining} kaldı"
-,
+    "quotaBalanceLeft": "{remaining} kaldı",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Sunucu kayıtları yazdıkça burada görünür. Çıktı bekliyorsanız düzey, sağlayıcı veya arama filtrelerini genişletin.",
     "noLevelsTitle": "Düzey seçilmedi",
     "noLevelsDescription": "Günlük çıktısını görmek için en az bir düzeyi açın.",
-    "loadFailed": "Sunucu günlüğü yüklenemedi."
+    "loadFailed": "Sunucu günlüğü yüklenemedi.",
+    "eventFilter": "Olay",
+    "allEvents": "Tüm olaylar"
   },
   "playground": {
     "title": "Oyun Alanı",

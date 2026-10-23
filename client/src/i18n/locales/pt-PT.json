@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} pedidos, {tokens} tokens este mês",
     "quotaBalanceHint": "Restam {remaining} de {limit} {metric}",
-    "quotaBalanceLeft": "Restam {remaining}"
-,
+    "quotaBalanceLeft": "Restam {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "As entradas aparecem aqui à medida que o servidor as escreve. Alargue os filtros de nível, fornecedor ou pesquisa se esperava ver resultados.",
     "noLevelsTitle": "Nenhum nível selecionado",
     "noLevelsDescription": "Ative pelo menos um nível para ver o registo.",
-    "loadFailed": "Não foi possível carregar o registo do servidor."
+    "loadFailed": "Não foi possível carregar o registo do servidor.",
+    "eventFilter": "Evento",
+    "allEvents": "Todos os eventos"
   },
   "playground": {
     "title": "Parque infantil",

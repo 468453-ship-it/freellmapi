@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "ఈ నెల {requests} అభ్యర్థనలు, {tokens} టోకెన్లు",
     "quotaBalanceHint": "{limit} {metric}లో {remaining} మిగిలింది",
-    "quotaBalanceLeft": "{remaining} మిగిలింది"
-,
+    "quotaBalanceLeft": "{remaining} మిగిలింది",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "సర్వర్ రాస్తున్న కొద్దీ ఎంట్రీలు ఇక్కడ కనిపిస్తాయి. అవుట్‌పుట్ ఆశించినట్లయితే స్థాయి, ప్రొవైడర్ లేదా శోధన ఫిల్టర్‌లను విస్తృతం చేయండి.",
     "noLevelsTitle": "ఏ స్థాయీ ఎంచుకోలేదు",
     "noLevelsDescription": "లాగ్ అవుట్‌పుట్ చూడటానికి కనీసం ఒక స్థాయిని ఆన్ చేయండి.",
-    "loadFailed": "సర్వర్ లాగ్‌ను లోడ్ చేయడం సాధ్యం కాలేదు."
+    "loadFailed": "సర్వర్ లాగ్‌ను లోడ్ చేయడం సాధ్యం కాలేదు.",
+    "eventFilter": "ఈవెంట్",
+    "allEvents": "అన్ని ఈవెంట్‌లు"
   },
   "playground": {
     "title": "ప్లేగ్రౌండ్",

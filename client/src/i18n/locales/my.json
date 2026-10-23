@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "ယခုလ တောင်းဆိုမှု {requests}၊ တိုကင် {tokens}",
     "quotaBalanceHint": "{limit} {metric} အနက် {remaining} ကျန်သည်",
-    "quotaBalanceLeft": "{remaining} ကျန်သည်"
-,
+    "quotaBalanceLeft": "{remaining} ကျန်သည်",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "ဆာဗာက ရေးသားသည်နှင့်အမျှ အချက်အလက်များ ဤနေရာတွင် ပေါ်လာပါမည်။ ရလဒ်ရှိမည်ဟု မျှော်လင့်ပါက အဆင့်၊ ဝန်ဆောင်မှုပေးသူ သို့မဟုတ် ရှာဖွေမှု စစ်ထုတ်ချက်များကို ကျယ်ပြန့်အောင် ပြင်ပါ။",
     "noLevelsTitle": "အဆင့် တစ်ခုမျှ မရွေးထားပါ",
     "noLevelsDescription": "မှတ်တမ်းများ မြင်ရရန် အနည်းဆုံး အဆင့်တစ်ခု ဖွင့်ပါ။",
-    "loadFailed": "ဆာဗာမှတ်တမ်းကို တင်၍မရပါ။"
+    "loadFailed": "ဆာဗာမှတ်တမ်းကို တင်၍မရပါ။",
+    "eventFilter": "အီးဗင့်",
+    "allEvents": "အီးဗင့်အားလုံး"
   },
   "playground": {
     "title": "ကစားကွင်း",

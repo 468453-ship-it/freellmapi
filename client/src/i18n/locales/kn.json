@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "ಈ ತಿಂಗಳು {requests} ವಿನಂತಿಗಳು, {tokens} ಟೋಕನ್‌ಗಳು",
     "quotaBalanceHint": "{limit} {metric} ಪೈಕಿ {remaining} ಉಳಿದಿದೆ",
-    "quotaBalanceLeft": "{remaining} ಉಳಿದಿದೆ"
-,
+    "quotaBalanceLeft": "{remaining} ಉಳಿದಿದೆ",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "ಸರ್ವರ್ ಬರೆಯುತ್ತಿದ್ದಂತೆ ನಮೂದುಗಳು ಇಲ್ಲಿ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ. ಔಟ್‌ಪುಟ್ ನಿರೀಕ್ಷಿಸಿದ್ದರೆ ಮಟ್ಟ, ಪೂರೈಕೆದಾರ ಅಥವಾ ಹುಡುಕಾಟ ಫಿಲ್ಟರ್‌ಗಳನ್ನು ವಿಸ್ತರಿಸಿ.",
     "noLevelsTitle": "ಯಾವುದೇ ಮಟ್ಟ ಆಯ್ಕೆಯಾಗಿಲ್ಲ",
     "noLevelsDescription": "ಲಾಗ್ ಔಟ್‌ಪುಟ್ ನೋಡಲು ಕನಿಷ್ಠ ಒಂದು ಮಟ್ಟವನ್ನು ಆನ್ ಮಾಡಿ.",
-    "loadFailed": "ಸರ್ವರ್ ಲಾಗ್ ಅನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ."
+    "loadFailed": "ಸರ್ವರ್ ಲಾಗ್ ಅನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ.",
+    "eventFilter": "ಘಟನೆ",
+    "allEvents": "ಎಲ್ಲಾ ಘಟನೆಗಳು"
   },
   "playground": {
     "title": "ಆಟದ ಮೈದಾನ",

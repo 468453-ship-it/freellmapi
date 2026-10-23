@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "या महिन्यात {requests} विनंत्या, {tokens} टोकन",
     "quotaBalanceHint": "{limit} {metric} पैकी {remaining} बाकी",
-    "quotaBalanceLeft": "{remaining} बाकी"
-,
+    "quotaBalanceLeft": "{remaining} बाकी",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "सर्व्हर लिहीत जाईल तशा नोंदी येथे दिसतील. आउटपुटची अपेक्षा असल्यास स्तर, प्रदाता किंवा शोध फिल्टरची व्याप्ती वाढवा.",
     "noLevelsTitle": "कोणताही स्तर निवडलेला नाही",
     "noLevelsDescription": "लॉग आउटपुट पाहण्यासाठी किमान एक स्तर चालू करा.",
-    "loadFailed": "सर्व्हर लॉग लोड करता आला नाही."
+    "loadFailed": "सर्व्हर लॉग लोड करता आला नाही.",
+    "eventFilter": "इव्हेंट",
+    "allEvents": "सर्व इव्हेंट"
   },
   "playground": {
     "title": "खेळाचे मैदान",

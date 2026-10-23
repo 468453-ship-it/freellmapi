@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} užklausos, {tokens} žetonai šį mėnesį",
     "quotaBalanceHint": "Liko {remaining} iš {limit} {metric}",
-    "quotaBalanceLeft": "Liko {remaining}"
-,
+    "quotaBalanceLeft": "Liko {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Įrašai atsiras čia, kai serveris juos užrašys. Jei tikėjotės rezultatų, išplėskite lygio, tiekėjo ar paieškos filtrus.",
     "noLevelsTitle": "Nepasirinktas nė vienas lygis",
     "noLevelsDescription": "Įjunkite bent vieną lygį, kad matytumėte žurnalo įrašus.",
-    "loadFailed": "Nepavyko įkelti serverio žurnalo."
+    "loadFailed": "Nepavyko įkelti serverio žurnalo.",
+    "eventFilter": "Įvykis",
+    "allEvents": "Visi įvykiai"
   },
   "playground": {
     "title": "Žaidimų aikštelė",

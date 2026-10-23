@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} طلبًا، {tokens} رمز هذا الشهر",
     "quotaBalanceHint": "متبقٍ {remaining} من {limit} {metric}",
-    "quotaBalanceLeft": "متبقٍ {remaining}"
-,
+    "quotaBalanceLeft": "متبقٍ {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "تظهر الإدخالات هنا فور كتابتها من الخادم. إذا كنت تتوقع مخرجات، فوسّع مرشّحات المستوى أو المزوّد أو البحث.",
     "noLevelsTitle": "لم يتم تحديد أي مستوى",
     "noLevelsDescription": "فعّل مستوى واحدًا على الأقل لعرض مخرجات السجل.",
-    "loadFailed": "تعذّر تحميل سجل الخادم."
+    "loadFailed": "تعذّر تحميل سجل الخادم.",
+    "eventFilter": "حدث",
+    "allEvents": "جميع الأحداث"
   },
   "playground": {
     "title": "ملعب",

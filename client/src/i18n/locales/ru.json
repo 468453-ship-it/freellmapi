@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} запросов, {tokens} токенов в этом месяце",
     "quotaBalanceHint": "Осталось {remaining} из {limit} {metric}",
-    "quotaBalanceLeft": "Осталось {remaining}"
-,
+    "quotaBalanceLeft": "Осталось {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Записи появятся здесь, как только сервер их запишет. Если вы ожидали вывод, расширьте фильтры по уровню, поставщику или поиску.",
     "noLevelsTitle": "Уровни не выбраны",
     "noLevelsDescription": "Включите хотя бы один уровень, чтобы видеть вывод журнала.",
-    "loadFailed": "Не удалось загрузить журнал сервера."
+    "loadFailed": "Не удалось загрузить журнал сервера.",
+    "eventFilter": "Событие",
+    "allEvents": "Все события"
   },
   "playground": {
     "title": "Детская площадка",

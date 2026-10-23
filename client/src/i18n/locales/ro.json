@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} cereri, {tokens} tokeni luna aceasta",
     "quotaBalanceHint": "Au rămas {remaining} din {limit} {metric}",
-    "quotaBalanceLeft": "Au rămas {remaining}"
-,
+    "quotaBalanceLeft": "Au rămas {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Intrările apar aici pe măsură ce serverul le scrie. Lărgește filtrele de nivel, furnizor sau căutare dacă te așteptai la rezultate.",
     "noLevelsTitle": "Niciun nivel selectat",
     "noLevelsDescription": "Activează cel puțin un nivel pentru a vedea jurnalul.",
-    "loadFailed": "Nu s-a putut încărca jurnalul serverului."
+    "loadFailed": "Nu s-a putut încărca jurnalul serverului.",
+    "eventFilter": "Eveniment",
+    "allEvents": "Toate evenimentele"
   },
   "playground": {
     "title": "Locul de joacă",

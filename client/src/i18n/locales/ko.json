@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "이번 달 요청 {requests}회, 토큰 {tokens}",
     "quotaBalanceHint": "{limit} {metric} 중 {remaining} 남음",
-    "quotaBalanceLeft": "{remaining} 남음"
-,
+    "quotaBalanceLeft": "{remaining} 남음",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "서버가 기록하는 대로 항목이 여기에 표시됩니다. 출력이 있어야 한다면 수준, 제공업체 또는 검색 필터를 넓혀 보세요.",
     "noLevelsTitle": "선택된 수준이 없습니다",
     "noLevelsDescription": "로그 출력을 보려면 수준을 하나 이상 켜세요.",
-    "loadFailed": "서버 로그를 불러오지 못했습니다."
+    "loadFailed": "서버 로그를 불러오지 못했습니다.",
+    "eventFilter": "이벤트",
+    "allEvents": "모든 이벤트"
   },
   "playground": {
     "title": "놀이터",

@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "මෙම මාසය ඉල්ලීම් {requests}, ටෝකන් {tokens}",
     "quotaBalanceHint": "{limit} {metric} න් {remaining} ඉතිරියි",
-    "quotaBalanceLeft": "{remaining} ඉතිරියි"
-,
+    "quotaBalanceLeft": "{remaining} ඉතිරියි",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "සේවාදායකය ලියන පරිදි ඇතුළත් කිරීම් මෙහි දිස්වේ. ප්‍රතිදානයක් අපේක්ෂා කළේ නම් මට්ටම, සපයන්නා හෝ සෙවුම් පෙරහන් පුළුල් කරන්න.",
     "noLevelsTitle": "මට්ටම් තෝරා නැත",
     "noLevelsDescription": "ලොග ප්‍රතිදානය බැලීමට අවම වශයෙන් එක් මට්ටමක් සක්‍රීය කරන්න.",
-    "loadFailed": "සේවාදායක ලොගය පූරණය කළ නොහැකි විය."
+    "loadFailed": "සේවාදායක ලොගය පූරණය කළ නොහැකි විය.",
+    "eventFilter": "සිදුවීම",
+    "allEvents": "සිදුවීම් සියල්ල"
   },
   "playground": {
     "title": "ක්රීඩා පිටිය",

@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} requêtes, {tokens} jetons ce mois",
     "quotaBalanceHint": "{remaining} sur {limit} {metric} restants",
-    "quotaBalanceLeft": "{remaining} restants"
-,
+    "quotaBalanceLeft": "{remaining} restants",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Les entrées apparaissent ici au fur et à mesure que le serveur les écrit. Élargissez les filtres de niveau, de fournisseur ou de recherche si vous attendiez des résultats.",
     "noLevelsTitle": "Aucun niveau sélectionné",
     "noLevelsDescription": "Activez au moins un niveau pour voir le journal.",
-    "loadFailed": "Impossible de charger le journal du serveur."
+    "loadFailed": "Impossible de charger le journal du serveur.",
+    "eventFilter": "Événement",
+    "allEvents": "Tous les événements"
   },
   "playground": {
     "title": "Bac à sable",

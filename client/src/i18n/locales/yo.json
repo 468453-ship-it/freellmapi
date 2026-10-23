@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} ìbéèrè, {tokens} token oṣù yìí",
     "quotaBalanceHint": "{remaining} nínú {limit} {metric} ló kù",
-    "quotaBalanceLeft": "{remaining} ló kù"
-,
+    "quotaBalanceLeft": "{remaining} ló kù",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Awọn akọsilẹ yoo han nibi bi olupin ṣe n kọ wọn. Fẹ awọn asẹ ipele, olupese tabi wiwa siwaju sii ti o ba nireti abajade.",
     "noLevelsTitle": "Ko si ipele ti a yan",
     "noLevelsDescription": "Tan o kere ju ipele kan lati ri abajade àkọọlẹ.",
-    "loadFailed": "A kò lè gbé àkọọlẹ olupin wọlé."
+    "loadFailed": "A kò lè gbé àkọọlẹ olupin wọlé.",
+    "eventFilter": "Ìṣẹ̀lẹ̀",
+    "allEvents": "Gbogbo ìṣẹ̀lẹ̀"
   },
   "playground": {
     "title": "Ibi isereile",

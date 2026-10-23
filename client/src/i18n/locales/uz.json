@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "Bu oy {requests} so‘rov, {tokens} token",
     "quotaBalanceHint": "{limit} {metric} dan {remaining} qoldi",
-    "quotaBalanceLeft": "{remaining} qoldi"
-,
+    "quotaBalanceLeft": "{remaining} qoldi",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Server yozuvlarni yozgani sari ular shu yerda paydo boʻladi. Natija kutgan boʻlsangiz, daraja, provayder yoki qidiruv filtrlarini kengaytiring.",
     "noLevelsTitle": "Daraja tanlanmagan",
     "noLevelsDescription": "Jurnal chiqishini koʻrish uchun kamida bitta darajani yoqing.",
-    "loadFailed": "Server jurnalini yuklab boʻlmadi."
+    "loadFailed": "Server jurnalini yuklab boʻlmadi.",
+    "eventFilter": "Hodisa",
+    "allEvents": "Barcha hodisalar"
   },
   "playground": {
     "title": "O'yin maydonchasi",

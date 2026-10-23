@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "اس مہینے {requests} درخواستیں، {tokens} ٹوکن",
     "quotaBalanceHint": "{limit} {metric} میں سے {remaining} باقی",
-    "quotaBalanceLeft": "{remaining} باقی"
-,
+    "quotaBalanceLeft": "{remaining} باقی",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "سرور جیسے جیسے لکھتا ہے، اندراجات یہاں ظاہر ہوتے جائیں گے۔ اگر آپ کو آؤٹ پٹ کی توقع تھی تو لیول، فراہم کنندہ یا تلاش کے فلٹرز کا دائرہ بڑھائیں۔",
     "noLevelsTitle": "کوئی لیول منتخب نہیں",
     "noLevelsDescription": "لاگ آؤٹ پٹ دیکھنے کے لیے کم از کم ایک لیول آن کریں۔",
-    "loadFailed": "سرور لاگ لوڈ نہیں ہو سکا۔"
+    "loadFailed": "سرور لاگ لوڈ نہیں ہو سکا۔",
+    "eventFilter": "واقعہ",
+    "allEvents": "تمام واقعات"
   },
   "playground": {
     "title": "کھیل کا میدان",

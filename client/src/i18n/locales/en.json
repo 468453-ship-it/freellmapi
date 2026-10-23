@@ -914,7 +914,9 @@
     "emptyDescription": "Entries appear here as the server writes them. Widen the level, provider or search filters if you expected output.",
     "noLevelsTitle": "No levels selected",
     "noLevelsDescription": "Turn on at least one level to see log output.",
-    "loadFailed": "Couldn't load the server log."
+    "loadFailed": "Couldn't load the server log.",
+    "eventFilter": "Event",
+    "allEvents": "All events"
   },
   "playground": {
     "title": "Playground",

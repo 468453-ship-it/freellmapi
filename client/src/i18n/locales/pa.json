@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "ਇਸ ਮਹੀਨੇ {requests} ਬੇਨਤੀਆਂ, {tokens} ਟੋਕਨ",
     "quotaBalanceHint": "{limit} {metric} ਵਿੱਚੋਂ {remaining} ਬਾਕੀ",
-    "quotaBalanceLeft": "{remaining} ਬਾਕੀ"
-,
+    "quotaBalanceLeft": "{remaining} ਬਾਕੀ",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "ਜਿਵੇਂ-ਜਿਵੇਂ ਸਰਵਰ ਲਿਖਦਾ ਹੈ, ਐਂਟਰੀਆਂ ਇੱਥੇ ਦਿਖਾਈ ਦੇਣਗੀਆਂ। ਜੇ ਤੁਹਾਨੂੰ ਆਉਟਪੁੱਟ ਦੀ ਉਮੀਦ ਸੀ ਤਾਂ ਪੱਧਰ, ਪ੍ਰਦਾਤਾ ਜਾਂ ਖੋਜ ਫਿਲਟਰਾਂ ਦਾ ਘੇਰਾ ਵਧਾਓ।",
     "noLevelsTitle": "ਕੋਈ ਪੱਧਰ ਨਹੀਂ ਚੁਣਿਆ",
     "noLevelsDescription": "ਲੌਗ ਆਉਟਪੁੱਟ ਵੇਖਣ ਲਈ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਪੱਧਰ ਚਾਲੂ ਕਰੋ।",
-    "loadFailed": "ਸਰਵਰ ਲੌਗ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ।"
+    "loadFailed": "ਸਰਵਰ ਲੌਗ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ।",
+    "eventFilter": "ਈਵੈਂਟ",
+    "allEvents": "ਸਾਰੇ ਈਵੈਂਟ"
   },
   "playground": {
     "title": "ਖੇਡ ਦਾ ਮੈਦਾਨ",

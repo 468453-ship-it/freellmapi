@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} solicitudes, {tokens} tokens este mes",
     "quotaBalanceHint": "Quedan {remaining} de {limit} {metric}",
-    "quotaBalanceLeft": "Quedan {remaining}"
-,
+    "quotaBalanceLeft": "Quedan {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Las entradas aparecen aquí a medida que el servidor las escribe. Amplía los filtros de nivel, proveedor o búsqueda si esperabas ver algo.",
     "noLevelsTitle": "Ningún nivel seleccionado",
     "noLevelsDescription": "Activa al menos un nivel para ver el registro.",
-    "loadFailed": "No se pudo cargar el registro del servidor."
+    "loadFailed": "No se pudo cargar el registro del servidor.",
+    "eventFilter": "Evento",
+    "allEvents": "Todos los eventos"
   },
   "playground": {
     "title": "Entorno de pruebas",

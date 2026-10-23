@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "ଏହି ମାସରେ {requests} ଅନୁରୋଧ, {tokens} ଟୋକେନ୍",
     "quotaBalanceHint": "{limit} {metric} ମଧ୍ୟରୁ {remaining} ବାକି",
-    "quotaBalanceLeft": "{remaining} ବାକି"
-,
+    "quotaBalanceLeft": "{remaining} ବାକି",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "ସର୍ଭର ଲେଖିବା ସହିତ ଏଣ୍ଟ୍ରିଗୁଡିକ ଏଠାରେ ଦେଖାଯିବ। ଆଉଟପୁଟ ଆଶା କରିଥିଲେ ସ୍ତର, ପ୍ରଦାନକାରୀ କିମ୍ୱା ସନ୍ଧାନ ଫିଲ୍ଟରର ପରିସର ବଢ଼ାନ୍ତୁ।",
     "noLevelsTitle": "କୌଣସି ସ୍ତର ବଛାଯାଇନାହିଁ",
     "noLevelsDescription": "ଲଗ ଆଉଟପୁଟ ଦେଖିବାକୁ ଅନ୍ତତଃ ଗୋଟିଏ ସ୍ତର ଚାଲୁ କରନ୍ତୁ।",
-    "loadFailed": "ସର୍ଭର ଲଗ ଲୋଡ କରାଯାଇପାରିଲା ନାହିଁ।"
+    "loadFailed": "ସର୍ଭର ଲଗ ଲୋଡ କରାଯାଇପାରିଲା ନାହିଁ।",
+    "eventFilter": "ଇଭେଣ୍ଟ",
+    "allEvents": "ସମସ୍ତ ଇଭେଣ୍ଟ"
   },
   "playground": {
     "title": "ଖେଳ ପଡିଆ",

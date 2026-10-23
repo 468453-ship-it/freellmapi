@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} verzoeken, {tokens} tokens deze maand",
     "quotaBalanceHint": "{remaining} van {limit} {metric} over",
-    "quotaBalanceLeft": "{remaining} over"
-,
+    "quotaBalanceLeft": "{remaining} over",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Regels verschijnen hier zodra de server ze schrijft. Verruim de filters voor niveau, aanbieder of zoekopdracht als je uitvoer verwachtte.",
     "noLevelsTitle": "Geen niveaus geselecteerd",
     "noLevelsDescription": "Zet minstens één niveau aan om loguitvoer te zien.",
-    "loadFailed": "Kan het serverlog niet laden."
+    "loadFailed": "Kan het serverlog niet laden.",
+    "eventFilter": "Gebeurtenis",
+    "allEvents": "Alle gebeurtenissen"
   },
   "playground": {
     "title": "Speeltuin",

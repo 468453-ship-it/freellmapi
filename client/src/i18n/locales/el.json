@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} αιτήματα, {tokens} tokens αυτόν τον μήνα",
     "quotaBalanceHint": "Απομένουν {remaining} από {limit} {metric}",
-    "quotaBalanceLeft": "Απομένουν {remaining}"
-,
+    "quotaBalanceLeft": "Απομένουν {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Οι εγγραφές εμφανίζονται εδώ καθώς τις γράφει ο διακομιστής. Διευρύνετε τα φίλτρα επιπέδου, παρόχου ή αναζήτησης αν περιμένατε αποτελέσματα.",
     "noLevelsTitle": "Δεν έχει επιλεγεί επίπεδο",
     "noLevelsDescription": "Ενεργοποιήστε τουλάχιστον ένα επίπεδο για να δείτε τις καταγραφές.",
-    "loadFailed": "Δεν ήταν δυνατή η φόρτωση του αρχείου καταγραφής του διακομιστή."
+    "loadFailed": "Δεν ήταν δυνατή η φόρτωση του αρχείου καταγραφής του διακομιστή.",
+    "eventFilter": "Γεγονός",
+    "allEvents": "Όλα τα γεγονότα"
   },
   "playground": {
     "title": "Παιδική χαρά",

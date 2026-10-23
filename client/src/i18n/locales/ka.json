@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "ამ თვეში {requests} მოთხოვნა, {tokens} ტოკენი",
     "quotaBalanceHint": "დარჩა {remaining} / {limit} {metric}",
-    "quotaBalanceLeft": "დარჩა {remaining}"
-,
+    "quotaBalanceLeft": "დარჩა {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "ჩანაწერები აქ გამოჩნდება, როგორც კი სერვერი ჩაწერს მათ. თუ გამოტანას ელოდით, გააფართოვეთ დონის, პროვაიდერის ან ძებნის ფილტრები.",
     "noLevelsTitle": "დონეები არჩეული არ არის",
     "noLevelsDescription": "ჩართეთ ერთი დონე მაინც, რომ ჟურნალის გამოტანა ნახოთ.",
-    "loadFailed": "სერვერის ჟურნალის ჩატვირთვა ვერ მოხერხდა."
+    "loadFailed": "სერვერის ჟურნალის ჩატვირთვა ვერ მოხერხდა.",
+    "eventFilter": "მოვლენა",
+    "allEvents": "ყველა მოვლენა"
   },
   "playground": {
     "title": "სათამაშო მოედანი",

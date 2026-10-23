@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "এই মাসে {requests} অনুরোধ, {tokens} টোকেন",
     "quotaBalanceHint": "{limit} {metric}-এর মধ্যে {remaining} বাকি",
-    "quotaBalanceLeft": "{remaining} বাকি"
-,
+    "quotaBalanceLeft": "{remaining} বাকি",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "সার্ভার যেমন লেখে, এন্ট্রিগুলি এখানে দেখা যাবে। আউটপুট আশা করে থাকলে লেভেল, প্রদানকারী বা অনুসন্ধান ফিল্টারের পরিসর বাড়ান।",
     "noLevelsTitle": "কোনো লেভেল নির্বাচিত নয়",
     "noLevelsDescription": "লগ আউটপুট দেখতে অন্তত একটি লেভেল চালু করুন।",
-    "loadFailed": "সার্ভার লগ লোড করা গেল না।"
+    "loadFailed": "সার্ভার লগ লোড করা গেল না।",
+    "eventFilter": "ইভেন্ট",
+    "allEvents": "সমস্ত ইভেন্ট"
   },
   "playground": {
     "title": "খেলার মাঠ",

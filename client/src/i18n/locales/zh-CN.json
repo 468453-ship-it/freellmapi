@@ -875,7 +875,9 @@
     "emptyDescription": "服务器写入日志时，条目会显示在这里。如果预期会有输出，请放宽级别、提供方或搜索筛选条件。",
     "noLevelsTitle": "未选择级别",
     "noLevelsDescription": "至少启用一个级别才能查看日志输出。",
-    "loadFailed": "无法加载服务器日志。"
+    "loadFailed": "无法加载服务器日志。",
+    "eventFilter": "事件",
+    "allEvents": "全部事件"
   },
   "playground": {
     "title": "试验场",

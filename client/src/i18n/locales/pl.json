@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "{requests} żądań, {tokens} tokenów w tym miesiącu",
     "quotaBalanceHint": "Pozostało {remaining} z {limit} {metric}",
-    "quotaBalanceLeft": "Pozostało {remaining}"
-,
+    "quotaBalanceLeft": "Pozostało {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Wpisy pojawią się tutaj, gdy serwer zacznie je zapisywać. Poszerz filtry poziomu, dostawcy lub wyszukiwania, jeśli spodziewasz się wyników.",
     "noLevelsTitle": "Nie wybrano poziomów",
     "noLevelsDescription": "Włącz co najmniej jeden poziom, aby zobaczyć zawartość logu.",
-    "loadFailed": "Nie udało się wczytać logu serwera."
+    "loadFailed": "Nie udało się wczytać logu serwera.",
+    "eventFilter": "Zdarzenie",
+    "allEvents": "Wszystkie zdarzenia"
   },
   "playground": {
     "title": "Plac zabaw",

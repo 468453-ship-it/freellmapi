@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "Maombi {requests}, tokeni {tokens} mwezi huu",
     "quotaBalanceHint": "Zimebaki {remaining} kati ya {limit} {metric}",
-    "quotaBalanceLeft": "Zimebaki {remaining}"
-,
+    "quotaBalanceLeft": "Zimebaki {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Maingizo huonekana hapa seva inapoyaandika. Panua vichujio vya kiwango, mtoa huduma au utafutaji ikiwa ulitarajia matokeo.",
     "noLevelsTitle": "Hakuna kiwango kilichochaguliwa",
     "noLevelsDescription": "Washa angalau kiwango kimoja ili kuona matokeo ya kumbukumbu.",
-    "loadFailed": "Imeshindwa kupakia kumbukumbu ya seva."
+    "loadFailed": "Imeshindwa kupakia kumbukumbu ya seva.",
+    "eventFilter": "Tukio",
+    "allEvents": "Matukio yote"
   },
   "playground": {
     "title": "Uwanja wa michezo",

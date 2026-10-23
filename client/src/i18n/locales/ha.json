@@ -720,8 +720,7 @@
     "keyProxyUndo": "Undo",
     "monthlyUsageLine": "Buƙatotu {requests}, token {tokens} wannan wata",
     "quotaBalanceHint": "Saura {remaining} daga {limit} {metric}",
-    "quotaBalanceLeft": "Saura {remaining}"
-,
+    "quotaBalanceLeft": "Saura {remaining}",
     "groupLabel": "Group",
     "groupLabelPlaceholder": "e.g. Relays, Work…",
     "groupLabelHint": "Optional: endpoints in the same group are listed together, and a request can stay inside the group with custom:<model>#<group>. Leave blank for the default Custom group.",
@@ -876,7 +875,9 @@
     "emptyDescription": "Shigarwa na bayyana nan yayin da uwar garken ke rubuta su. Faɗaɗa matatun mataki, mai samarwa ko bincike idan kana tsammanin fitarwa.",
     "noLevelsTitle": "Ba a zaɓi kowane mataki ba",
     "noLevelsDescription": "Kunna aƙalla mataki ɗaya don ganin fitarwar log.",
-    "loadFailed": "An kasa loda log ɗin uwar garke."
+    "loadFailed": "An kasa loda log ɗin uwar garke.",
+    "eventFilter": "Lambar",
+    "allEvents": "Duk lambobi"
   },
   "playground": {
     "title": "filin wasa",
