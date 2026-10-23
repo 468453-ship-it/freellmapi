@@ -43,6 +43,7 @@ import { ApinexProvider } from './apinex.js';
 import { OnomeoProvider } from './onomeo.js';
 import { IteraComputeProvider } from './iteracompute.js';
 import { SerpSearchProvider } from './serpsearch.js';
+import { BraveProvider } from './brave.js';
 
 const providers = new Map<Platform, BaseProvider>();
 
@@ -93,6 +94,7 @@ register(new OnomeoProvider());
 // monthly token allowance; no free credential probe (see adapter docs).
 register(new IteraComputeProvider());
 register(new SerpSearchProvider());
+register(new BraveProvider());
 
 // Free-plan grants are shared wallets, not free credits per model. Eligibility
 // and tested model rows belong in Oracle, never in bundled DB migrations.

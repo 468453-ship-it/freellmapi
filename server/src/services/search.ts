@@ -6,6 +6,7 @@ import { proxyFetch } from '../lib/proxy.js';
 import { isSearchPlatform } from '../lib/search-platforms.js';
 import { TAVILY_BASE_URL } from '../providers/tavily.js';
 import { SERPSEARCH_BASE_URL } from '../providers/serpsearch.js';
+import { BRAVE_BASE_URL, BRAVE_BAD_KEY_CODE } from '../providers/brave.js';
 import { EXA_BASE_URL } from '../providers/exa.js';
 import { FIRECRAWL_BASE_URL } from '../providers/firecrawl.js';
 import { LINKUP_BASE_URL } from '../providers/linkup.js';
@@ -312,6 +313,36 @@ const ADAPTERS: Record<string, Adapter> = {
       rows = (result.organic_results ?? []) as unknown[];
     }
     const hits = rows.filter((r): r is Record<string, unknown> => !!r && typeof r === 'object').map(r => ({
+      title: str(r.title), url: str(r.url), content: str(r.description),
+    }));
+    return { results: keepHits(hits).slice(0, n) };
+  },
+  // Brave: a bad key is a 422 carrying BRAVE_BAD_KEY_CODE (mapped to 401 so
+  // coolDown benches it), a QUOTA_LIMITED 429 is spent credit (mapped to 402),
+  // and any other 429 is its 1-second burst window.
+  brave: async (cred, query, opts, n) => {
+    const news = opts.topic === 'news';
+    const url = new URL(`${BRAVE_BASE_URL}/${news ? 'news' : 'web'}/search`);
+    url.searchParams.set('q', query);
+    url.searchParams.set('count', String(n));
+    let parsed: { web?: { results?: unknown }; results?: unknown } | null;
+    try {
+      parsed = await upstream(url.toString(), 'brave', {
+        method: 'GET', redirect: 'error', headers: { 'X-Subscription-Token': cred.key, Accept: 'application/json' },
+      }, opts.signal) as typeof parsed;
+    } catch (e) {
+      if (!(e instanceof SearchError)) throw e;
+      if (e.status === 422 && e.message.includes(BRAVE_BAD_KEY_CODE)) throw new SearchError(e.message, 401);
+      // A 429 for a spent monthly allowance (QUOTA_LIMITED) is the credits-
+      // spent case, not a burst: park the key like a 402 instead of retrying
+      // it every second until the month resets.
+      if (e.status === 429 && /quota/i.test(e.message)) throw new SearchError(e.message, 402);
+      // Brave sends no Retry-After; its burst window is one second.
+      if (e.status === 429) throw new SearchError(e.message, 429, undefined, e.retryAfterMs ?? 1_000);
+      throw e;
+    }
+    const rows = news ? parsed?.results : parsed?.web?.results;
+    const hits = (Array.isArray(rows) ? rows : []).filter((r): r is Record<string, unknown> => !!r && typeof r === 'object').map(r => ({
       title: str(r.title), url: str(r.url), content: str(r.description),
     }));
     return { results: keepHits(hits).slice(0, n) };

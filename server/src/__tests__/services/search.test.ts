@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { initDb, getDb } from '../../db/index.js';
 import { encrypt } from '../../lib/crypto.js';
-import { clearAllCooldowns } from '../../services/ratelimit.js';
+import { clearAllCooldowns, isOnCooldown } from '../../services/ratelimit.js';
+import { BraveProvider } from '../../providers/brave.js';
 import {
   runSearch,
   SearchError,
@@ -150,6 +151,72 @@ describe('search service', () => {
     expect(calls(fn)[0][0]).toBe('https://api.linkup.so/v1/search');
     expect(bodyOf(calls(fn)[0])).toMatchObject({ q: 'q', depth: 'standard', outputType: 'sourcedAnswer', maxResults: 5 });
     expect(out).toMatchObject({ answer: 'yes', provider: 'linkup', results: [{ title: 'S', url: 'https://s', content: 'src' }] });
+  });
+
+  describe('Brave (#1641)', () => {
+    const badKey = { error: { code: 'SUBSCRIPTION_TOKEN_INVALID', detail: 'The provided subscription token is invalid.', status: 422 }, type: 'ErrorResponse' };
+    beforeEach(() => {
+      getDb().prepare(`
+        INSERT INTO media_models (platform, model_id, display_name, modality, priority, enabled, quota_label, meta_json)
+        VALUES ('brave', 'brave-search', 'Brave Search', 'search', -1, 1, 'free monthly credits', '{}')
+      `).run();
+    });
+
+    it('searches web and news with the subscription token and maps hits', async () => {
+      addKey('brave');
+      let fn = mockFetch(() => json({ web: { results: [{ title: 'A &amp; B', url: 'https://a', description: 'alpha' }, { title: 'no url' }] } }));
+      let out = await runSearch('cats & dogs', { maxResults: 3 });
+      const url = new URL(calls(fn)[0][0]);
+      expect(`${url.origin}${url.pathname}`).toBe('https://api.search.brave.com/res/v1/web/search');
+      expect(url.searchParams.get('q')).toBe('cats & dogs');
+      expect(url.searchParams.get('count')).toBe('3');
+      expect(new Headers(calls(fn)[0][1].headers).get('x-subscription-token')).toBe('brave-test-key');
+      expect(out).toMatchObject({ provider: 'brave', engine: 'brave-search', results: [{ title: 'A & B', url: 'https://a', content: 'alpha', score: 1 }] });
+
+      fn = mockFetch(() => json({ results: [{ title: 'N', url: 'https://n', description: 'fresh' }] }));
+      out = await runSearch('q', { topic: 'news' });
+      expect(new URL(calls(fn)[0][0]).pathname).toBe('/res/v1/news/search');
+      expect(out.results).toEqual([{ title: 'N', url: 'https://n', content: 'fresh', score: 1 }]);
+    });
+
+    it('benches a key Brave rejects (422 SUBSCRIPTION_TOKEN_INVALID), but not a key whose request was refused (422 VALIDATION)', async () => {
+      const key = addKey('brave');
+      mockFetch(() => json({ error: { code: 'VALIDATION', detail: 'Unable to validate request parameter(s)', status: 422 } }, 422));
+      await expect(runSearch('q', { engine: 'brave-search' })).rejects.toBeInstanceOf(SearchError);
+      expect(isOnCooldown('brave', 'brave-search', key)).toBe(false);
+
+      mockFetch(() => json(badKey, 422));
+      await expect(runSearch('q', { engine: 'brave-search' })).rejects.toBeInstanceOf(SearchError);
+      expect(isOnCooldown('brave', 'brave-search', key)).toBe(true);
+    });
+
+    it('cools a rate-limited key down only for the one-second burst window', async () => {
+      const key = addKey('brave');
+      mockFetch(() => json({ error: { code: 'RATE_LIMITED', detail: 'Request rate limit exceeded for plan' } }, 429));
+      await expect(runSearch('q', { engine: 'brave-search' })).rejects.toBeInstanceOf(SearchError);
+      expect(isOnCooldown('brave', 'brave-search', key)).toBe(true);
+      const later = Date.now() + 2_000;
+      vi.spyOn(Date, 'now').mockReturnValue(later);
+      expect(isOnCooldown('brave', 'brave-search', key)).toBe(false);
+    });
+
+    it('parks a key whose monthly credit is spent (429 QUOTA_LIMITED) for the long credit cooldown', async () => {
+      const key = addKey('brave');
+      mockFetch(() => json({ error: { code: 'QUOTA_LIMITED', detail: 'Request quota limit exceeded for plan' } }, 429));
+      await expect(runSearch('q', { engine: 'brave-search' })).rejects.toBeInstanceOf(SearchError);
+      const later = Date.now() + 60 * 60_000;
+      vi.spyOn(Date, 'now').mockReturnValue(later);
+      expect(isOnCooldown('brave', 'brave-search', key)).toBe(true);
+    });
+
+    it('validates a key with a free no-query request: bad token is invalid, VALIDATION means the key is fine', async () => {
+      const brave = new BraveProvider();
+      mockFetch(() => json(badKey, 422));
+      expect(await brave.validateKey('bad')).toMatchObject({ valid: false });
+      mockFetch(() => json({ error: { code: 'VALIDATION', detail: 'Unable to validate request parameter(s)', status: 422 } }, 422));
+      expect(await brave.validateKey('good')).toBe(true);
+      expect(brave.supportsKeyPolling).toBe(false);
+    });
   });
 
   describe('Parallel (keyless)', () => {
