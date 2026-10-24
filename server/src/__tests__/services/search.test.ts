@@ -484,4 +484,16 @@ describe('decodeEntities', () => {
     expect(decodeEntities('&bogus; stays')).toBe('&bogus; stays');
     expect(decodeEntities('plain')).toBe('plain');
   });
+  it('leaves lone-surrogate entities verbatim instead of corrupting the string', () => {
+    // Obfuscated-email bait on scraped pages renders as a lone surrogate
+    // entity. String.fromCodePoint happily "decodes" it, producing a string
+    // that is not valid UTF-16: JSON.stringify turns it into U+FFFD escapes
+    // and strict encoders/serialisers choke on it. The entity must survive
+    // untouched, exactly like the out-of-range case (&#x110000;).
+    expect(decodeEntities('contact &#xD800; us')).toBe('contact &#xD800; us');
+    expect(decodeEntities('tail &#xDFFF; end')).toBe('tail &#xDFFF; end');
+    expect(decodeEntities('&#65533;?')).toBe('\uFFFD?'); // real replacement char still decodes
+    expect(decodeEntities('&#x110000; too big')).toBe('&#x110000; too big');
+    expect(decodeEntities('&#x1F600; emoji')).toBe('\u{1F600} emoji');
+  });
 });
