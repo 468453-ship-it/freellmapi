@@ -132,6 +132,7 @@ In Docker, `127.0.0.1` is the container, not your machine — see [03-outbound-p
 | `FREEAPI_DB_BACKUP_TOKEN` | Unset | Optional bearer token for uploads to `FREEAPI_DB_BACKUP_URL`. |
 | `FREEAPI_DB_BACKUP_KEY` | Uses `ENCRYPTION_KEY` if omitted | Separate 64-char hex key for the backup envelope. |
 | `FREEAPI_DB_BACKUP_INTERVAL_MS` | `300000` (5 min) | Period between background backups. |
+| `AUTO_BACKUP_DUMP_RETENTION` | `10` | Count bound for the automatic dump files on the Backups page (#1675): keeps the newest N dumps whose source is `scheduled` or `pre-update`, deleting the older files and their rows on the next dump write. Manual and pre-restore dumps are never auto-deleted. `0` disables the prune (keeps every auto dump forever). |
 | `FREEAPI_CONFIG_PATH` | Unset | Optional declarative startup config: path to a JSON file applied idempotently after migrations on every boot. Example: `/app/server/data/freellmapi.config.json`. |
 | `FREEAPI_CONFIG_JSON` | Unset | Same declarative config inline instead of via file, e.g. `{"keys":[{"platform":"groq","key":"gsk_...","label":"main"}],"routing":{"strategy":"balanced"}}`. |
 | `FREELLMAPI_UPDATE_CHECK` | Enabled | Manual application update checker. Set to `off` to hide it from Settings and prevent Git discovery or outbound update-check requests. This also switches off the automatic release reminder, which is a separate dashboard setting (Settings > General) that stays off until turned on there. |
