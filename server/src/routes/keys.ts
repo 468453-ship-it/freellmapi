@@ -99,6 +99,24 @@ const upload = multer({
 // at request time, one attempt at a time. '' = no override (global proxy).
 const proxyUrlSchema = z.string().max(KEY_PROXY_URL_MAX).refine(isValidKeyProxyUrl, { message: KEY_PROXY_URL_ERROR });
 
+// A label is free text, and two formats read it back as STRUCTURE: the .env
+// export writes it as a `# label` comment line (a label carrying a newline
+// injects a real `GOOGLE_KEY=...` line that the importer then loads as a
+// key), and the CSV export writes it as one cell (the formula guard quotes the
+// cell but cannot stop a newline from splitting the record). So a label is one
+// line of text, full stop: line breaks and other control characters collapse
+// to a space, and it is trimmed and bounded like every other operator label
+// (groupLabel is trim().max(80)).
+const LABEL_MAX = 200;
+function sanitizeLabel(label: string): string {
+  // eslint-disable-next-line no-control-regex -- collapsing control chars is the point.
+  return label.replace(/[\r\n\t\u0000-\u001f\u007f]+/g, ' ').trim().slice(0, LABEL_MAX);
+}
+// Defensive read for exports: rows stored by older builds can still hold a
+// newline, and an export must never write one into a label position.
+const labelForExport = (label: string | null | undefined): string =>
+  label == null ? '' : sanitizeLabel(label);
+
 const addKeySchema = z.object({
   platform: z.enum(PLATFORMS),
   key: z.string().optional(),
@@ -611,7 +629,7 @@ keysRouter.get('/export', (req: Request, res: Response) => {
       if (k.platform === 'custom' && k.baseUrl) {
         customIndex++;
         return [
-          `# ${k.label || `custom endpoint ${customIndex}`}`,
+          `# ${labelForExport(k.label) || `custom endpoint ${customIndex}`}`,
           `CUSTOM_${customIndex}_BASE_URL=${k.baseUrl}`,
           `CUSTOM_${customIndex}_KEY=${k.key}`,
         ].join('\n');
@@ -619,7 +637,8 @@ keysRouter.get('/export', (req: Request, res: Response) => {
       const n = (seenPerPlatform.get(k.platform) ?? 0) + 1;
       seenPerPlatform.set(k.platform, n);
       const envKey = `${k.platform.toUpperCase()}_KEY${n > 1 ? `_${n}` : ''}=${k.key}`;
-      return k.label ? `# ${k.label}\n${envKey}` : envKey;
+      const comment = labelForExport(k.label);
+      return comment ? `# ${comment}\n${envKey}` : envKey;
     });
     const content = lines.join('\n\n') + '\n';
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
@@ -646,7 +665,7 @@ keysRouter.get('/export', (req: Request, res: Response) => {
     // written by older builds still load.
     const header = 'platform,key,label,base_url';
     const lines = decryptedKeys.map(k =>
-      [escCsv(k.platform), escCsv(k.key), escCsv(neutralize(k.label)), escCsv(neutralize(k.baseUrl ?? ''))].join(',')
+      [escCsv(k.platform), escCsv(k.key), escCsv(neutralize(labelForExport(k.label))), escCsv(neutralize(k.baseUrl ?? ''))].join(',')
     );
     const content = [header, ...lines].join('\n') + '\n';
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
@@ -712,7 +731,8 @@ keysRouter.post('/', (req: Request, res: Response) => {
     return;
   }
 
-  const { platform, label } = parsed.data;
+  const { platform } = parsed.data;
+  const label = parsed.data.label === undefined ? undefined : sanitizeLabel(parsed.data.label);
   const isKeyless = resolveProvider(platform)?.keyless === true;
   const rawKey = parsed.data.key?.trim() ?? '';
 
@@ -1897,7 +1917,7 @@ keysRouter.patch('/:id', (req: Request, res: Response) => {
   }
   if (label !== undefined) {
     updates.push('label = ?');
-    values.push(label);
+    values.push(sanitizeLabel(label));
   }
   // #590: stored encrypted (credentials), so a change rewrites all three
   // columns; '' clears them to NULL.
