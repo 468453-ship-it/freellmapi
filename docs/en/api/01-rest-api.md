@@ -197,6 +197,9 @@ curl "http://localhost:3001/v1beta/models/gemini-2.5-flash:generateContent" \
 
 Gemini model names like `gemini-2.5-flash` resolve through the Gemini family map (Keys → Gemini model mapping) rather than the catalog directly, so they route to Auto or whichever catalog model each family is pinned to. Catalog ids work verbatim too.
 
+A client-profile key (`sk-cp-…`) authenticates the `/v1beta` generate/stream routes as
+well, with its enforced prompt injected ahead of `systemInstruction`.
+
 `contents` text, inline data, function calls/responses, system instructions,
 function declarations, structured JSON output, generation controls, and
 thinking budgets translate into the same internal chat/fallback pipeline.
@@ -360,6 +363,10 @@ curl http://localhost:3001/v1/messages \
     "messages": [{"role": "user", "content": "hi"}]
   }'
 ```
+
+A **client-profile key** (`sk-cp-…`, see the dashboard's Profiles page) authenticates
+`/v1/messages` too: the profile's server-enforced system prompt is injected ahead of the
+caller's `system` turn, exactly as on `/v1/chat/completions`.
 
 Claude model names map to your free pool on the **Keys → Anthropic** tab: each family (`default`, `opus`, `sonnet`, `haiku`) routes to `auto` (the router picks a free model) or a model you pin. `POST /v1/messages/count_tokens` and a content-negotiated `GET /v1/models` (Anthropic shape when `anthropic-version` is sent) are implemented too. Streaming, system prompts, tool use, and image input all translate across the same router as the OpenAI endpoints.
 
