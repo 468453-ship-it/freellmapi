@@ -510,6 +510,16 @@ function requestDeclaresToolUse(req: ResponsesRequest): boolean {
 }
 
 // ── Build the final (non-stream) Responses object ─────────────────────────
+/**
+ * Responses-API `incomplete_details.reason` for an upstream chat finish
+ * reason, or undefined when the response ran to completion.
+ */
+export function incompleteReason(finishReason: string | null | undefined): 'max_output_tokens' | 'content_filter' | undefined {
+  if (finishReason === 'length') return 'max_output_tokens';
+  if (finishReason === 'content_filter') return 'content_filter';
+  return undefined;
+}
+
 export function buildResponseObject(opts: {
   id: string;
   model: string;
@@ -519,13 +529,14 @@ export function buildResponseObject(opts: {
   completionTokens: number;
   reasoningTokens?: number;
   metadata?: Record<string, string>;
+  incompleteReason?: 'max_output_tokens' | 'content_filter';
 }) {
   const output: any[] = [];
   if (opts.text.length > 0) {
     output.push({
       type: 'message',
       id: newId('msg'),
-      status: 'completed',
+      status: opts.incompleteReason ? 'incomplete' : 'completed',
       role: 'assistant',
       content: [{ type: 'output_text', text: opts.text, annotations: [] }],
     });
@@ -545,7 +556,8 @@ export function buildResponseObject(opts: {
     id: opts.id,
     object: 'response',
     created_at: nowUnix(),
-    status: 'completed',
+    status: opts.incompleteReason ? 'incomplete' : 'completed',
+    ...(opts.incompleteReason ? { incomplete_details: { reason: opts.incompleteReason } } : {}),
     model: opts.model,
     output,
     output_text: opts.text,
@@ -1471,11 +1483,15 @@ export async function handleResponses(req: Request, res: Response): Promise<void
             );
           }
 
+          // A truncated or filtered turn ends as `incomplete`, not `completed`,
+          // so clients don't take a cut-off answer as the whole answer.
+          const incomplete = incompleteReason(upstreamFinish);
+
           // Finalize any open text item.
           if (msgItemId !== null) {
             sse('response.output_text.done', { item_id: msgItemId, output_index: textOutputIndex, content_index: 0, text: msgText });
             sse('response.content_part.done', { item_id: msgItemId, output_index: textOutputIndex, content_index: 0, part: { type: 'output_text', text: msgText, annotations: [] } });
-            sse('response.output_item.done', { output_index: textOutputIndex, item: { id: msgItemId, type: 'message', status: 'completed', role: 'assistant', content: [{ type: 'output_text', text: msgText, annotations: [] }] } });
+            sse('response.output_item.done', { output_index: textOutputIndex, item: { id: msgItemId, type: 'message', status: incomplete ? 'incomplete' : 'completed', role: 'assistant', content: [{ type: 'output_text', text: msgText, annotations: [] }] } });
           }
           // Finalize tool-call items. Arguments are repaired against the tool's
           // parameter schema at this point (after the full string accumulated):
@@ -1505,9 +1521,9 @@ export async function handleResponses(req: Request, res: Response): Promise<void
           const finalResponse = buildResponseObject({
             id: responseId, model: route.modelId, text: msgText,
             toolCalls: finalToolCalls, promptTokens: estimatedInputTokens, completionTokens: totalOutputTokens,
-            reasoningTokens: totalReasoningTokens,
+            reasoningTokens: totalReasoningTokens, incompleteReason: incomplete,
           });
-          sse('response.completed', { response: finalResponse });
+          sse(incomplete ? 'response.incomplete' : 'response.completed', { response: finalResponse });
           res.end();
 
           recordUpstreamSuccess(route, estimatedInputTokens + totalOutputTokens, state);
@@ -1651,6 +1667,7 @@ export async function handleResponses(req: Request, res: Response): Promise<void
       res.json(buildResponseObject({
         id: responseId, model: route.modelId, text, toolCalls,
         promptTokens, completionTokens, reasoningTokens,
+        incompleteReason: incompleteReason(result.choices[0]?.finish_reason),
       }));
 
       traceRouteEvent('Responses', {
