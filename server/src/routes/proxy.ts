@@ -2156,7 +2156,7 @@ proxyRouter.post('/chat/completions', async (req: Request, res: Response) => {
         const hasFinalToolCalls = Array.isArray(finalToolCalls) && finalToolCalls.length > 0;
         if (hasFinalToolCalls) {
           writeFrame({ ...base, choices: [{ index: 0, delta: { role: 'assistant' }, finish_reason: null }] });
-          writeFrame({ ...base, choices: [{ index: 0, delta: { tool_calls: finalToolCalls }, finish_reason: null }] });
+          writeFrame({ ...base, choices: [{ index: 0, delta: { tool_calls: finalToolCalls.map((call, index) => ({ ...call, index })) }, finish_reason: null }] });
           writeFrame({ ...base, choices: [{ index: 0, delta: {}, finish_reason: 'tool_calls' }], usage: response.usage });
         } else {
           if (!answerStarted) {
