@@ -170,6 +170,9 @@ describe('search service', () => {
       expect(`${url.origin}${url.pathname}`).toBe('https://api.search.brave.com/res/v1/web/search');
       expect(url.searchParams.get('q')).toBe('cats & dogs');
       expect(url.searchParams.get('count')).toBe('3');
+      // Brave decorates matched terms with <strong> unless asked not to;
+      // without this the hits carry raw markup every other engine never emits.
+      expect(url.searchParams.get('text_decorations')).toBe('false');
       expect(new Headers(calls(fn)[0][1].headers).get('x-subscription-token')).toBe('brave-test-key');
       expect(out).toMatchObject({ provider: 'brave', engine: 'brave-search', results: [{ title: 'A & B', url: 'https://a', content: 'alpha', score: 1 }] });
 

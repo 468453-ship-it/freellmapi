@@ -337,6 +337,10 @@ const ADAPTERS: Record<string, Adapter> = {
     const url = new URL(`${BRAVE_BASE_URL}/${news ? 'news' : 'web'}/search`);
     url.searchParams.set('q', query);
     url.searchParams.set('count', String(n));
+    // Brave decorates matched terms with <strong> tags by default
+    // (text_decorations=true), so titles and snippets would reach the caller
+    // wrapped in markup every other engine never emits. Ask for plain text.
+    url.searchParams.set('text_decorations', 'false');
     let parsed: { web?: { results?: unknown }; results?: unknown } | null;
     try {
       parsed = await upstream(url.toString(), 'brave', {
