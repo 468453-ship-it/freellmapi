@@ -54,6 +54,7 @@ const UNLISTED_PLATFORMS = new Set<string>();
 const PLATFORMS = [
   'aclide',
   'speka',
+  'kenari',
   'typhoon',
   'plugsky',
   'inferbase',

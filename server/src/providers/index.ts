@@ -17,6 +17,7 @@ import { ZhipuProvider } from './zhipu.js';
 import { SailProvider } from './sail.js';
 import { AclideProvider } from './aclide.js';
 import { SpekaProvider } from './speka.js';
+import { KenariProvider } from './kenari.js';
 import { TyphoonProvider } from './typhoon.js';
 import { PlugskyProvider } from './plugsky.js';
 import { InferbaseProvider } from './inferbase.js';
@@ -79,6 +80,7 @@ register(new OpenAICompatProvider({
 register(new SailProvider());
 register(new AclideProvider());
 register(new SpekaProvider());
+register(new KenariProvider());
 register(new TyphoonProvider());
 register(new PlugskyProvider());
 register(new InferbaseProvider());
