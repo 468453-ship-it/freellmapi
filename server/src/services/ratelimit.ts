@@ -1561,6 +1561,20 @@ const CONTEXT_WINDOW_PATTERNS: RegExp[] = [
 // would size the model out of nearly every request until the next catalog sync.
 export const MIN_LEARNED_CONTEXT_WINDOW = 1024;
 
+// Share of a refused request's size recorded as the window when the provider
+// names none. Below 1 so the next request of the same size is sized out too,
+// even though the token estimate is approximate.
+const UNKNOWN_WINDOW_FRACTION = 0.9;
+// Per-minute / per-day wording marks a throughput ceiling, not a window.
+const THROUGHPUT_REJECTION = /per (minute|day)|\btp[md]\b|rate.?limit/i;
+
+function windowFromRefusedSize(message: string | undefined | null, requestTokens: number | undefined): number | null {
+  if (requestTokens == null || !Number.isFinite(requestTokens)) return null;
+  if (message && THROUGHPUT_REJECTION.test(message)) return null;
+  const window = Math.floor(requestTokens * UNKNOWN_WINDOW_FRACTION);
+  return window >= MIN_LEARNED_CONTEXT_WINDOW ? window : null;
+}
+
 /** The context window a provider names when it rejects a prompt as too long,
  *  or null when the message names none. */
 export function parseProviderContextWindow(message: string | undefined | null): number | null {
@@ -1580,9 +1594,21 @@ export function parseProviderContextWindow(message: string | undefined | null): 
  * or lower one that was too high, never raise it. The router's context gates
  * then size the model out of prompts it cannot hold before they dispatch.
  * Returns the learned window when the row changed, else null.
+ *
+ * When the rejection names no window (BazaarLink: "This request is too large
+ * for a free tier", #1717) but the caller knows the size of the request that
+ * was refused, the window is learned as UNKNOWN_WINDOW_FRACTION of that size:
+ * the model provably cannot hold it, so later requests that big route
+ * elsewhere instead of being re-shipped to it. Throughput rejections (Groq's
+ * per-minute "Request too large ... TPM") are a tpm_limit, not a window, and
+ * are left to learnLimitFromError.
  */
-export function learnContextWindowFromError(modelDbId: number, err: { message?: string }): number | null {
-  const window = parseProviderContextWindow(err?.message);
+export function learnContextWindowFromError(
+  modelDbId: number,
+  err: { message?: string },
+  requestTokens?: number,
+): number | null {
+  const window = parseProviderContextWindow(err?.message) ?? windowFromRefusedSize(err?.message, requestTokens);
   if (window == null) return null;
   const result = withDb(db =>
     db.prepare(

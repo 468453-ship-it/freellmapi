@@ -520,6 +520,11 @@ export function isContextTooLargeError(err: any): boolean {
     || /input[^.]*longer than (the )?(max|maximum)/.test(msg)
     || msg.includes('exceeds the maximum number of tokens')
     || msg.includes('request too large')
+    // BazaarLink: 400 "This request is too large for a free tier" (#1717).
+    // No window named, but it is a size rejection: without this it was
+    // bucketed as provider_bad_request and the next candidate got the same
+    // oversized payload.
+    || msg.includes('request is too large')
     || msg.includes('payload too large')
     || msg.includes('request entity too large')
     || msg.includes('request body too large')
