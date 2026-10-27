@@ -1,6 +1,7 @@
 import { getDb } from '../db/index.js';
 import { BEATAPI_BASE_URL } from '../providers/beatapi.js';
 import { APINEX_BASE_URL } from '../providers/apinex.js';
+import { BLOCKRUN_BASE_URL } from '../providers/blockrun.js';
 import { parseRetryAfterMs, parseStatedRetryMs } from '../providers/base.js';
 import { RetryHintTracker } from '../lib/retry-hint.js';
 import { getClientContext } from '../lib/client-context.js';
@@ -185,6 +186,75 @@ function cloudflareKey(key: string): { accountId: string; token: string } {
 }
 
 const ADAPTERS: Record<string, Adapter> = {
+  // The modern BlockRun endpoint uses input + named questions, not the
+  // System One wire shape. Keep this free decision route out of chat.
+  // Contract: https://blockrun.ai/docs/api-reference/decisions
+  blockrun: async (cred, modelId, body, signal) => {
+    if (modelId !== 'gpt-6-luna') throw new DecisionError('Unsupported BlockRun free decision model', 400);
+    const text = (value: unknown): string => typeof value === 'string' ? value : JSON.stringify(value) ?? '';
+    const questions = Object.entries(body.questions).map(([name, question]) => {
+      const base = { name, instructions: text(question.instructions) };
+      if (question.type === 'noul') {
+        return { ...base, type: 'predicate', ...(question.criteria === undefined ? {} :
+          { instructions: `${base.instructions}\nCriteria: ${text(question.criteria)}` }) };
+      }
+      if (question.type === 'choice') {
+        if (!question.criteria || typeof question.criteria !== 'object' || Array.isArray(question.criteria)) {
+          throw new DecisionError('BlockRun choice requires a criteria map', 400);
+        }
+        const choices = Object.entries(question.criteria).map(([value, description]) => ({ value, description: description == null ? value : text(description) }));
+        if (!choices.length) throw new DecisionError('BlockRun choice requires options', 400);
+        return { ...base, type: 'choice', choices };
+      }
+      if (!Array.isArray(question.criteria) || !question.criteria.length) {
+        throw new DecisionError('BlockRun score requires an ordered criteria array', 400);
+      }
+      return { ...base, type: 'score', levels: question.criteria.map((level, i) => ({ label: String(i), description: text(level) })) };
+    });
+    const json = await upstream(`${BLOCKRUN_BASE_URL}/decisions`, 'blockrun', {
+      method: 'POST', redirect: 'error',
+      headers: { Authorization: `Bearer ${cred.key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: modelId, input: text(body.state), questions }),
+    }, signal) as { model?: unknown; answers?: unknown; usage?: unknown; error?: unknown } | null;
+    if (!json || json.error || ![modelId, `openai/${modelId}`].includes(String(json.model)) || !Array.isArray(json.answers)) {
+      throw new DecisionError('blockrun returned an error, invalid answers or a different decision model', 502);
+    }
+    const probability = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1;
+    const answers = new Map<string, unknown>();
+    for (const raw of json.answers) {
+      if (!raw || typeof raw !== 'object') throw new DecisionError('blockrun returned an invalid answer', 502);
+      const a = raw as Record<string, unknown>;
+      if (typeof a.name !== 'string' || !Object.hasOwn(body.questions, a.name) || answers.has(a.name)) {
+        throw new DecisionError('blockrun returned an unexpected or duplicate answer', 502);
+      }
+      const q = body.questions[a.name];
+      if (q.type === 'noul') {
+        if (a.type !== 'predicate' || !probability(a.probability)) throw new DecisionError('blockrun returned an invalid predicate', 502);
+        answers.set(a.name, { type: 'noul', noul: a.probability });
+        continue;
+      }
+      if (a.type !== q.type || !probability(a.confidence) || !Array.isArray(a.probabilities)) {
+        throw new DecisionError('blockrun returned an invalid typed answer', 502);
+      }
+      const allowed = q.type === 'choice' ? Object.keys(q.criteria as object) : (q.criteria as unknown[]).map((_, i) => String(i));
+      const probabilities = new Map<string, number>();
+      for (const p of a.probabilities) {
+        if (!p || !['string', 'number'].includes(typeof p.value) || !allowed.includes(String(p.value)) ||
+            probabilities.has(String(p.value)) || !probability(p.probability)) {
+          throw new DecisionError('blockrun returned invalid answer probabilities', 502);
+        }
+        probabilities.set(String(p.value), p.probability);
+      }
+      if (probabilities.size !== allowed.length) throw new DecisionError('blockrun omitted answer probabilities', 502);
+      if (q.type === 'choice' ? typeof a.choice !== 'string' || !allowed.includes(a.choice) :
+        typeof a.score !== 'number' || !Number.isFinite(a.score) || a.score < 0 || a.score > allowed.length - 1) {
+        throw new DecisionError('blockrun returned an out-of-range answer', 502);
+      }
+      answers.set(a.name, { type: q.type, [q.type]: a[q.type], probabilities: Object.fromEntries(probabilities), confidence: a.confidence });
+    }
+    if (answers.size !== questions.length) throw new DecisionError('blockrun omitted requested answers', 502);
+    return { answers: Object.fromEntries(answers), usage: usageOf(json.usage) };
+  },
   apinex: async (cred, modelId, body, signal) => {
     const json = await upstream(`${APINEX_BASE_URL}/decisions`, 'apinex', {
       method: 'POST', redirect: 'error',

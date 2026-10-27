@@ -24,10 +24,11 @@ import { TYPHOON_BASE_URL } from '../providers/typhoon.js';
 import { ELECTRONHUB_BASE_URL } from '../providers/electronhub.js';
 import { FREEAI_BASE_URL, freeAiAudioUrl } from '../providers/freeai.js';
 import { KENARI_BASE_URL, requireKenariFreeModel } from '../providers/kenari.js';
+import { PLUGSKY_BASE_URL } from '../providers/plugsky.js';
 
 /** Platforms with a media adapter below. catalog-sync gates media rows on this
  *  (decoupled from the chat provider registry — e.g. SiliconFlow is media-only). */
-export const MEDIA_PLATFORMS = new Set(['nvidia', 'pollinations', 'cloudflare', 'siliconflow', 'google', 'speechify', 'electronhub', 'freeai', 'kenari']);
+export const MEDIA_PLATFORMS = new Set(['nvidia', 'pollinations', 'cloudflare', 'siliconflow', 'google', 'speechify', 'electronhub', 'freeai', 'kenari', 'plugsky']);
 
 /** Video uses a dedicated optional catalog registry so binaries that predate
  *  this modality ignore the rows instead of accidentally ingesting them as
@@ -359,6 +360,25 @@ async function callImageProvider(
   const key = credential.key;
   const [w, h] = parseSize(p.size);
   switch (row.platform) {
+    case 'plugsky': {
+      // Both routes share the monthly image allowance. dall-e-3 is Plugsky's
+      // compatibility alias for FLUX Dev, NOT OpenAI DALL-E (catalog label).
+      if (!['plugsky-flux', 'dall-e-3'].includes(row.model_id)) {
+        throw new MediaError('Plugsky requires a verified free image route', 400);
+      }
+      const r = await mediaFetch(`${PLUGSKY_BASE_URL}/images/generations`, 'plugsky', 'image', {
+        method: 'POST', redirect: 'error',
+        headers: { 'Content-Type': 'application/json', ...bearerAuthHeader(key) },
+        body: JSON.stringify({ model: row.model_id, prompt: p.prompt, n: p.n ?? 1,
+          ...(p.size ? { size: p.size } : {}), response_format: 'b64_json' }),
+      });
+      const j = await r.json() as { data?: { b64_json?: unknown }[]; error?: unknown } | null;
+      if (j?.error || !Array.isArray(j?.data) || !j.data.length ||
+          j.data.some(i => !i || typeof i.b64_json !== 'string' || !i.b64_json.trim())) {
+        throw new MediaError('plugsky returned no image data', 502);
+      }
+      return j.data.map(i => ({ b64_json: i.b64_json as string }));
+    }
     case 'kenari': {
       requireKenariFreeModel(row.model_id);
       const r = await mediaFetch(`${KENARI_BASE_URL}/images/generations`, 'kenari', 'image', {

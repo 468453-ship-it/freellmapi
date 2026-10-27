@@ -74,6 +74,7 @@ export type Platform =
   | 'speka'
   // Named free chat/image routes share one renewable daily account allowance.
   | 'kenari'
+  | 'kiosapi'
   // Decision-only JEV adapter; promotional availability is catalog-managed.
   | 'beatapi'
   // Free-category chat and decisions share one weighted daily allowance.

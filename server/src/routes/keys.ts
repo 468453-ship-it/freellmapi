@@ -55,6 +55,7 @@ const PLATFORMS = [
   'aclide',
   'speka',
   'kenari',
+  'kiosapi',
   'typhoon',
   'plugsky',
   'inferbase',
