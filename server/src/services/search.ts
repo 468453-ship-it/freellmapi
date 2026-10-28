@@ -552,6 +552,90 @@ export function searchAvailable(): boolean {
   return false;
 }
 
+// Display names and keyless flags for the diagnostics below. Kept local
+// because providers/index pulls in search-only.ts, which imports this module;
+// a test pins it to SEARCH_PLATFORMS and to each provider's `keyless`.
+export const SEARCH_PLATFORM_INFO: Record<string, { name: string; keyless?: boolean }> = {
+  tavily: { name: 'Tavily' },
+  exa: { name: 'Exa' },
+  firecrawl: { name: 'Firecrawl' },
+  linkup: { name: 'Linkup' },
+  parallel: { name: 'Parallel', keyless: true },
+  serpsearch: { name: 'SerpSearch' },
+  keenable: { name: 'Keenable', keyless: true },
+  brave: { name: 'Brave Search' },
+};
+
+const platformName = (p: string): string => SEARCH_PLATFORM_INFO[p]?.name ?? p;
+
+export type SearchEngineState = 'ready' | 'cooling_down' | 'needs_key' | 'key_error' | 'disabled';
+
+export interface SearchStatus {
+  /** ready: a search can run now; cooling_down: keys exist but every one is
+   *  benched; needs_configuration: nothing to search with. */
+  status: 'ready' | 'cooling_down' | 'needs_configuration';
+  /** Every engine in the installed catalog (plus custom relays), in order. */
+  engines: Array<{ engine: string; platform: string; state: SearchEngineState }>;
+  /** Search platforms with a saved key whose engine is not in the installed
+   *  catalog yet, so the key cannot search until a catalog update adds it. */
+  missing_from_catalog: string[];
+}
+
+/** Search readiness from local state only: catalog rows, saved keys and
+ *  cooldowns. Runs no search and spends no quota. */
+export function searchStatus(): SearchStatus {
+  const db = getDb();
+  const keys = db.prepare('SELECT id, platform, status FROM api_keys WHERE enabled = 1').all() as
+    { id: number; platform: string; status: string }[];
+  const rows = orderedEngines().filter(r => ADAPTERS[r.platform]);
+  const engines = rows.map(row => {
+    const own = row.platform === 'custom' ? keys.filter(k => k.id === row.key_id) : keys.filter(k => k.platform === row.platform);
+    const usable = own.filter(k => k.status === 'healthy' || k.status === 'unknown');
+    const state: SearchEngineState = row.enabled !== 1 ? 'disabled'
+      : own.length === 0 ? 'needs_key'
+      : usable.length === 0 ? 'key_error'
+      : usable.every(k => isOnCooldown(row.platform, row.model_id, k.id)) ? 'cooling_down'
+      : 'ready';
+    return { engine: row.model_id, platform: row.platform, state };
+  });
+  const inCatalog = new Set(allEngineRows().map(r => r.platform));
+  const missing = [...new Set(keys.map(k => k.platform))]
+    .filter(p => isSearchPlatform(p) && !inCatalog.has(p))
+    .sort((a, b) => Object.keys(SEARCH_PLATFORM_INFO).indexOf(a) - Object.keys(SEARCH_PLATFORM_INFO).indexOf(b));
+  const status = engines.some(e => e.state === 'ready') ? 'ready'
+    : engines.some(e => e.state === 'cooling_down') ? 'cooling_down'
+    : 'needs_configuration';
+  return { status, engines, missing_from_catalog: missing };
+}
+
+const listOf = (names: string[], joiner: 'and' | 'or'): string =>
+  names.length <= 1 ? names.join('') : `${names.slice(0, -1).join(', ')} ${joiner} ${names.at(-1)}`;
+
+/** The "nothing to search with" message, built from what is installed: it
+ *  names only engines this catalog has, and says why a saved key cannot run. */
+export function noSearchMessage(s: SearchStatus = searchStatus()): string {
+  const parts: string[] = [];
+  if (s.missing_from_catalog.length > 0) {
+    const names = s.missing_from_catalog.map(platformName);
+    parts.push(`${listOf(names, 'and')} ${names.length === 1 ? 'is' : 'are'} set up on the Keys page, but the installed catalog has no ${names.length === 1 ? 'engine for it' : 'engines for them'} yet. ${names.length === 1 ? 'It starts' : 'They start'} working on ${names.length === 1 ? 'its' : 'their'} own once a catalog update adds ${names.length === 1 ? 'it' : 'them'}.`);
+  }
+  const named = (state: SearchEngineState) =>
+    [...new Set(s.engines.filter(e => e.state === state && e.platform !== 'custom').map(e => platformName(e.platform)))];
+  const off = s.engines.filter(e => e.state === 'disabled' && e.platform !== 'custom' && SEARCH_PLATFORM_INFO[e.platform]);
+  const broken = named('key_error');
+  if (broken.length > 0) parts.push(`The ${listOf(broken, 'and')} ${broken.length === 1 ? 'key' : 'keys'} failed ${broken.length === 1 ? 'its' : 'their'} last check; re-check on the Keys page.`);
+  const needKey = s.engines.filter(e => e.state === 'needs_key' && e.platform !== 'custom').map(e => e.platform);
+  const keyless = [...new Set(needKey.filter(p => SEARCH_PLATFORM_INFO[p]?.keyless))].map(platformName);
+  const keyed = [...new Set(needKey.filter(p => !SEARCH_PLATFORM_INFO[p]?.keyless))].map(platformName);
+  const remedies: string[] = [];
+  if (keyless.length > 0) remedies.push(`add ${listOf(keyless, 'or')} (no key needed)`);
+  if (keyed.length > 0) remedies.push(`add a ${listOf(keyed, 'or')} key`);
+  if (remedies.length > 0) parts.push(`To search, ${remedies.join(', or ')} on the Keys page.`);
+  if (off.length > 0) parts.push(`Turned off under Models → Search: ${listOf([...new Set(off.map(e => platformName(e.platform)))], 'and')}.`);
+  if (s.engines.length === 0) parts.push('The installed catalog has no search engines. Check for a catalog update on the Premium page.');
+  return `No search engine is ready. ${parts.join(' ')}`.trim();
+}
+
 function searchChain(engine: string | undefined): SearchEngineRow[] {
   const enabled = orderedEngines().filter(r => r.enabled === 1 && ADAPTERS[r.platform]);
   // Custom relays first, catalog engines after, each group in effective order.
@@ -645,11 +729,7 @@ export async function runSearch(query: string, opts: SearchOptions = {}): Promis
         'search_keys_cooling_down',
       );
     }
-    throw new SearchError(
-      'No search key configured. Enable Parallel or Keenable (no key needed) or add a Tavily, Exa, Firecrawl or Linkup key on the Keys page.',
-      503,
-      'no_search_keys',
-    );
+    throw new SearchError(noSearchMessage(), 503, 'no_search_keys');
   }
   // Only statuses the caller can act on pass through (see media chainError):
   // an upstream 401 means OUR provider key failed, not the caller's.
