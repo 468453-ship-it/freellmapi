@@ -149,6 +149,8 @@ export type Platform =
   | 'parallel'
   | 'serpsearch'
   | 'keenable'
+  | 'halx'
+  | 'aisense'
   | 'brave'
   | 'cloudflare'
   | 'zhipu'

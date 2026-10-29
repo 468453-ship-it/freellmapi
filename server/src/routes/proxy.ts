@@ -981,8 +981,15 @@ const DecisionBody = z.object({
   model: z.string().min(1).optional(),
   state: z.unknown().refine(v => v !== undefined && v !== null && v !== '', { message: 'state is required' }),
   questions: z.record(z.string().min(1).max(100), DecisionQuestionBody)
-    .refine(q => Object.keys(q).length >= 1 && Object.keys(q).length <= 64, { message: 'questions must hold 1 to 64 entries' }),
-});
+    .refine(q => Object.keys(q).length >= 1 && Object.keys(q).length <= 64, { message: 'questions must hold 1 to 64 entries' }).optional(),
+  fields: z.record(z.string().min(1).max(100), z.object({
+    type: z.enum(['text', 'number']),
+    instructions: z.string().max(2000).optional(),
+    decimals: z.number().int().min(0).max(10).optional(),
+    unit: z.string().max(100).optional(),
+  }).strict()).refine(f => Object.keys(f).length >= 1 && Object.keys(f).length <= 64, { message: 'fields must hold 1 to 64 entries' }).optional(),
+}).refine(b => (b.questions !== undefined) !== (b.fields !== undefined), { message: 'Send either questions or fields' })
+  .refine(b => !b.fields || typeof b.state === 'string', { message: 'Extraction requires text state' });
 
 async function handleDecision(req: Request, res: Response): Promise<void> {
   if (!requireInferenceAuth(req, res)) return;
@@ -995,9 +1002,9 @@ async function handleDecision(req: Request, res: Response): Promise<void> {
   const abort = new AbortController();
   res.on('close', () => { if (!res.writableFinished) abort.abort(); });
   try {
-    const { model, state, questions } = parsed.data;
+    const { model, state, questions, fields } = parsed.data;
     const result = await runDecision(
-      { state, questions: questions as Parameters<typeof runDecision>[0]['questions'] },
+      fields ? { state: state as string, fields } : { state, questions: questions as NonNullable<Parameters<typeof runDecision>[0]['questions']> },
       { model, signal: abort.signal },
     );
     res.json({
@@ -1006,6 +1013,8 @@ async function handleDecision(req: Request, res: Response): Promise<void> {
       provider: result.provider,
       answers: result.answers,
       usage: result.usage,
+      ...(result.modelVersion ? { model_version: result.modelVersion } : {}),
+      ...(result.truncated !== undefined ? { truncated: result.truncated } : {}),
     });
   } catch (err: any) {
     if (res.headersSent || abort.signal.aborted) return;
